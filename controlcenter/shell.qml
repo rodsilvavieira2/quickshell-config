@@ -39,6 +39,7 @@ ShellRoot {
     property var processList: []
     property string selectedPid: ""
     property int processMaxRows: 50
+    property string uiFontFamily: "JetBrainsMono Nerd Font Mono"
 
     onPanelOpenChanged: {
         if (panelOpen) {
@@ -186,7 +187,7 @@ ShellRoot {
 
     PanelWindow {
         id: window
-        
+
         property var focusedScreenName: Hyprland.focusedMonitor?.name ?? ""
         screen: {
             for (let i = 0; i < Quickshell.screens.values.length; i++) {
@@ -196,14 +197,14 @@ ShellRoot {
             }
             return Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null;
         }
-        
+
         visible: shellRoot.panelOpen
-        color: "#66000000"
-        
+        color: "transparent"
+
         WlrLayershell.namespace: "quickshell:controlcenter"
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
-        
+
         anchors {
             top: true
             bottom: true
@@ -223,7 +224,7 @@ ShellRoot {
             focus: true
             Keys.onEscapePressed: event => {
                 shellRoot.panelOpen = false;
-                event.accepted = true;
+                event.accepted = true
             }
         }
 
@@ -278,6 +279,7 @@ ShellRoot {
                         Layout.fillHeight: true
                         title: "CPU CORE"
                         titleColor: "#b4befe" // Lavender
+                        fontFamily: shellRoot.uiFontFamily
 
                         CircularProgress {
                             width: 140
@@ -288,6 +290,7 @@ ShellRoot {
                             progressColor: "#b4befe"
                             title: Math.round(shellRoot.cpuUsage * 100) + "%"
                             subTitle: "Load"
+                            fontFamily: shellRoot.uiFontFamily
                         }
 
                         Text {
@@ -296,6 +299,7 @@ ShellRoot {
                             anchors.bottomMargin: 12
                             text: "Temp: <font color='#fab387'>" + shellRoot.cpuTemp + "</font>"
                             color: "#a6adc8"
+                            font.family: shellRoot.uiFontFamily
                             font.pixelSize: 14
                             textFormat: Text.RichText
                         }
@@ -320,6 +324,7 @@ ShellRoot {
                         Layout.fillHeight: true
                         title: "MEMORY (RAM)"
                         titleColor: "#89b4fa" // Blue
+                        fontFamily: shellRoot.uiFontFamily
 
                         Column {
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -335,12 +340,14 @@ ShellRoot {
                                 value: shellRoot.memTotal > 0 ? (shellRoot.memUsed / shellRoot.memTotal) : 0
                                 progressColor: "#89b4fa" // Blue
                                 text: "used: " + shellRoot.memUsed.toFixed(1) + " GB / " + shellRoot.memTotal.toFixed(1) + " GB"
+                                fontFamily: shellRoot.uiFontFamily
                             }
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: "Cached: " + shellRoot.memCached.toFixed(1) + " GB, Free: " + shellRoot.memFree.toFixed(1) + " GB"
                                 color: "#94e2d5" // Teal
+                                font.family: shellRoot.uiFontFamily
                                 font.pixelSize: 14
                             }
                         }
@@ -352,6 +359,7 @@ ShellRoot {
                         Layout.fillHeight: true
                         title: "GPU ENGINE"
                         titleColor: "#a6e3a1" // Mint Green
+                        fontFamily: shellRoot.uiFontFamily
 
                         CircularProgress {
                             width: 140
@@ -362,6 +370,7 @@ ShellRoot {
                             progressColor: "#a6e3a1"
                             title: Math.round(shellRoot.gpuUsage * 100) + "%"
                             subTitle: "Load"
+                            fontFamily: shellRoot.uiFontFamily
                         }
 
                         Text {
@@ -371,6 +380,7 @@ ShellRoot {
                             property bool isHot: parseInt(shellRoot.gpuTemp) > 75
                             text: "Temp: <font color='" + (isHot ? "#eba0ac" : "#fab387") + "'>" + shellRoot.gpuTemp + "</font>"
                             color: "#a6adc8"
+                            font.family: shellRoot.uiFontFamily
                             font.pixelSize: 14
                             textFormat: Text.RichText
                         }
@@ -387,6 +397,7 @@ ShellRoot {
                             progressColor: "#a6e3a1" // Mint
                             backgroundColor: "#313244"
                             text: "VRAM: " + shellRoot.gpuMemUsed.toFixed(1) + " GB / " + shellRoot.gpuMemTotal.toFixed(1) + " GB"
+                            fontFamily: shellRoot.uiFontFamily
                         }
                     }
                 }
@@ -422,6 +433,7 @@ ShellRoot {
                             Layout.alignment: Qt.AlignHCenter
                             text: "RUNNING PROCESSES"
                             color: "#f2cdcd" // Flamingo
+                            font.family: shellRoot.uiFontFamily
                             font.pixelSize: 16
                             font.bold: true
                             font.letterSpacing: 1.1
@@ -439,11 +451,11 @@ ShellRoot {
                                 anchors.rightMargin: processCard.columnPadding + processCard.scrollBarWidth + 4
                                 spacing: processCard.columnSpacing
 
-                                Text { Layout.preferredWidth: processCard.pidWidth; text: "PID"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 13; font.bold: true }
-                                Text { Layout.preferredWidth: processCard.nameMinWidth; text: "Process Name"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 13; font.bold: true }
-                                Text { Layout.preferredWidth: processCard.cpuWidth; text: "CPU %"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 13; font.bold: true }
-                                Text { Layout.preferredWidth: processCard.ramWidth; text: "RAM (MB)"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 13; font.bold: true }
-                                Text { Layout.fillWidth: true; text: "User"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.preferredWidth: processCard.pidWidth; text: "PID"; color: "#a6adc8"; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.preferredWidth: processCard.nameMinWidth; text: "Process Name"; color: "#a6adc8"; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.preferredWidth: processCard.cpuWidth; text: "CPU %"; color: "#a6adc8"; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.preferredWidth: processCard.ramWidth; text: "RAM (MB)"; color: "#a6adc8"; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.fillWidth: true; text: "User"; color: "#a6adc8"; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
                             }
 
                             Rectangle {
@@ -492,11 +504,11 @@ ShellRoot {
                                     anchors.rightMargin: processCard.columnPadding + processCard.scrollBarWidth + 4
                                     spacing: processCard.columnSpacing
 
-                                    Text { Layout.preferredWidth: processCard.pidWidth; text: modelData.pid; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 13 }
-                                    Text { Layout.preferredWidth: processCard.nameMinWidth; text: modelData.name; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 13; elide: Text.ElideRight }
-                                    Text { Layout.preferredWidth: processCard.cpuWidth; text: modelData.cpu; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 13 }
-                                    Text { Layout.preferredWidth: processCard.ramWidth; text: modelData.ram; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 13 }
-                                    Text { Layout.fillWidth: true; text: modelData.user; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 13; elide: Text.ElideRight }
+                                    Text { Layout.preferredWidth: processCard.pidWidth; text: modelData.pid; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13 }
+                                    Text { Layout.preferredWidth: processCard.nameMinWidth; text: modelData.name; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; elide: Text.ElideRight }
+                                    Text { Layout.preferredWidth: processCard.cpuWidth; text: modelData.cpu; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13 }
+                                    Text { Layout.preferredWidth: processCard.ramWidth; text: modelData.ram; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13 }
+                                    Text { Layout.fillWidth: true; text: modelData.user; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; elide: Text.ElideRight }
                                 }
                             }
                         }

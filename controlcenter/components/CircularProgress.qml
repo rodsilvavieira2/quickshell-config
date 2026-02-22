@@ -9,6 +9,7 @@ Item {
     property color backgroundColor: "#313244"
     property string title: ""
     property string subTitle: ""
+    property string fontFamily: ""
 
     width: 140
     height: 140
@@ -53,6 +54,7 @@ Item {
         Text {
             text: root.title
             color: "#ffffff"
+            font.family: root.fontFamily !== "" ? root.fontFamily : font.family
             font.pixelSize: 32
             font.bold: true
             anchors.horizontalCenter: parent.horizontalCenter
@@ -60,6 +62,7 @@ Item {
         Text {
             text: root.subTitle
             color: "#a6adc8"
+            font.family: root.fontFamily !== "" ? root.fontFamily : font.family
             font.pixelSize: 14
             anchors.horizontalCenter: parent.horizontalCenter
             visible: root.subTitle !== ""

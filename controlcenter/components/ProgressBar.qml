@@ -7,6 +7,7 @@ Item {
     property color backgroundColor: "#313244"
     property string text: ""
     property real cornerRadius: height / 2
+    property string fontFamily: ""
     
     height: 32
     
@@ -33,6 +34,7 @@ Item {
             anchors.centerIn: parent
             text: root.text
             color: "#ffffff"
+            font.family: root.fontFamily !== "" ? root.fontFamily : font.family
             font.pixelSize: 14
         }
     }
