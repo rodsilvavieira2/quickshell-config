@@ -1,124 +1,151 @@
 # Quickshell Agent Guidelines
 
-Welcome, Agent! This file outlines the conventions, architecture, and commands required to operate within this Quickshell codebase. Your goal is to adhere strictly to these guidelines when analyzing, modifying, or extending configurations.
+This file describes how to work in this repository as an automated coding agent.
 
-## 1. Project Context & Architecture
+## 1. Project Context
+- Framework: Quickshell (Qt/QML shell for Wayland, optimized for Hyprland)
+- Language: QML with embedded JavaScript (Qt6 engine)
+- Structure: independent configurations in top-level folders (applauncher/, controlcenter/, overview/, powermenu/, search/)
+- Each configuration must have a root `shell.qml` and runs as its own daemon process
+- Configs communicate via IPC using `IpcHandler`
 
-- **Framework:** Quickshell (A Qt/QML based shell for Wayland compositors, specifically optimized for Hyprland).
-- **Environment:** QtQuick, Wayland, Hyprland, IPC.
-- **Language:** QML and embedded JavaScript (ES6+ features supported depending on Qt6 version).
-- **Structure:** The codebase is divided into independent Quickshell configurations, each residing in its own subdirectory (e.g., `overview/`, `applauncher/`). 
-  - Each configuration must have a root `shell.qml` file.
-  - Configurations operate as separate daemon processes and communicate via IPC.
+## 2. Build, Lint, Test
+- No build step or automated lint/test suite is defined in this repo
+- Run a configuration (example):
+  ```bash
+  quickshell -c applauncher &
+  # If you use the qs alias:
+  qs -c applauncher &
+  ```
+- IPC actions (toggle/open/close example):
+  ```bash
+  quickshell ipc -c applauncher call applauncher toggle
+  quickshell ipc -c applauncher call applauncher open
+  quickshell ipc -c applauncher call applauncher close
+  ```
+- Run a single QML file (sandbox):
+  ```bash
+  quickshell -p path/to/TestComponent.qml &
+  ```
+- Debug logs:
+  ```bash
+  quickshell -c applauncher > debug.log 2>&1 &
+  tail -f debug.log
+  ```
+- Persistent log (most recent):
+  ```bash
+  cat /run/user/1000/quickshell/by-id/$(ls -t /run/user/1000/quickshell/by-id | head -n 1)/log.qslog
+  ```
 
-## 2. Build & Test Commands
-
-Since this is a set of QML shell scripts rather than a compiled binary application, there is no traditional "build" step. 
-
-### Starting a Configuration
-To run or test a specific configuration module (e.g., `applauncher`):
-```bash
-quickshell -c applauncher &
-# Alternatively, if 'qs' is aliased to 'quickshell':
-qs -c applauncher &
-```
-
-### IPC Commands (Toggling and Controlling)
-Quickshell modules often run in the background and expose actions via IPC using `IpcHandler`.
-```bash
-# Toggle the app launcher
-quickshell ipc -c applauncher call applauncher toggle
-
-# Open or close explicitly
-quickshell ipc -c applauncher call applauncher open
-quickshell ipc -c applauncher call applauncher close
-```
-
-### Running a "Single Test" (Sandboxing)
-To test a single isolated QML file outside of the main configuration tree:
-```bash
-# Pass the explicit path using -p
-quickshell -p path/to/TestComponent.qml &
-```
-
-### Logging and Debugging
-Quickshell logs internally to `XDG_RUNTIME_DIR`. However, for immediate debugging during development, you can stream the standard output/error directly to a log file to trace QML errors:
-```bash
-quickshell -c applauncher > debug.log 2>&1 &
-tail -f debug.log
-```
-Or view the most recent persistent logs:
-```bash
-cat /run/user/1000/quickshell/by-id/$(ls -t /run/user/1000/quickshell/by-id | head -n 1)/log.qslog
-```
-
-## 3. Code Style Guidelines
-
-### File and Component Naming
-- **QML Files:** Must be PascalCase (e.g., `OverviewWindow.qml`, `AppIcon.qml`), except for the main entry point which must be `shell.qml`.
-- **IDs:** Must be camelCase and descriptive (e.g., `shellRoot`, `appList`, `searchInput`). Avoid generic IDs like `item1` or `rect`.
-- **Properties & Functions:** Must use camelCase (e.g., `launcherOpen`, `filterApps()`).
-
-### Imports
-- Group imports logically.
-- Core Qt imports first (`import QtQuick`, `import QtQuick.Controls`, `import QtQuick.Layouts`).
-- Quickshell imports second (`import Quickshell`, `import Quickshell.Wayland`, etc.).
-- Local directory/module imports last (`import "../../common"`).
-- Always include necessary pragmas at the top of the file, such as:
+## 3. Imports and Pragmas
+- Keep pragmas at the top of the file, before imports
+- Typical pragmas:
   ```qml
   //@ pragma UseQApplication
   //@ pragma Env QT_QUICK_CONTROLS_STYLE=Basic
+  //@ pragma IconTheme "Suru++"
+  //@ pragma Env QS_ICON_THEME=Suru++
   ```
+- Import order with blank lines between groups:
+  - Qt imports first (QtQuick, Controls, Layouts)
+  - Quickshell imports second
+  - Local relative imports last
 
-### QML Formatting and Structure
-- Structure QML properties in the following order inside an element:
-  1. `id` (Always the first property).
-  2. Custom `property` declarations.
-  3. Signal handlers (`onClicked`, `onTextChanged`).
-  4. Core properties (width, height, color).
-  5. Anchors and Layout bindings (`anchors.fill: parent`, `Layout.fillWidth: true`).
-  6. Child elements.
-  7. States and Transitions.
-- Use 4 spaces for indentation. Never use tabs.
-- Use `Qt.rgba()` or standard hex codes (`#RRGGBB` or `#AARRGGBB`) for colors. QML does not support CSS-style `rgba(r, g, b, a)` strings.
+## 4. Naming
+- QML files are PascalCase, except the entrypoint `shell.qml`
+- IDs are camelCase and descriptive (no item1, rect, etc.)
+- Properties, functions, and signals use camelCase
+- Use `required` properties in delegates for modelData/index
 
-### JavaScript inside QML
-- Keep inline JS minimal. For complex logic, extract it into a JavaScript function declared at the top of the component or in a separate `.js` file if it becomes too large.
-- Use `let` and `const` instead of `var` wherever possible. (Note: standard QML property declarations still require `property var` for dynamic arrays/objects, which is fine).
-- Use strict equality (`===` and `!==`).
-- Use modern ES6 features (Arrow functions, Template literals) safely within the Qt JS engine limits.
+## 5. Formatting and Structure
+- Indent with 4 spaces, never tabs
+- Property order inside an element:
+  1. id
+  2. property declarations
+  3. signal handlers
+  4. core properties (width/height/color/etc.)
+  5. anchors and Layout bindings
+  6. child elements
+  7. states/transitions
+- Keep anchors grouped in an `anchors {}` block
+- Use hex colors or `Qt.rgba()`; avoid CSS rgba strings
+- Keep inline JavaScript small; extract to functions or .js when it grows
 
-### Typing
-- Define strong types for properties when known (e.g., `property bool launcherOpen`, `property int currentIndex`).
-- Fall back to `property var` only for complex arrays or JSON objects.
+## 6. Types and Data
+- Use strong property types when known: bool, int, real, string, color
+- Use `property var` only for arrays or dynamic objects
+- Prefer typed lists for QML properties (example: `property list<real>`)
+- Use `required` properties in delegates to avoid undefined access
+- When parsing external data, guard against empty/invalid values
 
-### Error Handling & Safety
-- **Optional Chaining:** Use optional chaining (`?.`) and nullish coalescing (`??`) extensively when accessing deeply nested properties, especially from external data sources like `DesktopEntries` or `Hyprland`.
+## 7. Singletons and Common Modules
+- Shared config and appearance live in `common/` directories
+- For singletons use:
   ```qml
-  property string focusedMonitorName: Hyprland.focusedMonitor?.name ?? ""
+  pragma Singleton
+  pragma ComponentBehavior: Bound
   ```
-- **Null Checks:** Always verify that an object or property exists before invoking methods on it.
-  ```javascript
-  if (app && app.execute) {
-      app.execute();
-  }
-  ```
-- **Connections & Signals:** When using `Connections`, target the specific QML object correctly. Be mindful of undefined targets on initialization. When listening to model changes (like `DesktopEntries.applications`), ensure you hook into appropriate signals like `onValuesChanged` and handle cases where values might briefly be empty/undefined.
-- **Resource Lookups:** When looking up icons or resources, prefer robust fallback chains using provided tools (e.g., `Quickshell.iconPath("system-search-symbolic", "search")`). Avoid hardcoding absolute system paths.
+- Keep helper functions in `common/functions/` and widgets in `common/widgets/`
+- Import singletons via relative paths (example: `import "../common"`)
 
-## 4. Workflows and Best Practices
+## 8. JavaScript Practices
+- Use `let` and `const`, avoid `var`
+- Use strict equality (`===`/`!==`)
+- Use optional chaining and nullish coalescing for nested data
+- Avoid assuming index 0 exists for dynamic lists
+- Prefer arrow functions for short callbacks
+- Use template strings for composed commands or labels
 
-- **Modularity:** Keep configurations modular. Do not merge completely separate tools (e.g., a launcher and an overview widget) into the same Quickshell configuration namespace unless they strictly depend on each other. Isolate them in separate subdirectories.
-- **Verification:** Before assuming a fix works, always restart the quickshell configuration and check the logs. Syntax errors or unresolved imports will immediately cause the configuration to fail on load.
-- **Asynchronicity:** Be aware that Hyprland workspaces, clients, and system DesktopEntries are dynamically populated. Do not assume index `0` exists at startup. Listen to the appropriate signals instead of executing one-off queries in `Component.onCompleted`.
+## 9. Error Handling and Safety
+- Always check objects exist before calling methods
+- Guard external command output before parsing or JSON decoding
+- Use `Connections` with a clear target; handle target being undefined
+- For dynamic data (Hyprland, DesktopEntries), prefer signal-driven updates over one-off reads in Component.onCompleted
+- When running commands, use `Quickshell.execDetached` or `Process` and handle empty output
+- Use `StringUtils.shellSingleQuoteEscape()` for shell commands derived from user input
 
-## 5. Theming & Visual Design
+## 10. IPC and Window Behavior
+- Use `IpcHandler` with clear target names per module
+- For overlays use `PanelWindow` and set WlrLayershell namespace/layer/keyboardFocus
+- Provide a focus catcher and handle Escape to close
+- Ensure mouse areas prevent click-through and consume internal clicks
 
-- **App Theme:** The current visual theme for the application is based on **Catppuccin Mocha Dark**.
-- **Color Palette:** Stick strictly to these core colors when building or modifying QML components:
-  - **Background (Base):** `#1e1e2e` (Used for main window and container backgrounds)
-  - **Borders & Selected Items (Surface1/2):** `#313244` (Used for outlines, separators, and hover/selected states)
-  - **Primary Text (Text):** `#cdd6f4` (Used for main titles and active input text)
-  - **Secondary/Placeholder Text (Subtext0):** `#a6adc8` (Used for descriptions, generic names, and placeholder text)
-  - **Overlays/Shadows:** `#66000000` (Used for semi-transparent backdrops/dimming effects behind floating windows)
-- **Styling Directives:** Do not introduce arbitrary colors outside of this palette. Maintain a minimalist design approach, leveraging spacing, border-radius (e.g., `radius: 8` or `12`), and padding for layout hierarchy instead of excess elements.
+## 11. Lists and Models
+- Use `ListView`/`Repeater` with `required` delegate properties
+- Keep model computations lightweight; use `Timer` or `Connections` to debounce when needed
+- Use `boundsBehavior: Flickable.StopAtBounds` for stable scrolling
+- Prefer `ScriptModel` or helper functions for filtered/sorted lists
+
+## 12. Resources and Assets
+- Use `Quickshell.iconPath()` for icons with fallbacks
+- Use `Quickshell.shellPath()` for local assets and actions
+- Avoid hardcoding absolute system paths unless required
+- Store assets in `assets/` inside a module when possible
+
+## 13. Theming
+- The theme is Catppuccin Mocha Dark; do not introduce random colors
+- Core palette:
+  - Background: `#1e1e2e`
+  - Borders/selected: `#313244`
+  - Primary text: `#cdd6f4`
+  - Secondary text: `#a6adc8`
+  - Overlay/shadow: `#66000000`
+- Prefer radius values like 8 or 12 and use spacing for hierarchy
+- Use existing `Appearance` objects for fonts, sizes, and animations
+
+## 14. Repo Workflows
+- Keep configurations modular; do not merge unrelated tools
+- Restart the specific config after changes to validate
+- Use IPC to open/close UI for quick verification
+- Expect asynchronous population of Hyprland data; handle race conditions with care
+- Avoid expensive work in bindings that rerun every frame
+
+## 15. Cursor/Copilot Rules
+- No Cursor rules found in `.cursor/rules/` or `.cursorrules`
+- No Copilot rules found in `.github/copilot-instructions.md`
+
+## 16. Quick References
+- Module entrypoints: `applauncher/shell.qml`, `controlcenter/shell.qml`, `overview/shell.qml`, `powermenu/shell.qml`, `search/shell.qml`
+- Common styles and options live in `overview/common` and `search/common`
+- Actions for search live in `search/actions`
+- Emoji data lives in `search/assets/emoji.txt`
