@@ -6,7 +6,7 @@ Rectangle {
     property color titleColor: "#cdd6f4"
 
     color: "#181825" // Mantle
-    radius: 12
+    radius: 8
     border.color: "#313244"
     border.width: 1
 
@@ -14,9 +14,9 @@ Rectangle {
         id: titleText
         text: root.title
         color: root.titleColor
-        font.pixelSize: 18
+        font.pixelSize: 16
         font.bold: true
-        font.letterSpacing: 1.2
+        font.letterSpacing: 1.1
         visible: root.title !== ""
         anchors {
             top: parent.top

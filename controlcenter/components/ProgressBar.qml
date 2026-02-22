@@ -6,20 +6,21 @@ Item {
     property color progressColor: "#74c7ec"
     property color backgroundColor: "#313244"
     property string text: ""
+    property real cornerRadius: height / 2
     
-    height: 36
+    height: 32
     
     Rectangle {
         id: bgRect
         anchors.fill: parent
-        radius: height / 2
+        radius: root.cornerRadius
         color: root.backgroundColor
         
         Rectangle {
             id: fillRect
             height: parent.height
             width: Math.max(parent.height, parent.width * root.value)
-            radius: parent.radius
+            radius: root.cornerRadius
             color: root.progressColor
             anchors.left: parent.left
             

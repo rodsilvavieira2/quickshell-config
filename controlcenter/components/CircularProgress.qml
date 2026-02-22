@@ -4,14 +4,14 @@ import QtQuick.Shapes
 Item {
     id: root
     property real value: 0 // 0 to 1
-    property real thickness: 16
+    property real thickness: 14
     property color progressColor: "#b4befe"
     property color backgroundColor: "#313244"
     property string title: ""
     property string subTitle: ""
 
-    width: 160
-    height: 160
+    width: 140
+    height: 140
 
     Shape {
         anchors.fill: parent

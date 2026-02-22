@@ -232,15 +232,15 @@ ShellRoot {
 
             property int panelPadding: 20
             property int panelSpacing: 20
-            property int topRowMinHeight: 220
-            property int topRowMaxHeight: 320
+            property int topRowMinHeight: 260
+            property int topRowMaxHeight: 300
             property real contentWidth: width - (panelPadding * 2)
             property real contentHeight: height - (panelPadding * 2)
             property real topRowHeight: {
                 const cardWidth = (contentWidth - (panelSpacing * 2)) / 3;
-                const idealHeight = cardWidth * 0.62;
+                const idealHeight = cardWidth * 0.7;
                 const cappedHeight = Math.min(idealHeight, topRowMaxHeight);
-                const availableHeight = (contentHeight - panelSpacing) * 0.45;
+                const availableHeight = (contentHeight - panelSpacing) * 0.48;
                 return Math.max(topRowMinHeight, Math.min(cappedHeight, availableHeight));
             }
 
@@ -249,7 +249,7 @@ ShellRoot {
             height: window.height * 0.75
             anchors.centerIn: parent
             color: "#1e1e2e" // App Background
-            radius: 12
+            radius: 8
             border.color: "#313244"
             border.width: 1
 
@@ -280,10 +280,10 @@ ShellRoot {
                         titleColor: "#b4befe" // Lavender
 
                         CircularProgress {
-                            width: Math.round(parent.height * 0.58)
-                            height: width
+                            width: 140
+                            height: 140
                             anchors.centerIn: parent
-                            anchors.verticalCenterOffset: -Math.round(parent.height * 0.06)
+                            anchors.verticalCenterOffset: -22
                             value: shellRoot.cpuUsage
                             progressColor: "#b4befe"
                             title: Math.round(shellRoot.cpuUsage * 100) + "%"
@@ -293,7 +293,7 @@ ShellRoot {
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.bottom: sparkline.top
-                            anchors.bottomMargin: 8
+                            anchors.bottomMargin: 12
                             text: "Temp: <font color='#fab387'>" + shellRoot.cpuTemp + "</font>"
                             color: "#a6adc8"
                             font.pixelSize: 14
@@ -308,7 +308,7 @@ ShellRoot {
                             anchors.leftMargin: 20
                             anchors.rightMargin: 20
                             anchors.bottomMargin: 16
-                            height: 42
+                            height: 40
                             history: shellRoot.cpuHistory
                             lineColor: "#fab387" // Peach
                         }
@@ -322,12 +322,16 @@ ShellRoot {
                         titleColor: "#89b4fa" // Blue
 
                         Column {
-                            anchors.centerIn: parent
-                            width: parent.width - 80
-                            spacing: 14
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.verticalCenterOffset: 10
+                            width: 320
+                            spacing: 16
 
                             ProgressBar {
                                 width: parent.width
+                                height: 32
+                                cornerRadius: 6
                                 value: shellRoot.memTotal > 0 ? (shellRoot.memUsed / shellRoot.memTotal) : 0
                                 progressColor: "#89b4fa" // Blue
                                 text: "used: " + shellRoot.memUsed.toFixed(1) + " GB / " + shellRoot.memTotal.toFixed(1) + " GB"
@@ -350,10 +354,10 @@ ShellRoot {
                         titleColor: "#a6e3a1" // Mint Green
 
                         CircularProgress {
-                            width: Math.round(parent.height * 0.58)
-                            height: width
+                            width: 140
+                            height: 140
                             anchors.centerIn: parent
-                            anchors.verticalCenterOffset: -Math.round(parent.height * 0.06)
+                            anchors.verticalCenterOffset: -22
                             value: shellRoot.gpuUsage
                             progressColor: "#a6e3a1"
                             title: Math.round(shellRoot.gpuUsage * 100) + "%"
@@ -363,7 +367,7 @@ ShellRoot {
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.bottom: gpuBar.top
-                            anchors.bottomMargin: 12
+                            anchors.bottomMargin: 10
                             property bool isHot: parseInt(shellRoot.gpuTemp) > 75
                             text: "Temp: <font color='" + (isHot ? "#eba0ac" : "#fab387") + "'>" + shellRoot.gpuTemp + "</font>"
                             color: "#a6adc8"
@@ -373,11 +377,11 @@ ShellRoot {
 
                         ProgressBar {
                             id: gpuBar
-                            anchors.left: parent.left
-                            anchors.right: parent.right
+                            anchors.horizontalCenter: parent.horizontalCenter
                             anchors.bottom: parent.bottom
-                            anchors.leftMargin: 20
-                            anchors.rightMargin: 20
+                            width: 360
+                            height: 28
+                            cornerRadius: 6
                             anchors.bottomMargin: 16
                             value: shellRoot.gpuMemTotal > 0 ? (shellRoot.gpuMemUsed / shellRoot.gpuMemTotal) : 0
                             progressColor: "#a6e3a1" // Mint
@@ -391,16 +395,16 @@ ShellRoot {
                 Rectangle {
                     id: processCard
 
-                    property int columnPadding: 12
+                    property int columnPadding: 16
                     property int columnSpacing: 12
-                    property int headerHeight: 30
-                    property int rowHeight: 32
-                    property int pidWidth: 80
-                    property int cpuWidth: 80
-                    property int ramWidth: 110
-                    property int userWidth: 160
-                    property int nameMinWidth: 220
-                    property int scrollBarWidth: 8
+                    property int headerHeight: 32
+                    property int rowHeight: 28
+                    property int pidWidth: 100
+                    property int cpuWidth: 120
+                    property int ramWidth: 150
+                    property int userWidth: 0
+                    property int nameMinWidth: 350
+                    property int scrollBarWidth: 12
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -418,7 +422,7 @@ ShellRoot {
                             Layout.alignment: Qt.AlignHCenter
                             text: "RUNNING PROCESSES"
                             color: "#f2cdcd" // Flamingo
-                            font.pixelSize: 17
+                            font.pixelSize: 16
                             font.bold: true
                             font.letterSpacing: 1.1
                         }
@@ -432,14 +436,14 @@ ShellRoot {
                             RowLayout {
                                 anchors.fill: parent
                                 anchors.leftMargin: processCard.columnPadding
-                                anchors.rightMargin: processCard.columnPadding + processCard.scrollBarWidth
+                                anchors.rightMargin: processCard.columnPadding + processCard.scrollBarWidth + 4
                                 spacing: processCard.columnSpacing
 
-                                Text { Layout.preferredWidth: processCard.pidWidth; text: "PID"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 14; font.bold: true }
-                                Text { Layout.fillWidth: true; Layout.minimumWidth: processCard.nameMinWidth; text: "Process Name"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 14; font.bold: true }
-                                Text { Layout.preferredWidth: processCard.cpuWidth; text: "CPU %"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 14; font.bold: true }
-                                Text { Layout.preferredWidth: processCard.ramWidth; text: "RAM (MB)"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 14; font.bold: true }
-                                Text { Layout.preferredWidth: processCard.userWidth; text: "User"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 14; font.bold: true }
+                                Text { Layout.preferredWidth: processCard.pidWidth; text: "PID"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.preferredWidth: processCard.nameMinWidth; text: "Process Name"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.preferredWidth: processCard.cpuWidth; text: "CPU %"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.preferredWidth: processCard.ramWidth; text: "RAM (MB)"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.fillWidth: true; text: "User"; color: "#a6adc8"; font.family: "monospace"; font.pixelSize: 13; font.bold: true }
                             }
 
                             Rectangle {
@@ -465,7 +469,7 @@ ShellRoot {
                                 contentItem: Rectangle {
                                     implicitWidth: processCard.scrollBarWidth
                                     implicitHeight: 100
-                                    radius: processCard.scrollBarWidth / 2
+                                    radius: 6
                                     color: "#313244"
                                 }
                             }
@@ -485,14 +489,14 @@ ShellRoot {
                                 RowLayout {
                                     anchors.fill: parent
                                     anchors.leftMargin: processCard.columnPadding
-                                    anchors.rightMargin: processCard.columnPadding + processCard.scrollBarWidth
+                                    anchors.rightMargin: processCard.columnPadding + processCard.scrollBarWidth + 4
                                     spacing: processCard.columnSpacing
 
-                                    Text { Layout.preferredWidth: processCard.pidWidth; text: modelData.pid; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 14 }
-                                    Text { Layout.fillWidth: true; Layout.minimumWidth: processCard.nameMinWidth; text: modelData.name; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 14; elide: Text.ElideRight }
-                                    Text { Layout.preferredWidth: processCard.cpuWidth; text: modelData.cpu; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 14 }
-                                    Text { Layout.preferredWidth: processCard.ramWidth; text: modelData.ram; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 14 }
-                                    Text { Layout.preferredWidth: processCard.userWidth; text: modelData.user; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 14; elide: Text.ElideRight }
+                                    Text { Layout.preferredWidth: processCard.pidWidth; text: modelData.pid; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 13 }
+                                    Text { Layout.preferredWidth: processCard.nameMinWidth; text: modelData.name; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 13; elide: Text.ElideRight }
+                                    Text { Layout.preferredWidth: processCard.cpuWidth; text: modelData.cpu; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 13 }
+                                    Text { Layout.preferredWidth: processCard.ramWidth; text: modelData.ram; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 13 }
+                                    Text { Layout.fillWidth: true; text: modelData.user; color: rowItem.textColor; font.family: "monospace"; font.pixelSize: 13; elide: Text.ElideRight }
                                 }
                             }
                         }
