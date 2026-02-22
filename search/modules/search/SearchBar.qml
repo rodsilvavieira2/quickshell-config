@@ -28,13 +28,12 @@ Rectangle {
     RowLayout {
         anchors.fill: parent
         anchors.margins: 14
-        spacing: 10
 
         Image {
-            Layout.preferredWidth: 18
-            Layout.preferredHeight: 18
+            Layout.preferredWidth: 24
+            Layout.preferredHeight: 24
             source: "/home/rodrigo/.config/quickshell/search/assets/search.svg"
-            sourceSize: Qt.size(18, 18)
+            sourceSize: Qt.size(24, 24)
         }
 
         TextField {
@@ -44,7 +43,7 @@ Rectangle {
             font.family: Appearance.font.family.main
             font.pixelSize: Appearance.font.pixelSize.normal
             color: Appearance.colors.colOnLayer0
-            placeholderText: "Search apps"
+            placeholderText: "Search apps..."
             placeholderTextColor: Appearance.colors.colSubtext
             onAccepted: root.accepted()
             Keys.onEscapePressed: event => {
