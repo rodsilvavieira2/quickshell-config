@@ -1,0 +1,24 @@
+singleton Appearance 1.0 Appearance.qml
+singleton Config 1.0 Config.qml
+singleton Directories 1.0 Directories.qml
+singleton NotificationUtils 1.0 NotificationUtils.qml
+singleton ColorUtils 1.0 functions/ColorUtils.qml
+StyledText 1.0 widgets/StyledText.qml
+StyledRectangularShadow 1.0 widgets/StyledRectangularShadow.qml
+StyledToolTip 1.0 widgets/StyledToolTip.qml
+StyledToolTipContent 1.0 widgets/StyledToolTipContent.qml
+MaterialSymbol 1.0 widgets/MaterialSymbol.qml
+RippleButton 1.0 widgets/RippleButton.qml
+GroupButton 1.0 widgets/GroupButton.qml
+StyledListView 1.0 widgets/StyledListView.qml
+StyledFlickable 1.0 widgets/StyledFlickable.qml
+ScrollEdgeFade 1.0 widgets/ScrollEdgeFade.qml
+PagePlaceholder 1.0 widgets/PagePlaceholder.qml
+PointingHandLinkHover 1.0 widgets/PointingHandLinkHover.qml
+DragManager 1.0 widgets/DragManager.qml
+NotificationActionButton 1.0 widgets/NotificationActionButton.qml
+NotificationGroupExpandButton 1.0 widgets/NotificationGroupExpandButton.qml
+NotificationAppIcon 1.0 widgets/NotificationAppIcon.qml
+NotificationItem 1.0 widgets/NotificationItem.qml
+NotificationGroup 1.0 widgets/NotificationGroup.qml
+NotificationListView 1.0 widgets/NotificationListView.qml
