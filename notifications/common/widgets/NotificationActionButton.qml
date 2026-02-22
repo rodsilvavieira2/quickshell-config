@@ -12,12 +12,17 @@ RippleButton {
     rightPadding: 14
     buttonRadius: Appearance.rounding.small
     colBackground: (urgency == NotificationUrgency.Critical) ? Appearance.colors.colCritical : Appearance.colors.colLayer3
-    colBackgroundHover: (urgency == NotificationUrgency.Critical) ? Appearance.colors.colCritical : Appearance.colors.colLayer4
+    colBackgroundHover: (urgency == NotificationUrgency.Critical) ? Appearance.colors.colCritical : Appearance.colors.colFlamingo
     colRipple: Appearance.colors.colLayer4
+    colText: (urgency == NotificationUrgency.Critical) ? Appearance.colors.colOnCritical : Appearance.colors.colOnLayer0
+    colTextHover: (urgency == NotificationUrgency.Critical) ? Appearance.colors.colOnCritical : Appearance.colors.colOnFlamingo
 
     contentItem: StyledText {
         horizontalAlignment: Text.AlignHCenter
         text: buttonText
-        color: (urgency == NotificationUrgency.Critical) ? Appearance.colors.colOnCritical : Appearance.colors.colOnLayer0
+        color: button.highlighted ? button.colTextHover : button.colText
+        Behavior on color {
+            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+        }
     }
 }

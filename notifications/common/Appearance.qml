@@ -16,7 +16,7 @@ Singleton {
         property color colLayer2: "#313244"
         property color colLayer3: "#45475a"
         property color colLayer4: "#585b70"
-        property color colOnLayer0: "#cdd6f4"
+        property color colOnLayer0: "#ffffff"
         property color colSubtext: "#a6adc8"
         property color colBorder: "#313244"
         property color colShadow: "#66000000"
@@ -25,7 +25,9 @@ Singleton {
         property color colCritical: "#f38ba8"
         property color colOnCritical: "#11111b"
         property color colTooltip: "#313244"
-        property color colOnTooltip: "#cdd6f4"
+        property color colOnTooltip: "#ffffff"
+        property color colFlamingo: "#f2cdcd"
+        property color colOnFlamingo: "#181825"
     }
 
     property QtObject rounding: QtObject {

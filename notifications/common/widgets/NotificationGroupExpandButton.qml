@@ -13,8 +13,10 @@ RippleButton {
 
     buttonRadius: Appearance.rounding.full
     colBackground: Appearance.colors.colLayer2
-    colBackgroundHover: Appearance.colors.colLayer3
+    colBackgroundHover: Appearance.colors.colFlamingo
     colRipple: Appearance.colors.colLayer4
+    property color colText: Appearance.colors.colOnLayer0
+    property color colTextHover: Appearance.colors.colOnFlamingo
 
     contentItem: Item {
         anchors.centerIn: parent
@@ -27,13 +29,19 @@ RippleButton {
                 visible: root.count > 1
                 text: root.count
                 font.pixelSize: root.fontSize
-                color: Appearance.colors.colSubtext
+                color: root.highlighted ? root.colTextHover : Appearance.colors.colSubtext
+                Behavior on color {
+                    animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                }
             }
             MaterialSymbol {
                 text: "keyboard_arrow_down"
                 iconSize: root.iconSize
-                color: Appearance.colors.colOnLayer0
+                color: root.highlighted ? root.colTextHover : root.colText
                 rotation: expanded ? 180 : 0
+                Behavior on color {
+                    animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                }
                 Behavior on rotation {
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                 }

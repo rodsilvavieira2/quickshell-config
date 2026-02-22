@@ -15,9 +15,9 @@ GroupButton {
     buttonRadius: baseHeight / 2
     buttonRadiusPressed: Appearance.rounding.small
     colBackground: Appearance.colors.colLayer2
-    colBackgroundHover: Appearance.colors.colLayer3
-    colBackgroundActive: Appearance.colors.colLayer4
-    property color colText: toggled ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer0
+    colBackgroundHover: Appearance.colors.colFlamingo
+    colBackgroundActive: Appearance.colors.colFlamingo
+    property color displayColor: toggled ? Appearance.colors.colOnPrimary : (button.highlighted ? Appearance.colors.colOnFlamingo : Appearance.colors.colOnLayer0)
 
     contentItem: Item {
         id: content
@@ -32,13 +32,19 @@ GroupButton {
                 visible: buttonIcon !== ""
                 text: buttonIcon
                 iconSize: Appearance.font.pixelSize.huge
-                color: button.colText
+                color: button.displayColor
+                Behavior on color {
+                    animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                }
             }
             StyledText {
                 visible: buttonText !== ""
                 text: buttonText
                 font.pixelSize: Appearance.font.pixelSize.small
-                color: button.colText
+                color: button.displayColor
+                Behavior on color {
+                    animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                }
             }
         }
     }

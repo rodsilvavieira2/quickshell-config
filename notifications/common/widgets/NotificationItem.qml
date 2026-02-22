@@ -267,6 +267,7 @@ Item {
                             spacing: 6
 
                             NotificationActionButton {
+                                id: closeBtn
                                 Layout.fillWidth: true
                                 buttonText: "Close"
                                 urgency: notificationObject ? (notificationObject.urgency !== undefined ? notificationObject.urgency : NotificationUrgency.Normal) : NotificationUrgency.Normal
@@ -283,8 +284,11 @@ Item {
                                     MaterialSymbol {
                                         anchors.centerIn: parent
                                         iconSize: Appearance.font.pixelSize.larger
-                                        color: Appearance.colors.colOnLayer0
+                                        color: closeBtn.highlighted ? closeBtn.colTextHover : closeBtn.colText
                                         text: "close"
+                                        Behavior on color {
+                                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                                        }
                                     }
                                 }
                             }
@@ -306,6 +310,7 @@ Item {
                             }
 
                             NotificationActionButton {
+                                id: copyBtn
                                 Layout.fillWidth: true
                                 urgency: notificationObject ? (notificationObject.urgency !== undefined ? notificationObject.urgency : NotificationUrgency.Normal) : NotificationUrgency.Normal
                                 implicitWidth: (notificationActions.length == 0) ? ((actionsFlickable.width - actionRowLayout.spacing) / 2) :
@@ -333,8 +338,11 @@ Item {
                                         id: copyIcon
                                         anchors.centerIn: parent
                                         iconSize: Appearance.font.pixelSize.larger
-                                        color: Appearance.colors.colOnLayer0
+                                        color: copyBtn.highlighted ? copyBtn.colTextHover : copyBtn.colText
                                         text: "content_copy"
+                                        Behavior on color {
+                                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                                        }
                                     }
                                 }
                             }

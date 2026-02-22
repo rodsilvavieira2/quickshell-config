@@ -17,6 +17,7 @@ Item {
     readonly property bool localIconReady: root.hasText && localIcon.status === Image.Ready
     readonly property bool localIconFailed: root.hasText && localIcon.status === Image.Error
     readonly property bool useLocalIcon: preferLocalIcons && localIconReady
+    readonly property bool useFallbackIcon: root.hasText && (!root.useFontIcon && (!root.preferLocalIcons || root.localIconFailed))
     property string fallbackName: {
         switch (text) {
         case "notifications":
@@ -87,9 +88,20 @@ Item {
         anchors.centerIn: parent
         width: root.iconSize
         height: root.iconSize
-        source: root.hasText && (!root.useFontIcon && (!root.preferLocalIcons || root.localIconFailed)) ? Quickshell.iconPath(root.fallbackName, "image-missing") : ""
-        visible: root.hasText && (!root.useFontIcon && (!root.preferLocalIcons || root.localIconFailed))
+        source: root.useFallbackIcon ? Quickshell.iconPath(root.fallbackName, "image-missing") : ""
+        visible: false
         smooth: true
         mipmap: true
+        asynchronous: true
+    }
+
+    MultiEffect {
+        anchors.centerIn: parent
+        width: root.iconSize
+        height: root.iconSize
+        source: fallbackIcon
+        visible: root.useFallbackIcon
+        colorization: 1
+        colorizationColor: root.color
     }
 }

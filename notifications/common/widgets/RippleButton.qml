@@ -8,7 +8,12 @@ Control {
     property color colBackground: "transparent"
     property color colBackgroundHover: "transparent"
     property color colRipple: "#ffffff"
+    property color colText: Appearance.colors.colOnLayer0
+    property color colTextHover: Appearance.colors.colOnLayer0
     property real buttonRadius: Appearance.rounding.small
+    readonly property bool highlighted: root.enabled && (mouseArea.containsMouse || mouseArea.pressed || root.activeFocus)
+
+    focusPolicy: Qt.StrongFocus
 
     leftPadding: 10
     rightPadding: 10
@@ -18,10 +23,12 @@ Control {
     implicitHeight: 34
     implicitWidth: contentItem.implicitWidth + leftPadding + rightPadding
 
+    property alias mouseArea: mouseArea
+
     background: Rectangle {
         id: bg
         radius: root.buttonRadius
-        color: mouseArea.containsMouse ? root.colBackgroundHover : root.colBackground
+        color: root.highlighted ? root.colBackgroundHover : root.colBackground
         Behavior on color {
             animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
         }
@@ -41,6 +48,7 @@ Control {
     contentItem: StyledText {
         id: label
         text: ""
+        color: root.highlighted ? root.colTextHover : root.colText
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
     }
@@ -50,6 +58,7 @@ Control {
         anchors.fill: parent
         hoverEnabled: true
         onPressed: {
+            root.forceActiveFocus()
             ripple.width = 0
             ripple.height = 0
             ripple.opacity = 0.2
