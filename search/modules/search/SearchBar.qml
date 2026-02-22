@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "../../common"
 import "../../common/widgets"
+import "../../services"
 
 Rectangle {
     id: root
@@ -46,6 +47,10 @@ Rectangle {
             placeholderText: "Search apps"
             placeholderTextColor: Appearance.colors.colSubtext
             onAccepted: root.accepted()
+            Keys.onEscapePressed: event => {
+                GlobalStates.searchOpen = false
+                event.accepted = true
+            }
             Keys.onUpPressed: event => {
                 root.navigateUp()
                 event.accepted = true

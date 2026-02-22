@@ -37,11 +37,11 @@ Scope {
             id: focusCatcher
             anchors.fill: parent
             focus: GlobalStates.searchOpen
-
             Keys.onEscapePressed: event => {
                 GlobalStates.searchOpen = false
                 event.accepted = true
             }
+
         }
 
         Rectangle {
