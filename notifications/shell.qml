@@ -1,5 +1,7 @@
 //@ pragma UseQApplication
 //@ pragma Env QT_QUICK_CONTROLS_STYLE=Basic
+//@ pragma IconTheme "Suru++"
+//@ pragma Env QS_ICON_THEME=Suru++
 
 import QtQuick
 import Quickshell

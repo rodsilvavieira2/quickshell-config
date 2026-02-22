@@ -21,6 +21,7 @@ Item {
     }
 
     PagePlaceholder {
+        anchors.fill: parent
         shown: Notifications.list.length === 0
         icon: "notifications"
         description: "Nothing here"

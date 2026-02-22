@@ -277,11 +277,15 @@ Item {
                                     root.destroyWithAnimation()
                                 }
 
-                                contentItem: MaterialSymbol {
-                                    iconSize: Appearance.font.pixelSize.larger
-                                    horizontalAlignment: Text.AlignHCenter
-                                    color: Appearance.colors.colOnLayer0
-                                    text: "close"
+                                contentItem: Item {
+                                    implicitWidth: Appearance.font.pixelSize.larger
+                                    implicitHeight: Appearance.font.pixelSize.larger
+                                    MaterialSymbol {
+                                        anchors.centerIn: parent
+                                        iconSize: Appearance.font.pixelSize.larger
+                                        color: Appearance.colors.colOnLayer0
+                                        text: "close"
+                                    }
                                 }
                             }
 
@@ -322,12 +326,16 @@ Item {
                                     }
                                 }
 
-                                contentItem: MaterialSymbol {
-                                    id: copyIcon
-                                    iconSize: Appearance.font.pixelSize.larger
-                                    horizontalAlignment: Text.AlignHCenter
-                                    color: Appearance.colors.colOnLayer0
-                                    text: "content_copy"
+                                contentItem: Item {
+                                    implicitWidth: Appearance.font.pixelSize.larger
+                                    implicitHeight: Appearance.font.pixelSize.larger
+                                    MaterialSymbol {
+                                        id: copyIcon
+                                        anchors.centerIn: parent
+                                        iconSize: Appearance.font.pixelSize.larger
+                                        color: Appearance.colors.colOnLayer0
+                                        text: "content_copy"
+                                    }
                                 }
                             }
                         }

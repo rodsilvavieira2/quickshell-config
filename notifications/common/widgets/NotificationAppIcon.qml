@@ -1,6 +1,5 @@
 import QtQuick
 import Quickshell
-import Quickshell.Widgets
 import Quickshell.Services.Notifications
 import ".."
 
@@ -42,15 +41,19 @@ Item {
         }
     }
 
-    Loader {
-        id: appIconLoader
-        active: root.image === "" && root.appIcon !== ""
+    Image {
+        id: appIconImage
+        visible: root.image === "" && root.appIcon !== ""
         anchors.centerIn: parent
-        sourceComponent: IconImage {
-            implicitSize: 24
-            asynchronous: true
-            source: Quickshell.iconPath(root.appIcon, "image-missing")
-        }
+        width: 24
+        height: 24
+        source: root.appIcon.startsWith("/") || root.appIcon.startsWith("file:") || root.appIcon.startsWith("qrc:")
+            ? root.appIcon
+            : Quickshell.iconPath(root.appIcon, "image-missing")
+        fillMode: Image.PreserveAspectFit
+        asynchronous: true
+        smooth: true
+        mipmap: true
     }
 
     Loader {
