@@ -48,8 +48,15 @@ Item {
 
     Keys.onPressed: event => {
         if (searchBar.input.activeFocus) {
+            event.accepted = true
             return
         }
+        
+        if (!GlobalStates.searchOpen) {
+            event.accepted = true
+            return
+        }
+
         if (event.key === Qt.Key_Up) {
             results.decrementCurrentIndex()
             event.accepted = true
