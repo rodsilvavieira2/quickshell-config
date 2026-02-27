@@ -342,14 +342,6 @@ ShellRoot {
                                 text: "used: " + shellRoot.memUsed.toFixed(1) + " GB / " + shellRoot.memTotal.toFixed(1) + " GB"
                                 fontFamily: shellRoot.uiFontFamily
                             }
-
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: "Cached: " + shellRoot.memCached.toFixed(1) + " GB, Free: " + shellRoot.memFree.toFixed(1) + " GB"
-                                color: "#94e2d5" // Teal
-                                font.family: shellRoot.uiFontFamily
-                                font.pixelSize: 14
-                            }
                         }
                     }
 
