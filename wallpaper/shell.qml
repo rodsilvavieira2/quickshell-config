@@ -77,7 +77,7 @@ ShellRoot {
 
     function applyWallpaper(path) {
         if (path !== "") {
-            Quickshell.execDetached("swww img '" + path + "' --transition-type wipe");
+            Quickshell.execDetached(["/home/rodrigo/.config/hypr/scripts/wall", path]);
             shellRoot.activeWallpaperPath = path;
             for (let i = 0; i < shellRoot.allWallpapers.length; i++) {
                 if (shellRoot.allWallpapers[i].path === path) {
@@ -134,12 +134,19 @@ ShellRoot {
         // Main Container
         Rectangle {
             id: mainContainer
-            width: 900
-            height: 600
+            width: parent.width * 0.8
+            height: parent.height * 0.8
             anchors.centerIn: parent
             color: "#1e1e2e"
+            border.color: "#89b4fa"
+            border.width: 2
             radius: 10
             clip: true
+            
+            Shortcut {
+                sequence: "Esc"
+                onActivated: shellRoot.wallpaperOpen = false
+            }
 
             MouseArea {
                 anchors.fill: parent
@@ -179,7 +186,7 @@ ShellRoot {
                         border.color: searchInput.activeFocus ? "#89b4fa" : "#313244"
 
                         Image {
-                            source: Quickshell.iconPath("system-search-symbolic", "search")
+                            source: "file:///home/rodrigo/.config/quickshell/wallpaper/resources/search.svg"
                             width: 16
                             height: 16
                             anchors.left: parent.left
@@ -196,6 +203,8 @@ ShellRoot {
                         shellRoot.wallpaperOpen = false;
                         event.accepted = true;
                     }
+                    
+                    KeyNavigation.down: gridView
                 }
             }
 
@@ -207,6 +216,7 @@ ShellRoot {
                 anchors.bottom: parent.bottom
 
                 Rectangle {
+                    id: applyBtn
                     width: Math.max(80, applyText.implicitWidth + 32)
                     height: 32
                     anchors.right: parent.right
@@ -214,7 +224,13 @@ ShellRoot {
                     anchors.rightMargin: 24
                     anchors.bottomMargin: 20
                     radius: 6
-                    color: applyMouseArea.pressed ? "#89dceb" : (applyMouseArea.containsMouse ? "#b4befe" : "#89b4fa")
+                    
+                    activeFocusOnTab: true
+                    KeyNavigation.up: gridView
+                    
+                    color: applyMouseArea.pressed ? "#89dceb" : (applyMouseArea.containsMouse || applyBtn.activeFocus ? "#b4befe" : "#89b4fa")
+                    border.width: applyBtn.activeFocus ? 2 : 0
+                    border.color: "#cba6f7"
 
                     Text {
                         id: applyText
@@ -234,6 +250,13 @@ ShellRoot {
                             shellRoot.applyWallpaper(shellRoot.selectedWallpaperPath);
                         }
                     }
+                    
+                    Keys.onPressed: (event) => {
+                        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+                            shellRoot.applyWallpaper(shellRoot.selectedWallpaperPath);
+                            event.accepted = true;
+                        }
+                    }
                 }
             }
 
@@ -241,16 +264,13 @@ ShellRoot {
             Item {
                 id: gallerySection
                 width: parent.width
-                height: 180
+                height: Math.max(180, parent.height * 0.45) // make the gallery scale to take around 45% of the height
                 anchors.bottom: footerSection.top
                 clip: true
 
                 ScrollView {
                     anchors.fill: parent
                     anchors.margins: 20
-                    contentWidth: availableWidth
-                    contentHeight: flowGrid.implicitHeight
-
                     ScrollBar.vertical: ScrollBar {
                         width: 12
                         policy: ScrollBar.AsNeeded
@@ -263,61 +283,99 @@ ShellRoot {
                         background: Item {} // Transparent
                     }
 
-                    Flow {
-                        id: flowGrid
-                        width: parent.width
-                        spacing: 16
+                    GridView {
+                        id: gridView
+                        boundsBehavior: Flickable.StopAtBounds
+                        cellWidth: 160
+                        cellHeight: 119
+                        model: shellRoot.filteredWallpapers
+                        clip: true
+                        activeFocusOnTab: true
+                        focus: true
+                        
+                        KeyNavigation.up: searchInput
+                        KeyNavigation.down: applyBtn
+                        
+                        onCurrentIndexChanged: {
+                            if (activeFocus && currentIndex >= 0 && currentIndex < shellRoot.filteredWallpapers.length) {
+                                shellRoot.selectedWallpaperPath = shellRoot.filteredWallpapers[currentIndex].path;
+                                shellRoot.activeWallpaperName = shellRoot.filteredWallpapers[currentIndex].name;
+                            }
+                        }
+                        
+                        Keys.onPressed: (event) => {
+                            if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+                                if (currentIndex >= 0 && currentIndex < shellRoot.filteredWallpapers.length) {
+                                    shellRoot.applyWallpaper(shellRoot.filteredWallpapers[currentIndex].path);
+                                }
+                                event.accepted = true;
+                            }
+                        }
 
-                        Repeater {
-                            model: shellRoot.filteredWallpapers
-                            delegate: Item {
-                                required property var modelData
-                                required property int index
+                        delegate: Item {
+                            required property var modelData
+                            required property int index
 
-                                width: 144
-                                height: 81 + 6 + 16 // img + margin + text
+                            width: 144
+                            height: 103
 
-                                ColumnLayout {
-                                    anchors.fill: parent
-                                    spacing: 6
+                            ColumnLayout {
+                                anchors.fill: parent
+                                spacing: 6
 
+                                Rectangle {
+                                    Layout.preferredWidth: 144
+                                    Layout.preferredHeight: 81
+                                    radius: 6
+                                    color: "#181825"
+                                    border.width: modelData.path === shellRoot.selectedWallpaperPath ? 2 : 1
+                                    border.color: modelData.path === shellRoot.selectedWallpaperPath ? "#89b4fa" : (thumbMouseArea.containsMouse ? "#89dceb" : "#313244")
+                                    
                                     Rectangle {
-                                        Layout.preferredWidth: 144
-                                        Layout.preferredHeight: 81
+                                        anchors.fill: parent
                                         radius: 6
-                                        color: "#181825"
-                                        border.width: modelData.path === shellRoot.selectedWallpaperPath ? 2 : 1
-                                        border.color: modelData.path === shellRoot.selectedWallpaperPath || thumbMouseArea.containsMouse ? "#89b4fa" : "#313244"
-                                        clip: true
+                                        color: "transparent"
+                                        border.width: 2
+                                        border.color: "#cba6f7"
+                                        visible: gridView.activeFocus && gridView.currentIndex === index
+                                    }
+                                    
+                                    clip: true
 
-                                        Image {
-                                            anchors.fill: parent
-                                            anchors.margins: modelData.path === shellRoot.selectedWallpaperPath ? 2 : 1
-                                            source: "file://" + modelData.path
-                                            fillMode: Image.PreserveAspectCrop
-                                            asynchronous: true
-                                        }
-
-                                        MouseArea {
-                                            id: thumbMouseArea
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            onClicked: {
-                                                shellRoot.selectedWallpaperPath = modelData.path;
-                                                shellRoot.activeWallpaperName = modelData.name;
-                                            }
-                                        }
+                                    Image {
+                                        anchors.fill: parent
+                                        anchors.margins: modelData.path === shellRoot.selectedWallpaperPath ? 2 : 1
+                                        source: "file://" + modelData.path
+                                        fillMode: Image.PreserveAspectCrop
+                                        asynchronous: true
+                                        sourceSize.width: 144
+                                        sourceSize.height: 81
                                     }
 
-                                    Text {
-                                        Layout.fillWidth: true
-                                        text: modelData.name
-                                        color: "#cdd6f4"
-                                        font.pixelSize: 12
-                                        font.family: ".AppleSystemUIFont, Segoe UI, sans-serif"
-                                        horizontalAlignment: Text.AlignHCenter
-                                        elide: Text.ElideRight
+                                    MouseArea {
+                                        id: thumbMouseArea
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        onClicked: {
+                                            gridView.forceActiveFocus();
+                                            gridView.currentIndex = index;
+                                            shellRoot.selectedWallpaperPath = modelData.path;
+                                            shellRoot.activeWallpaperName = modelData.name;
+                                        }
+                                        onDoubleClicked: {
+                                            shellRoot.applyWallpaper(modelData.path);
+                                        }
                                     }
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: modelData.name
+                                    color: "#cdd6f4"
+                                    font.pixelSize: 12
+                                    font.family: ".AppleSystemUIFont, Segoe UI, sans-serif"
+                                    horizontalAlignment: Text.AlignHCenter
+                                    elide: Text.ElideRight
                                 }
                             }
                         }
@@ -363,6 +421,8 @@ ShellRoot {
                             source: shellRoot.selectedWallpaperPath !== "" ? "file://" + shellRoot.selectedWallpaperPath : ""
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
+                            sourceSize.width: 400
+                            sourceSize.height: 225
                         }
 
                         // Checkmark Badge
