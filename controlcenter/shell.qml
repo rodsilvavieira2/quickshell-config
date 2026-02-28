@@ -36,7 +36,7 @@ ShellRoot {
     property real gpuMemTotal: 1
 
     // Process State
-    property var processList: []
+    ListModel { id: processModel }
     property string selectedPid: ""
     property int processMaxRows: 50
     property string uiFontFamily: "JetBrainsMono Nerd Font Mono"
@@ -179,7 +179,16 @@ ShellRoot {
             onStreamFinished: {
                 const parsed = shellRoot.parseProcessLines(text);
                 if (parsed.length > 0) {
-                    shellRoot.processList = parsed;
+                    for (let i = 0; i < parsed.length; i++) {
+                        if (i < processModel.count) {
+                            processModel.set(i, parsed[i]);
+                        } else {
+                            processModel.append(parsed[i]);
+                        }
+                    }
+                    while (processModel.count > parsed.length) {
+                        processModel.remove(processModel.count - 1, 1);
+                    }
                 }
             }
         }
@@ -464,7 +473,7 @@ ShellRoot {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             clip: true
-                            model: shellRoot.processList
+                            model: processModel
                             boundsBehavior: Flickable.StopAtBounds
 
                             ScrollBar.vertical: ScrollBar {
@@ -482,12 +491,12 @@ ShellRoot {
                                 id: rowItem
                                 width: ListView.view.width
                                 height: processCard.rowHeight
-                                color: shellRoot.selectedPid === modelData.pid ? "#f2cdcd" : (index % 2 === 0 ? "#181825" : "#1e1e2e")
-                                property color textColor: shellRoot.selectedPid === modelData.pid ? "#11111b" : "#cdd6f4"
+                                color: shellRoot.selectedPid === pid ? "#f2cdcd" : (index % 2 === 0 ? "#181825" : "#1e1e2e")
+                                property color textColor: shellRoot.selectedPid === pid ? "#11111b" : "#cdd6f4"
 
                                 MouseArea {
                                     anchors.fill: parent
-                                    onClicked: shellRoot.selectedPid = modelData.pid
+                                    onClicked: shellRoot.selectedPid = pid
                                 }
 
                                 RowLayout {
@@ -496,11 +505,11 @@ ShellRoot {
                                     anchors.rightMargin: processCard.columnPadding + processCard.scrollBarWidth + 4
                                     spacing: processCard.columnSpacing
 
-                                    Text { Layout.preferredWidth: processCard.pidWidth; text: modelData.pid; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13 }
-                                    Text { Layout.preferredWidth: processCard.nameMinWidth; text: modelData.name; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; elide: Text.ElideRight }
-                                    Text { Layout.preferredWidth: processCard.cpuWidth; text: modelData.cpu; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13 }
-                                    Text { Layout.preferredWidth: processCard.ramWidth; text: modelData.ram; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13 }
-                                    Text { Layout.fillWidth: true; text: modelData.user; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; elide: Text.ElideRight }
+                                    Text { Layout.preferredWidth: processCard.pidWidth; text: pid; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13 }
+                                    Text { Layout.preferredWidth: processCard.nameMinWidth; text: name; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; elide: Text.ElideRight }
+                                    Text { Layout.preferredWidth: processCard.cpuWidth; text: cpu; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13 }
+                                    Text { Layout.preferredWidth: processCard.ramWidth; text: ram; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13 }
+                                    Text { Layout.fillWidth: true; text: user; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; elide: Text.ElideRight }
                                 }
                             }
                         }
