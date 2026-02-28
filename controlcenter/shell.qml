@@ -260,8 +260,8 @@ ShellRoot {
             anchors.centerIn: parent
             color: "#1e1e2e" // App Background
             radius: 8
-            border.color: "#313244"
-            border.width: 1
+            border.color: "#89b4fa"
+            border.width: 2
 
             // Consume clicks inside the main panel
             MouseArea {

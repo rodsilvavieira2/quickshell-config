@@ -60,8 +60,8 @@ Scope {
             anchors.right: parent.right
             color: Appearance.colors.colBackground
             radius: 12
-            border.color: Appearance.colors.colBorder
-            border.width: 1
+            border.color: "#89b4fa"
+            border.width: 2
             anchors.margins: 12
 
             opacity: GlobalStates.panelOpen ? 1 : 0

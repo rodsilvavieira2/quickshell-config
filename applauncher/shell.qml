@@ -112,8 +112,8 @@ ShellRoot {
             anchors.verticalCenterOffset: -100
             color: "#1e1e2e"
             radius: 12
-            border.color: "#313244"
-            border.width: 1
+            border.color: "#89b4fa"
+            border.width: 2
             clip: true
 
             MouseArea {

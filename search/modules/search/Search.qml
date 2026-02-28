@@ -51,8 +51,8 @@ Scope {
             anchors.centerIn: parent
             color: Appearance.colors.colLayer0
             radius: 16
-            border.width: 1
-            border.color: Appearance.colors.colLayer0Border
+            border.width: 2
+            border.color: "#89b4fa"
 
             StyledRectangularShadow { target: panel }
 

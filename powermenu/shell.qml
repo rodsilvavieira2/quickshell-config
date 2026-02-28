@@ -137,8 +137,8 @@ ShellRoot {
             anchors.centerIn: parent
             color: "#1e1e2e"
             radius: 12
-            border.color: "#313244"
-            border.width: 1
+            border.color: "#89b4fa"
+            border.width: 2
 
             // Consume clicks inside the menu box so it doesn't close when clicked
             MouseArea {
