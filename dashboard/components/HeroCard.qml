@@ -25,6 +25,7 @@ Rectangle {
         anchors.bottom: parent.bottom
         width: parent.width * heroCard.usage
         color: Qt.rgba(heroCard.accentColor.r, heroCard.accentColor.g, heroCard.accentColor.b, 0.15)
+        radius: 16
         
         Behavior on width {
             NumberAnimation { duration: 500; easing.type: Easing.InOutQuad }

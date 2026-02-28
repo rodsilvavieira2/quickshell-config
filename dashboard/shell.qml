@@ -106,11 +106,9 @@ ShellRoot {
             onClicked: shellRoot.panelOpen = false
         }
 
-        Item {
-            id: focusCatcher
-            anchors.fill: parent
-            focus: true
-            Keys.onEscapePressed: event => { shellRoot.panelOpen = false; event.accepted = true; }
+        Shortcut {
+            sequence: "Escape"
+            onActivated: shellRoot.panelOpen = false
         }
 
         Rectangle {
