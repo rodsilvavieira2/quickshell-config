@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Services.Pipewire
+import Quickshell.Io
 
 Item {
     id: root
@@ -29,11 +30,46 @@ Item {
     readonly property PwNode sink: Pipewire.defaultAudioSink
     readonly property PwNode source: Pipewire.defaultAudioSource
 
-    readonly property bool muted: !!sink?.audio?.muted
-    readonly property real volume: sink?.audio?.volume ?? 0
+    readonly property bool muted: sink && sink.audio ? sink.audio.muted : false
+    readonly property real volume: sink && sink.audio ? sink.audio.volume : 0
 
-    readonly property bool sourceMuted: !!source?.audio?.muted
-    readonly property real sourceVolume: source?.audio?.volume ?? 0
+    readonly property bool sourceMuted: (source && source.audio && !isNaN(source.audio.volume)) ? source.audio.muted : fallbackSourceMuted
+    readonly property real sourceVolume: (source && source.audio && !isNaN(source.audio.volume)) ? source.audio.volume : fallbackSourceVolume
+
+    property real fallbackSourceVolume: 0.5
+    property bool fallbackSourceMuted: false
+
+    Process {
+        id: wpctlReader
+        command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SOURCE@"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let str = text.trim();
+                if (str.startsWith("Volume:")) {
+                    let parts = str.split(" ");
+                    let volStr = parts[1];
+                    if (str.includes("[MUTED]")) {
+                        root.fallbackSourceMuted = true;
+                        volStr = volStr.replace("[MUTED]", "").trim();
+                    } else {
+                        root.fallbackSourceMuted = false;
+                    }
+                    root.fallbackSourceVolume = parseFloat(volStr);
+                }
+            }
+        }
+    }
+
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: {
+            if (source && source.audio && isNaN(source.audio.volume)) {
+                wpctlReader.running = true;
+            }
+        }
+    }
 
     function setVolume(newVolume) {
         if (sink && sink.audio) {
@@ -48,16 +84,46 @@ Item {
         }
     }
 
+    Process {
+        id: wpctlWriter
+        property string action: "vol" // 'vol' or 'mute'
+        property real targetVol: 0
+        property bool targetMute: false
+        
+        command: {
+            if (action === "vol") {
+                return ["wpctl", "set-volume", "@DEFAULT_AUDIO_SOURCE@", targetVol.toString()];
+            } else {
+                return ["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", targetMute ? "1" : "0"];
+            }
+        }
+    }
+
     function setSourceVolume(newVolume) {
         if (source && source.audio) {
-            source.audio.muted = false;
-            source.audio.volume = Math.max(0, Math.min(1.0, newVolume));
+            let clamped = Math.max(0, Math.min(1.0, newVolume));
+            if (isNaN(source.audio.volume)) {
+                root.fallbackSourceVolume = clamped;
+                wpctlWriter.action = "vol";
+                wpctlWriter.targetVol = clamped;
+                wpctlWriter.running = true;
+            } else {
+                source.audio.muted = false;
+                source.audio.volume = clamped;
+            }
         }
     }
 
     function toggleSourceMute() {
         if (source && source.audio) {
-            source.audio.muted = !source.audio.muted;
+            if (isNaN(source.audio.volume)) {
+                root.fallbackSourceMuted = !root.fallbackSourceMuted;
+                wpctlWriter.action = "mute";
+                wpctlWriter.targetMute = root.fallbackSourceMuted;
+                wpctlWriter.running = true;
+            } else {
+                source.audio.muted = !source.audio.muted;
+            }
         }
     }
 

@@ -110,7 +110,7 @@ Rectangle {
                 }
 
                 Text {
-                    text: root.audioService ? Math.round(root.audioService.volume * 100) + "%" : "0%"
+                    text: root.audioService && !isNaN(root.audioService.volume) ? Math.round(root.audioService.volume * 100) + "%" : "0%"
                     color: "#a6adc8"
                     font.family: uiFontFamily
                     font.pixelSize: 13
@@ -159,7 +159,7 @@ Rectangle {
                     id: outputSlider
                     Layout.fillWidth: true
                     activeFocusOnTab: true
-                    value: root.audioService ? root.audioService.volume : 0
+                    value: root.audioService && !isNaN(root.audioService.volume) ? root.audioService.volume : 0
                     onMoved: {
                         if (root.audioService) root.audioService.setVolume(value);
                     }
@@ -276,7 +276,7 @@ Rectangle {
                 }
 
                 Text {
-                    text: root.audioService ? Math.round(root.audioService.sourceVolume * 100) + "%" : "0%"
+                    text: root.audioService && !isNaN(root.audioService.sourceVolume) ? Math.round(root.audioService.sourceVolume * 100) + "%" : "0%"
                     color: "#a6adc8"
                     font.family: uiFontFamily
                     font.pixelSize: 13
@@ -325,7 +325,7 @@ Rectangle {
                     id: inputSlider
                     Layout.fillWidth: true
                     activeFocusOnTab: true
-                    value: root.audioService ? root.audioService.sourceVolume : 0
+                    value: root.audioService && !isNaN(root.audioService.sourceVolume) ? root.audioService.sourceVolume : 0
                     onMoved: {
                         if (root.audioService) root.audioService.setSourceVolume(value);
                     }
