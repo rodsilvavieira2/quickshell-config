@@ -46,29 +46,6 @@ PanelWindow {
                 anchors.centerIn: parent
                 spacing: Root.Config.pillSpacing
 
-                // OS Icon
-                Text {
-                    text: "  "
-                    color: Root.Config.blue
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: Root.Config.iconSize + 2
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: console.log("Launcher triggered")
-                    }
-                }
-
-                // Thin separator
-                Rectangle {
-                    width: 1
-                    Layout.preferredHeight: leftPill.height * 0.5
-                    Layout.alignment: Qt.AlignVCenter
-                    color: Root.Config.overlay0
-                    opacity: 0.5
-                }
-
                 // Workspaces
                 Modules.Workspaces {}
             }
