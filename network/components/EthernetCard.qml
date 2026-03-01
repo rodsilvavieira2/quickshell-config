@@ -146,5 +146,90 @@ Rectangle {
                 color: "#cdd6f4"; font.pixelSize: 14; font.bold: true; Layout.fillWidth: true 
             }
         }
+
+        // Speed Test Section
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "#45475a"
+            visible: device.connected
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            visible: device.connected
+            spacing: 12
+
+            RowLayout {
+                Layout.fillWidth: true
+                Text {
+                    text: "Network Speed Test"
+                    color: "#f5e0dc" // Rosewater
+                    font.pixelSize: 15
+                    font.bold: true
+                    Layout.fillWidth: true
+                }
+                
+                Button {
+                    text: SpeedTest.isTesting ? "Cancel" : "󰓅 Run Test"
+                    font.pixelSize: 12
+                    background: Rectangle {
+                        color: SpeedTest.isTesting ? "#f38ba8" : "#b4befe" // Red or Lavender
+                        radius: 6
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: "#1e1e2e"
+                        font.bold: true
+                        font.pixelSize: 12
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+                    onClicked: {
+                        if (SpeedTest.isTesting) {
+                            SpeedTest.cancelTest();
+                        } else {
+                            SpeedTest.runTest(device.interface);
+                        }
+                    }
+                }
+            }
+
+            GridLayout {
+                columns: 3
+                Layout.fillWidth: true
+                columnSpacing: 20
+                visible: SpeedTest.ping !== "0 ms" || SpeedTest.isTesting
+
+                ColumnLayout {
+                    spacing: 4
+                    Text { text: "Ping"; color: "#a6adc8"; font.pixelSize: 12 }
+                    Text { text: SpeedTest.ping; color: "#fab387"; font.pixelSize: 16; font.bold: true }
+                }
+
+                ColumnLayout {
+                    spacing: 4
+                    Text { 
+                        text: "Download" + (SpeedTest.isTesting ? " (Live)" : ""); 
+                        color: "#a6adc8"; font.pixelSize: 12 
+                    }
+                    Text { 
+                        text: SpeedTest.isTesting ? SpeedTest.liveDownload + " Mbps" : SpeedTest.downloadSpeed; 
+                        color: "#a6e3a1"; font.pixelSize: 16; font.bold: true 
+                    }
+                }
+
+                ColumnLayout {
+                    spacing: 4
+                    Text { 
+                        text: "Upload" + (SpeedTest.isTesting ? " (Live)" : ""); 
+                        color: "#a6adc8"; font.pixelSize: 12 
+                    }
+                    Text { 
+                        text: SpeedTest.isTesting ? SpeedTest.liveUpload + " Mbps" : SpeedTest.uploadSpeed; 
+                        color: "#89b4fa"; font.pixelSize: 16; font.bold: true 
+                    }
+                }
+            }
+        }
     }
 }
