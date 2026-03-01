@@ -146,6 +146,18 @@ ShellRoot {
                 model: shellRoot.popups
                 interactive: false
                 
+                add: Transition {
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }
+                }
+                
+                remove: Transition {
+                    NumberAnimation { property: "opacity"; to: 0; duration: 200 }
+                }
+                
+                displaced: Transition {
+                    NumberAnimation { properties: "x,y"; duration: 200 }
+                }
+                
                 delegate: Item {
                     required property var modelData
                     width: ListView.view.width
@@ -254,6 +266,18 @@ ShellRoot {
                     clip: true
                     spacing: 12
                     model: shellRoot.allNotifications
+                    
+                    add: Transition {
+                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }
+                    }
+                    
+                    remove: Transition {
+                        NumberAnimation { property: "opacity"; to: 0; duration: 200 }
+                    }
+                    
+                    displaced: Transition {
+                        NumberAnimation { properties: "x,y"; duration: 200 }
+                    }
                     
                     delegate: Item {
                         required property var modelData
