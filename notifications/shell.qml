@@ -123,28 +123,40 @@ ShellRoot {
 
         anchors {
             top: true
-            right: true
             bottom: true
-        }
-        margins {
-            top: 20
-            right: 20
+            left: true
+            right: true
         }
         
-        implicitWidth: 380
+        Item {
+            anchors {
+                top: parent.top
+                right: parent.right
+                bottom: parent.bottom
+                margins: 20
+            }
+            width: 380
 
-        ListView {
-            id: popupsList
-            anchors.fill: parent
-            spacing: 12
-            model: shellRoot.popups
-            interactive: false
-            
-            delegate: NotificationCard {
-                notif: modelData
-                isPopup: true
-                onCloseClicked: shellRoot.removePopup(modelData.id)
-                onActionClicked: (actionId) => shellRoot.invokeAction(modelData.id, actionId)
+            ListView {
+                id: popupsList
+                anchors.fill: parent
+                spacing: 12
+                model: shellRoot.popups
+                interactive: false
+                
+                delegate: Item {
+                    required property var modelData
+                    width: ListView.view.width
+                    height: card.height
+                    
+                    NotificationCard {
+                        id: card
+                        notif: parent.modelData
+                        isPopup: true
+                        onCloseClicked: shellRoot.removePopup(parent.modelData.id)
+                        onActionClicked: (actionId) => shellRoot.invokeAction(parent.modelData.id, actionId)
+                    }
+                }
             }
         }
     }
@@ -241,12 +253,19 @@ ShellRoot {
                     spacing: 12
                     model: shellRoot.allNotifications
                     
-                    delegate: NotificationCard {
+                    delegate: Item {
+                        required property var modelData
                         width: ListView.view.width
-                        notif: modelData
-                        isPopup: false
-                        onCloseClicked: shellRoot.removeNotification(modelData.id)
-                        onActionClicked: (actionId) => shellRoot.invokeAction(modelData.id, actionId)
+                        height: card.height
+                        
+                        NotificationCard {
+                            id: card
+                            width: parent.width
+                            notif: parent.modelData
+                            isPopup: false
+                            onCloseClicked: shellRoot.removeNotification(parent.modelData.id)
+                            onActionClicked: (actionId) => shellRoot.invokeAction(parent.modelData.id, actionId)
+                        }
                     }
                     
                     Text {
