@@ -1,3 +1,0 @@
-module notifications
-NotificationPopup 1.0 modules/notificationPopup/NotificationPopup.qml
-NotificationPanel 1.0 modules/history/NotificationPanel.qml
