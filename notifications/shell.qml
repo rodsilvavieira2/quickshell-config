@@ -21,21 +21,23 @@ ShellRoot {
     property list<var> popups: []
     property var popupTimers: ({})
 
+    function clearAllNotifications() { 
+        notifServer.trackedNotifications.values.forEach(n => n.dismiss());
+        shellRoot.allNotifications = [];
+        shellRoot.popups = [];
+        
+        for (let id in shellRoot.popupTimers) {
+            shellRoot.popupTimers[id].destroy();
+        }
+        shellRoot.popupTimers = {};
+    }
+
     IpcHandler {
         target: "notifications"
         function toggle() { shellRoot.historyOpen = !shellRoot.historyOpen; }
         function open() { shellRoot.historyOpen = true; }
         function close() { shellRoot.historyOpen = false; }
-        function clear() { 
-            notifServer.trackedNotifications.values.forEach(n => n.dismiss());
-            shellRoot.allNotifications = [];
-            shellRoot.popups = [];
-            
-            for (let id in shellRoot.popupTimers) {
-                shellRoot.popupTimers[id].destroy();
-            }
-            shellRoot.popupTimers = {};
-        }
+        function clear() { shellRoot.clearAllNotifications(); }
     }
 
     NotificationServer {
@@ -228,7 +230,7 @@ ShellRoot {
                         font.pixelSize: 13
                         background: Rectangle { color: "#313244"; radius: 6 }
                         contentItem: Text { text: parent.text; color: "#cdd6f4"; font.pixelSize: 13; horizontalAlignment: Text.AlignHCenter }
-                        onClicked: shellRoot.clear()
+                        onClicked: shellRoot.clearAllNotifications()
                     }
                     
                     Button {
