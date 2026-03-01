@@ -1,2 +1,3 @@
 singleton Nmcli 1.0 Nmcli.qml
 singleton SpeedTest 1.0 SpeedTest.qml
+singleton NetSpeed 1.0 NetSpeed.qml

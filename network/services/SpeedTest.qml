@@ -10,44 +10,31 @@ Singleton {
     property string downloadSpeed: "0 Mbps"
     property string uploadSpeed: "0 Mbps"
     property string ping: "0 ms"
-    
-    // Live values
-    property string liveDownload: "0.00"
-    property string liveUpload: "0.00"
 
     signal testFinished()
 
     function runTest(interfaceName) {
-        if (isTesting) return;
-        isTesting = true;
-        downloadSpeed = "Testing...";
-        uploadSpeed = "Waiting...";
-        ping = "Testing...";
-        liveDownload = "0.00";
-        liveUpload = "0.00";
-        
-        monitorProc.interfaceName = interfaceName;
-        monitorProc.running = true;
-        pingProc.running = true;
+        if (isTesting) return
+        isTesting = true
+        downloadSpeed = "Testing..."
+        uploadSpeed = "Waiting..."
+        ping = "Testing..."
+        pingProc.running = true
     }
 
     function cancelTest() {
-        if (!isTesting) return;
-        
-        pingProc.running = false;
-        downloadProc.running = false;
-        uploadProc.running = false;
-        monitorProc.running = false;
-        
-        isTesting = false;
-        downloadSpeed = "Canceled";
-        uploadSpeed = "Canceled";
-        ping = "Canceled";
-        liveDownload = "0.00";
-        liveUpload = "0.00";
-        
-        // Cleanup temp file if exists
-        cleanupProc.running = true;
+        if (!isTesting) return
+
+        pingProc.running = false
+        downloadProc.running = false
+        uploadProc.running = false
+
+        isTesting = false
+        downloadSpeed = "Canceled"
+        uploadSpeed = "Canceled"
+        ping = "Canceled"
+
+        cleanupProc.running = true
     }
 
     Process {
@@ -55,78 +42,59 @@ Singleton {
         command: ["rm", "-f", "/tmp/speedtest.bin"]
     }
 
-    Process {
-        id: monitorProc
-        property string interfaceName: "eth0"
-        command: ["bash", "-c", "
-            IFACE='" + interfaceName + "';
-            while true; do
-                read rx1 tx1 < <(grep \"$IFACE\" /proc/net/dev | awk '{print $2, $10}');
-                sleep 0.5;
-                read rx2 tx2 < <(grep \"$IFACE\" /proc/net/dev | awk '{print $2, $10}');
-                # (Bytes * 8 bits) / (0.5s * 1024 * 1024) = Mbps
-                # We multiply by 16 because 0.5s is 1/2 second (8 * 2 = 16)
-                # Using bc for float math
-                echo \"$(echo \"scale=2; ($rx2-$rx1)*16/1048576\" | bc)|$(echo \"scale=2; ($tx2-$tx1)*16/1048576\" | bc)\";
-            done
-        "]
-        stdout: SplitParser {
-            onRead: data => {
-                let parts = data.trim().split("|");
-                if (parts.length === 2) {
-                    root.liveDownload = parts[0];
-                    root.liveUpload = parts[1];
-                }
-            }
-        }
-    }
-
+    // Step 1: Ping (4 probes to Cloudflare DNS — fast and reliable)
     Process {
         id: pingProc
-        command: ["bash", "-c", "ping -c 4 1.1.1.1 | tail -1 | awk '{print $4}' | cut -d '/' -f 2"]
+        command: ["bash", "-c", "ping -c 4 1.1.1.1 | tail -1 | awk -F '/' '{print $5}'"]
         stdout: StdioCollector {
             onStreamFinished: {
-                if (!root.isTesting) return;
-                root.ping = text.trim() !== "" ? text.trim() + " ms" : "Error";
-                downloadProc.running = true;
+                if (!root.isTesting) return
+                const t = text.trim()
+                root.ping = t !== "" ? t + " ms" : "Error"
+                downloadProc.running = true
             }
         }
     }
 
+    // Step 2: Download — Cloudflare speed test endpoint (25 MB)
     Process {
         id: downloadProc
-        command: ["bash", "-c", "curl -w '%{speed_download}' -o /dev/null -s http://speedtest.tele2.net/10MB.zip"]
+        command: ["bash", "-c",
+            "curl -w '%{speed_download}' -o /dev/null -s " +
+            "https://speed.cloudflare.com/__down?bytes=25000000"]
         stdout: StdioCollector {
             onStreamFinished: {
-                if (!root.isTesting) return;
-                let bytesPerSec = parseFloat(text.trim());
+                if (!root.isTesting) return
+                const bytesPerSec = parseFloat(text.trim())
                 if (isNaN(bytesPerSec)) {
-                    root.downloadSpeed = "Error";
+                    root.downloadSpeed = "Error"
                 } else {
-                    let mbps = (bytesPerSec * 8) / 1048576;
-                    root.downloadSpeed = mbps.toFixed(2) + " Mbps";
+                    root.downloadSpeed = (bytesPerSec * 8 / 1048576).toFixed(2) + " Mbps"
                 }
-                uploadProc.running = true;
+                uploadProc.running = true
             }
         }
     }
 
+    // Step 3: Upload — POST 10 MB to Cloudflare speed test endpoint
     Process {
         id: uploadProc
-        command: ["bash", "-c", "dd if=/dev/zero bs=1M count=5 of=/tmp/speedtest.bin 2>/dev/null; curl -w '%{speed_upload}' -T /tmp/speedtest.bin -o /dev/null -s https://httpbin.org/post; rm -f /tmp/speedtest.bin"]
+        command: ["bash", "-c",
+            "dd if=/dev/zero bs=1M count=10 of=/tmp/speedtest.bin 2>/dev/null && " +
+            "curl -w '%{speed_upload}' -X POST -T /tmp/speedtest.bin " +
+            "-o /dev/null -s https://speed.cloudflare.com/__up; " +
+            "rm -f /tmp/speedtest.bin"]
         stdout: StdioCollector {
             onStreamFinished: {
-                if (!root.isTesting) return;
-                let bytesPerSec = parseFloat(text.trim());
+                if (!root.isTesting) return
+                const bytesPerSec = parseFloat(text.trim())
                 if (isNaN(bytesPerSec)) {
-                    root.uploadSpeed = "Error";
+                    root.uploadSpeed = "Error"
                 } else {
-                    let mbps = (bytesPerSec * 8) / 1048576;
-                    root.uploadSpeed = mbps.toFixed(2) + " Mbps";
+                    root.uploadSpeed = (bytesPerSec * 8 / 1048576).toFixed(2) + " Mbps"
                 }
-                root.isTesting = false;
-                monitorProc.running = false;
-                root.testFinished();
+                root.isTesting = false
+                root.testFinished()
             }
         }
     }

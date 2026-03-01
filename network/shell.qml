@@ -17,6 +17,8 @@ ShellRoot {
 
     property bool panelOpen: false
 
+    onPanelOpenChanged: NetSpeed.active = panelOpen
+
     IpcHandler {
         target: "network"
         function toggle() { shellRoot.panelOpen = !shellRoot.panelOpen; }
@@ -62,8 +64,8 @@ ShellRoot {
         }
 
         Rectangle {
-            width: 440
-            height: Math.min(layout.implicitHeight + 40, parent.height * 0.8)
+            width: parent.width * 0.70
+            height: parent.height * 0.85
             anchors.centerIn: parent
             color: "#1e1e2e"
             radius: 16
@@ -74,9 +76,7 @@ ShellRoot {
             
             ColumnLayout {
                 id: layout
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
+                anchors.fill: parent
                 anchors.margins: 20
                 spacing: 16
                 
@@ -92,14 +92,6 @@ ShellRoot {
                         color: "#cdd6f4"
                         Layout.fillWidth: true
                     }
-                    
-                    Button {
-                        text: "×"
-                        font.pixelSize: 16
-                        background: Rectangle { color: "#313244"; radius: 6 }
-                        contentItem: Text { text: parent.text; color: "#f38ba8"; font.bold: true; font.pixelSize: 16; horizontalAlignment: Text.AlignHCenter }
-                        onClicked: shellRoot.panelOpen = false
-                    }
                 }
                 
                 Rectangle {
@@ -112,24 +104,60 @@ ShellRoot {
                 ListView {
                     id: networksList
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Math.max(100, Math.min(contentHeight, 400))
+                    Layout.fillHeight: true
                     clip: true
                     spacing: 12
-                    
+                    focus: true
+                    keyNavigationEnabled: true
+                    keyNavigationWraps: true
+                    highlightMoveDuration: 150
+                    boundsBehavior: Flickable.StopAtBounds
+
                     model: Nmcli.ethernetDevices
-                    
+
+                    // Reset to first card and focus list whenever panel opens
+                    Connections {
+                        target: shellRoot
+                        function onPanelOpenChanged() {
+                            if (shellRoot.panelOpen) {
+                                networksList.currentIndex = 0
+                                networksList.forceActiveFocus()
+                            }
+                        }
+                    }
+
+                    // Tab / Enter / Space — delegate to the focused card
+                    Keys.onPressed: event => {
+                        const item = networksList.currentItem
+                        if (!item) return
+
+                        if (event.key === Qt.Key_Tab) {
+                            item.card.cycleFocus(event.modifiers & Qt.ShiftModifier ? -1 : 1)
+                            event.accepted = true
+                        } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter
+                                   || event.key === Qt.Key_Space) {
+                            item.card.activateAction()
+                            event.accepted = true
+                        }
+                    }
+
                     delegate: Item {
+                        id: delegateItem
                         required property var modelData
+                        required property int index
                         width: ListView.view.width
                         height: card.height
-                        
+
+                        property alias card: card
+
                         EthernetCard {
                             id: card
                             width: parent.width
-                            device: parent.modelData
+                            device: delegateItem.modelData
+                            isSelected: delegateItem.ListView.isCurrentItem
                         }
                     }
-                    
+
                     Text {
                         anchors.centerIn: parent
                         text: "No Ethernet devices found"
