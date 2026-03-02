@@ -1,17 +1,14 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Quickshell
 import "../../common"
 import "../../common/widgets"
 import "../../services"
 
-Rectangle {
+Item {
     id: root
-    radius: 12
-    color: Appearance.colors.colLayer1
-    border.width: 1
-    border.color: Appearance.colors.colLayer1Hover
-    implicitHeight: 56
+    implicitHeight: 70
 
     property alias text: searchField.text
     property alias input: searchField
@@ -27,24 +24,32 @@ Rectangle {
 
     RowLayout {
         anchors.fill: parent
-        anchors.margins: 14
+        anchors.leftMargin: 18
+        anchors.rightMargin: 14
+        spacing: 12
 
-        Image {
-            Layout.preferredWidth: 24
-            Layout.preferredHeight: 24
-            source: "/home/rodrigo/.config/quickshell/search/assets/search.svg"
-            sourceSize: Qt.size(24, 24)
+        Text {
+            text: ""
+            font.family: "JetBrainsMono Nerd Font"
+            font.pixelSize: 20
+            color: Appearance.colors.colAccent
+            Layout.alignment: Qt.AlignVCenter
         }
 
         TextField {
             id: searchField
             Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
             background: Item {}
             font.family: Appearance.font.family.main
-            font.pixelSize: Appearance.font.pixelSize.normal
+            font.pixelSize: Appearance.font.pixelSize.larger
             color: Appearance.colors.colOnLayer0
-            placeholderText: "Search apps..."
+            placeholderText: "Search..."
             placeholderTextColor: Appearance.colors.colSubtext
+            leftPadding: 0
+            rightPadding: 0
+            topPadding: 0
+            bottomPadding: 0
             onAccepted: root.accepted()
             Keys.onEscapePressed: event => {
                 GlobalStates.searchOpen = false
@@ -59,5 +64,7 @@ Rectangle {
                 event.accepted = true
             }
         }
+
+
     }
 }

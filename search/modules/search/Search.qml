@@ -41,25 +41,29 @@ Scope {
                 GlobalStates.searchOpen = false
                 event.accepted = true
             }
-
         }
+
+        StyledRectangularShadow { target: panel }
 
         Rectangle {
             id: panel
-            width: 720
-            height: 520
+            width: 640
+            height: LauncherSearch.results.length > 0 ? 460 : 76
             anchors.centerIn: parent
+            anchors.verticalCenterOffset: -60
             color: Appearance.colors.colLayer0
-            radius: 16
-            border.width: 2
-            border.color: "#89b4fa"
+            radius: 14
+            border.width: 1
+            border.color: Appearance.colors.colLayer0Border
+            clip: true
 
-            StyledRectangularShadow { target: panel }
+            Behavior on height {
+                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+            }
 
             SearchWidget {
                 id: searchWidget
                 anchors.fill: parent
-                anchors.margins: 18
             }
         }
 

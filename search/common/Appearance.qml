@@ -8,15 +8,18 @@ Singleton {
     id: root
 
     property QtObject colors: QtObject {
-        property color colLayer0: "#1e1e2e"
-        property color colLayer0Border: "#313244"
-        property color colLayer1: "#1e1e2e"
-        property color colLayer1Hover: "#313244"
-        property color colLayer2: "#313244"
-        property color colLayer2Hover: "#313244"
-        property color colOnLayer0: "#cdd6f4"
-        property color colSubtext: "#a6adc8"
-        property color colShadow: "#66000000"
+        property color colLayer0: "#1e1e2e"            // Base - panel background
+        property color colLayer0Border: "#45475a"      // Surface1 - panel border
+        property color colLayer1: "#181825"            // Mantle - input area / deeper accent
+        property color colLayer1Hover: "#585b70"       // Surface2 - hover states
+        property color colLayer2: "#313244"            // Surface0 - icon background
+        property color colLayer2Hover: "#45475a"       // Surface1 - icon hover
+        property color colOnLayer0: "#cdd6f4"          // Text
+        property color colSubtext: "#a6adc8"           // Subtext0 - dimmed subtext
+        property color colShadow: "#99000000"          // Shadow
+        property color colAccent: "#89b4fa"            // Blue - accent
+        property color colAccentSubtle: "#1a89b4fa"    // Blue ~10% opacity - active item bg (AARRGGBB)
+        property color colSeparator: "#45475a"         // Surface1 - divider line
     }
 
     property QtObject font: QtObject {
@@ -27,8 +30,8 @@ Singleton {
         }
         property QtObject pixelSize: QtObject {
             property int smaller: 12
-            property int small: 15
-            property int normal: 16
+            property int small: 14
+            property int normal: 15
             property int larger: 19
             property int huge: 22
         }

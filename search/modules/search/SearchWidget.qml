@@ -15,7 +15,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 12
+        spacing: 0
 
         SearchBar {
             id: searchBar
@@ -32,10 +32,19 @@ Item {
             onNavigateDown: results.incrementCurrentIndex()
         }
 
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 1
+            color: Appearance.colors.colSeparator
+            visible: LauncherSearch.results.length > 0
+            opacity: 0.6
+        }
+
         SearchResults {
             id: results
             Layout.fillWidth: true
             Layout.fillHeight: true
+            visible: LauncherSearch.results.length > 0
         }
     }
 
@@ -51,7 +60,7 @@ Item {
             event.accepted = true
             return
         }
-        
+
         if (!GlobalStates.searchOpen) {
             event.accepted = true
             return

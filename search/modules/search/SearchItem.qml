@@ -10,63 +10,72 @@ Rectangle {
     required property var entry
     required property bool active
 
-    height: 56
+    height: 48
     radius: 8
-    color: active ? Appearance.colors.colLayer1Hover : "transparent"
-    border.width: active ? 1 : 0
-    border.color: Appearance.colors.colLayer2Hover
-    width: ListView.view.width - ListView.view.leftMargin - ListView.view.rightMargin
-    x: ListView.view.leftMargin
+    color: active ? Appearance.colors.colAccentSubtle : "transparent"
+
+    Behavior on color { ColorAnimation { duration: 120 } }
+
+    // 3-px left accent strip — only on the active item
+    Rectangle {
+        width: 3
+        height: 24
+        radius: 1.5
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        color: Appearance.colors.colAccent
+        visible: root.active
+
+        Behavior on opacity { NumberAnimation { duration: 120 } }
+    }
 
     RowLayout {
         anchors.fill: parent
-        anchors.margins: 12
-        spacing: 14
+        anchors.leftMargin: 14
+        anchors.rightMargin: 12
+        spacing: 12
 
+        // App icon box
         Rectangle {
-            width: 32
-            height: 32
-            radius: 6
+            width: 34
+            height: 34
+            radius: 8
             color: Appearance.colors.colLayer2
+            Layout.alignment: Qt.AlignVCenter
 
             StyledText {
                 anchors.centerIn: parent
                 text: root.entry.iconType === "text" ? (root.entry.iconName ?? "") : ""
                 font.pixelSize: 16
+                visible: root.entry.iconType === "text"
             }
 
             Image {
                 anchors.centerIn: parent
                 width: 22
                 height: 22
-                visible: root.entry.iconType === "system"
-                source: Quickshell.iconPath(root.entry.iconName || "", "application-x-executable")
-                sourceSize: Qt.size(22, 22)
-            }
-
-            Image {
-                anchors.centerIn: parent
-                width: 22
-                height: 22
-                visible: root.entry.iconType === "material"
-                source: Quickshell.iconPath(root.entry.iconName || "", "application-x-executable")
+                visible: root.entry.iconType === "system" || root.entry.iconType === "material"
+                source: visible ? Quickshell.iconPath(root.entry.iconName ?? "", "application-x-executable") : ""
                 sourceSize: Qt.size(22, 22)
             }
         }
 
+        // Name + comment
         ColumnLayout {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-            spacing: 2
+            spacing: 1
+
             StyledText {
-                text: root.entry.name || ""
+                text: root.entry.name ?? ""
                 font.pixelSize: Appearance.font.pixelSize.normal
                 elide: Text.ElideRight
                 horizontalAlignment: Text.AlignLeft
                 Layout.fillWidth: true
             }
+
             StyledText {
-                text: root.entry.comment || ""
+                text: root.entry.comment ?? ""
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 color: Appearance.colors.colSubtext
                 elide: Text.ElideRight
@@ -74,6 +83,16 @@ Rectangle {
                 horizontalAlignment: Text.AlignLeft
                 Layout.fillWidth: true
             }
+        }
+
+        // ↵ hint — only visible on active item
+        StyledText {
+            text: "↵"
+            font.pixelSize: Appearance.font.pixelSize.small
+            color: Appearance.colors.colAccent
+            visible: root.active
+            opacity: 0.75
+            Layout.alignment: Qt.AlignVCenter
         }
     }
 
