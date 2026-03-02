@@ -61,6 +61,28 @@ PanelWindow {
             }
         }
 
+        // ═══════════════════════════════════
+        //  STATUS ICONS PILL (left of tray)
+        // ═══════════════════════════════════
+        Rectangle {
+            id: statusIconsPill
+            anchors.right: rightPill.left
+            anchors.rightMargin: Root.Config.barMargin
+            anchors.verticalCenter: parent.verticalCenter
+            height: parent.height
+            width: statusIconsContent.implicitWidth + Root.Config.pillPadding * 2
+            radius: Root.Config.radius
+            color: Root.Config.pillColor
+
+            Modules.StatusIcons {
+                id: statusIconsContent
+                anchors.centerIn: parent
+            }
+        }
+
+        // ═══════════════════════════
+        //  RIGHT PILL (tray group)
+        // ═══════════════════════════
         Rectangle {
             id: rightPill
             anchors.right: parent.right
