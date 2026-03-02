@@ -21,7 +21,6 @@ PanelWindow {
     implicitHeight: Root.Config.barHeight + Root.Config.barMargin * 2
     color: "transparent"
 
-    // Three-pill bar layout
     Item {
         anchors.fill: parent
         anchors.topMargin: Root.Config.barMargin
@@ -29,9 +28,6 @@ PanelWindow {
         anchors.leftMargin: Root.Config.barMargin + 2
         anchors.rightMargin: Root.Config.barMargin + 2
 
-        // ═══════════════════════════
-        //  LEFT PILL (anchored left)
-        // ═══════════════════════════
         Rectangle {
             id: leftPill
             anchors.left: parent.left
@@ -46,14 +42,10 @@ PanelWindow {
                 anchors.centerIn: parent
                 spacing: Root.Config.pillSpacing
 
-                // Workspaces
                 Modules.Workspaces {}
             }
         }
 
-        // ═══════════════════════════
-        //  CENTER PILL (truly centered)
-        // ═══════════════════════════
         Rectangle {
             id: centerPill
             anchors.horizontalCenter: parent.horizontalCenter
@@ -69,9 +61,6 @@ PanelWindow {
             }
         }
 
-        // ═══════════════════════════
-        //  RIGHT PILL (anchored right)
-        // ═══════════════════════════
         Rectangle {
             id: rightPill
             anchors.right: parent.right
@@ -86,32 +75,9 @@ PanelWindow {
                 anchors.centerIn: parent
                 spacing: Root.Config.pillSpacing
 
-                // System tray (background apps)
                 Modules.SysTray {}
 
-                // Thin separator
-                Rectangle {
-                    width: 1
-                    Layout.preferredHeight: rightPill.height * 0.5
-                    Layout.alignment: Qt.AlignVCenter
-                    color: Root.Config.overlay0
-                    opacity: 0.5
-                }
-
-                // Desktop status icons
                 Modules.StatusTray {}
-
-                // Thin separator
-                Rectangle {
-                    width: 1
-                    Layout.preferredHeight: rightPill.height * 0.5
-                    Layout.alignment: Qt.AlignVCenter
-                    color: Root.Config.overlay0
-                    opacity: 0.5
-                }
-
-                // Power button
-                Modules.PowerMenu {}
             }
         }
     }

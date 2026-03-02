@@ -14,28 +14,10 @@ Item {
         anchors.centerIn: parent
         spacing: 10
 
-        // Volume icon
-        Text {
-            text: "󰕾"
-            color: Root.Config.text
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: Root.Config.iconSize
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
         // Microphone icon
         Text {
             text: ""
             color: Root.Config.text
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: Root.Config.iconSize
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
-        // Ethernet / Network icon
-        Text {
-            text: "󰈀"
-            color: Root.Config.green
             font.family: "JetBrainsMono Nerd Font"
             font.pixelSize: Root.Config.iconSize
             anchors.verticalCenter: parent.verticalCenter
