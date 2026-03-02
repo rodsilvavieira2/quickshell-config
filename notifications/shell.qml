@@ -125,78 +125,82 @@ ShellRoot {
 
         WlrLayershell.namespace: "quickshell:notifications:popups"
         WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
-        anchors { top: true; bottom: true; left: true; right: true }
+        // Only anchor to the corner where notifications live.
+        // A full-screen transparent surface blocks all pointer input on Wayland;
+        // restricting to top+right means the window surface covers only the
+        // actual notification strip so the rest of the screen stays clickable.
+        anchors { top: true; right: true }
+        width: 360 + 32  // card width + left margin + right margin
 
-        Item {
+        ListView {
+            id: popupsList
+            width: 360
+            height: contentHeight  // shrinks/grows with the popup count
+            spacing: 8
+            model: shellRoot.popups
+            interactive: false
+
             anchors {
                 top: parent.top
                 right: parent.right
-                bottom: parent.bottom
-                margins: 16
+                topMargin: 16
+                rightMargin: 16
             }
-            width: 360
 
-            ListView {
-                id: popupsList
-                anchors.fill: parent
-                spacing: 8
-                model: shellRoot.popups
-                interactive: false
-
-                // Slide in from right + fade
-                add: Transition {
-                    ParallelAnimation {
-                        NumberAnimation {
-                            property: "opacity"
-                            from: 0; to: 1
-                            duration: 220
-                            easing.type: Easing.OutCubic
-                        }
-                        NumberAnimation {
-                            property: "x"
-                            from: 40; to: 0
-                            duration: 220
-                            easing.type: Easing.OutCubic
-                        }
+            // Slide in from right + fade
+            add: Transition {
+                ParallelAnimation {
+                    NumberAnimation {
+                        property: "opacity"
+                        from: 0; to: 1
+                        duration: 220
+                        easing.type: Easing.OutCubic
+                    }
+                    NumberAnimation {
+                        property: "x"
+                        from: 40; to: 0
+                        duration: 220
+                        easing.type: Easing.OutCubic
                     }
                 }
+            }
 
-                // Slide out to right + fade
-                remove: Transition {
-                    ParallelAnimation {
-                        NumberAnimation {
-                            property: "opacity"
-                            to: 0
-                            duration: 180
-                            easing.type: Easing.InCubic
-                        }
-                        NumberAnimation {
-                            property: "x"
-                            to: 40
-                            duration: 180
-                            easing.type: Easing.InCubic
-                        }
+            // Slide out to right + fade
+            remove: Transition {
+                ParallelAnimation {
+                    NumberAnimation {
+                        property: "opacity"
+                        to: 0
+                        duration: 180
+                        easing.type: Easing.InCubic
+                    }
+                    NumberAnimation {
+                        property: "x"
+                        to: 40
+                        duration: 180
+                        easing.type: Easing.InCubic
                     }
                 }
+            }
 
-                displaced: Transition {
-                    NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutCubic }
-                }
+            displaced: Transition {
+                NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutCubic }
+            }
 
-                delegate: Item {
-                    required property var modelData
-                    width: ListView.view.width
-                    height: card.height
+            delegate: Item {
+                required property var modelData
+                width: ListView.view.width
+                height: card.height
 
-                    NotificationCard {
-                        id: card
-                        width: parent.width
-                        notif: parent.modelData
-                        isPopup: true
-                        onCloseClicked: shellRoot.removePopup(parent.modelData.id)
-                        onActionClicked: (actionId) => shellRoot.invokeAction(parent.modelData.id, actionId)
-                    }
+                NotificationCard {
+                    id: card
+                    width: parent.width
+                    notif: parent.modelData
+                    isPopup: true
+                    onCloseClicked: shellRoot.removePopup(parent.modelData.id)
+                    onActionClicked: (actionId) => shellRoot.invokeAction(parent.modelData.id, actionId)
                 }
             }
         }
