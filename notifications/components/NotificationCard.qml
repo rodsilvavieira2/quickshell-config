@@ -1,138 +1,180 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 
 Rectangle {
     id: root
-    
+
     required property var notif
     required property bool isPopup
-    
+
     signal closeClicked()
     signal actionClicked(string actionId)
-    
-    width: 380
-    height: layout.implicitHeight + 24
-    
-    color: notif.urgency === "critical" ? "#311825" : "#181825" // Mantle (darker) or Critical red tint
-    radius: 12
-    border.color: notif.urgency === "critical" ? "#f38ba8" : (isPopup ? "#89b4fa" : "#313244")
-    border.width: isPopup ? 2 : 1
-    
+
+    width: parent?.width ?? 360
+    height: layout.implicitHeight + 20
+
+    color: notif.urgency === "critical" ? "#2d1b25" : (isPopup ? "#1e1e2e" : "#181825")
+    radius: 10
+    border.color: notif.urgency === "critical" ? "#f38ba8" : "#313244"
+    border.width: 1
+
+    // Left accent strip — normal popups only (mirrors search active-item strip)
+    Rectangle {
+        visible: isPopup && notif.urgency !== "critical"
+        width: 3
+        height: parent.height - 16
+        radius: 1.5
+        anchors {
+            left: parent.left
+            verticalCenter: parent.verticalCenter
+        }
+        color: "#89b4fa"
+    }
+
     ColumnLayout {
         id: layout
         anchors.fill: parent
-        anchors.margins: 12
-        spacing: 8
-        
-        // Header
+        anchors.margins: 10
+        anchors.leftMargin: (isPopup && notif.urgency !== "critical") ? 14 : 10
+        spacing: 6
+
+        // Header row: icon · app name · time · ×
         RowLayout {
             Layout.fillWidth: true
-            spacing: 8
-            
-            // App Icon
+            spacing: 6
+
             Image {
-                Layout.preferredWidth: 24
-                Layout.preferredHeight: 24
+                Layout.preferredWidth: 18
+                Layout.preferredHeight: 18
                 source: Quickshell.iconPath(notif.appIcon || "dialog-information")
-                sourceSize: Qt.size(24, 24)
+                sourceSize: Qt.size(18, 18)
             }
-            
+
             Text {
                 Layout.fillWidth: true
                 text: notif.appName || "Notification"
-                color: "#a6adc8"
-                font.pixelSize: 13
+                color: "#6c7086"
+                font.pixelSize: 12
                 font.bold: true
+                font.family: "JetBrainsMono Nerd Font"
                 elide: Text.ElideRight
             }
-            
+
             Text {
                 text: notif.time || ""
-                color: "#a6adc8"
-                font.pixelSize: 12
+                color: "#6c7086"
+                font.pixelSize: 11
+                font.family: "JetBrainsMono Nerd Font"
             }
-            
+
             MouseArea {
-                Layout.preferredWidth: 16
-                Layout.preferredHeight: 16
+                id: closeArea
+                Layout.preferredWidth: 14
+                Layout.preferredHeight: 14
                 cursorShape: Qt.PointingHandCursor
+                hoverEnabled: true
+                onClicked: root.closeClicked()
+
                 Text {
                     anchors.centerIn: parent
                     text: "×"
-                    color: "#f38ba8"
-                    font.bold: true
-                    font.pixelSize: 16
+                    color: closeArea.containsMouse ? "#f38ba8" : "#6c7086"
+                    font.pixelSize: 14
+                    font.family: "JetBrainsMono Nerd Font"
+
+                    Behavior on color { ColorAnimation { duration: 120 } }
                 }
-                onClicked: root.closeClicked()
             }
         }
-        
-        // Body
+
+        // Body row: thumbnail · summary + body
         RowLayout {
             Layout.fillWidth: true
-            spacing: 12
-            
-            // Optional Image
-            Image {
+            spacing: 10
+
+            // Rounded thumbnail
+            Rectangle {
                 visible: notif.image !== ""
-                Layout.preferredWidth: 64
-                Layout.preferredHeight: 64
+                Layout.preferredWidth: 44
+                Layout.preferredHeight: 44
                 Layout.alignment: Qt.AlignTop
-                source: notif.image !== "" ? (notif.image.startsWith("/") ? "file://" + notif.image : notif.image) : ""
-                fillMode: Image.PreserveAspectCrop
-                sourceSize: Qt.size(64, 64)
+                radius: 6
+                clip: true
+                color: "transparent"
+
+                Image {
+                    anchors.fill: parent
+                    source: notif.image !== ""
+                        ? (notif.image.startsWith("/") ? "file://" + notif.image : notif.image)
+                        : ""
+                    fillMode: Image.PreserveAspectCrop
+                    sourceSize: Qt.size(44, 44)
+                }
             }
-            
+
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
-                spacing: 4
-                
+                spacing: 2
+
                 Text {
                     Layout.fillWidth: true
                     text: notif.summary || ""
                     color: "#cdd6f4"
-                    font.pixelSize: 15
+                    font.pixelSize: 13
                     font.bold: true
+                    font.family: "JetBrainsMono Nerd Font"
                     wrapMode: Text.Wrap
                 }
-                
+
                 Text {
                     Layout.fillWidth: true
                     text: notif.body || ""
                     color: "#a6adc8"
-                    font.pixelSize: 14
+                    font.pixelSize: 12
+                    font.family: "JetBrainsMono Nerd Font"
                     wrapMode: Text.Wrap
                     textFormat: Text.RichText
                     visible: text !== ""
+                    maximumLineCount: isPopup ? 2 : 5
+                    elide: Text.ElideRight
                 }
             }
         }
-        
-        // Actions
+
+        // Actions row
         RowLayout {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: 6
             visible: notif.actions && notif.actions.length > 0
-            
+
             Repeater {
                 model: notif.actions
-                delegate: Button {
+                delegate: Rectangle {
+                    required property var modelData
                     Layout.fillWidth: true
-                    text: modelData.text
-                    background: Rectangle {
-                        color: "#313244"
-                        radius: 6
-                    }
-                    contentItem: Text {
-                        text: parent.text
+                    height: 26
+                    color: actionArea.containsMouse ? "#45475a" : "#313244"
+                    radius: 6
+
+                    Behavior on color { ColorAnimation { duration: 120 } }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: modelData.text
                         color: "#cdd6f4"
-                        font.pixelSize: 13
-                        horizontalAlignment: Text.AlignHCenter
+                        font.pixelSize: 12
+                        font.family: "JetBrainsMono Nerd Font"
                     }
-                    onClicked: root.actionClicked(modelData.identifier)
+
+                    MouseArea {
+                        id: actionArea
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
+                        onClicked: root.actionClicked(modelData.identifier)
+                    }
                 }
             }
         }

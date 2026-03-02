@@ -16,16 +16,16 @@ ShellRoot {
     id: shellRoot
 
     property bool historyOpen: false
-    
+
     property list<var> allNotifications: []
     property list<var> popups: []
     property var popupTimers: ({})
 
-    function clearAllNotifications() { 
+    function clearAllNotifications() {
         notifServer.trackedNotifications.values.forEach(n => n.dismiss());
         shellRoot.allNotifications = [];
         shellRoot.popups = [];
-        
+
         for (let id in shellRoot.popupTimers) {
             shellRoot.popupTimers[id].destroy();
         }
@@ -35,9 +35,9 @@ ShellRoot {
     IpcHandler {
         target: "notifications"
         function toggle() { shellRoot.historyOpen = !shellRoot.historyOpen; }
-        function open() { shellRoot.historyOpen = true; }
-        function close() { shellRoot.historyOpen = false; }
-        function clear() { shellRoot.clearAllNotifications(); }
+        function open()   { shellRoot.historyOpen = true; }
+        function close()  { shellRoot.historyOpen = false; }
+        function clear()  { shellRoot.clearAllNotifications(); }
     }
 
     NotificationServer {
@@ -48,7 +48,7 @@ ShellRoot {
         bodyMarkupSupported: true
         bodySupported: true
         imageSupported: true
-        
+
         onNotification: (notification) => {
             notification.tracked = true;
             let n = {
@@ -63,18 +63,21 @@ ShellRoot {
                 time: new Date().toLocaleTimeString(Qt.locale(), Locale.ShortFormat),
                 source: notification
             };
-            
+
             let currentAll = shellRoot.allNotifications;
             currentAll.unshift(n);
             shellRoot.allNotifications = currentAll;
-            
+
             if (!shellRoot.historyOpen) {
                 let currentPopups = shellRoot.popups;
                 currentPopups.unshift(n);
                 shellRoot.popups = currentPopups;
-                
+
                 let timeout = notification.expireTimeout > 0 ? notification.expireTimeout : 5000;
-                let t = Qt.createQmlObject('import QtQuick; Timer { interval: ' + timeout + '; running: true; onTriggered: shellRoot.removePopup(' + n.id + ') }', shellRoot);
+                let t = Qt.createQmlObject(
+                    'import QtQuick; Timer { interval: ' + timeout + '; running: true; onTriggered: shellRoot.removePopup(' + n.id + ') }',
+                    shellRoot
+                );
                 shellRoot.popupTimers[n.id] = t;
             }
         }
@@ -104,67 +107,91 @@ ShellRoot {
         removeNotification(notifId);
     }
 
+    // ── Popup toasts ────────────────────────────────────────────────────────────
     PanelWindow {
         id: popupWindow
-        
+
         property var focusedScreenName: Hyprland.focusedMonitor?.name ?? ""
         screen: {
             for (let i = 0; i < Quickshell.screens.values.length; i++) {
-                if (Quickshell.screens.values[i].name === focusedScreenName) {
+                if (Quickshell.screens.values[i].name === focusedScreenName)
                     return Quickshell.screens.values[i];
-                }
             }
             return Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null;
         }
-        
+
         visible: shellRoot.popups.length > 0 && !shellRoot.historyOpen
         color: "transparent"
 
         WlrLayershell.namespace: "quickshell:notifications:popups"
         WlrLayershell.layer: WlrLayer.Overlay
 
-        anchors {
-            top: true
-            bottom: true
-            left: true
-            right: true
-        }
-        
+        anchors { top: true; bottom: true; left: true; right: true }
+
         Item {
             anchors {
                 top: parent.top
                 right: parent.right
                 bottom: parent.bottom
-                margins: 20
+                margins: 16
             }
-            width: 380
+            width: 360
 
             ListView {
                 id: popupsList
                 anchors.fill: parent
-                spacing: 12
+                spacing: 8
                 model: shellRoot.popups
                 interactive: false
-                
+
+                // Slide in from right + fade
                 add: Transition {
-                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }
+                    ParallelAnimation {
+                        NumberAnimation {
+                            property: "opacity"
+                            from: 0; to: 1
+                            duration: 220
+                            easing.type: Easing.OutCubic
+                        }
+                        NumberAnimation {
+                            property: "x"
+                            from: 40; to: 0
+                            duration: 220
+                            easing.type: Easing.OutCubic
+                        }
+                    }
                 }
-                
+
+                // Slide out to right + fade
                 remove: Transition {
-                    NumberAnimation { property: "opacity"; to: 0; duration: 200 }
+                    ParallelAnimation {
+                        NumberAnimation {
+                            property: "opacity"
+                            to: 0
+                            duration: 180
+                            easing.type: Easing.InCubic
+                        }
+                        NumberAnimation {
+                            property: "x"
+                            to: 40
+                            duration: 180
+                            easing.type: Easing.InCubic
+                        }
+                    }
                 }
-                
+
                 displaced: Transition {
-                    NumberAnimation { properties: "x,y"; duration: 200 }
+                    NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutCubic }
                 }
-                
+
                 delegate: Item {
                     required property var modelData
                     width: ListView.view.width
                     height: card.height
-                    
+
                     NotificationCard {
                         id: card
+                        width: parent.width
                         notif: parent.modelData
                         isPopup: true
                         onCloseClicked: shellRoot.removePopup(parent.modelData.id)
@@ -175,115 +202,128 @@ ShellRoot {
         }
     }
 
+    // ── History panel ────────────────────────────────────────────────────────────
     PanelWindow {
         id: historyWindow
-        
-        property var focusedScreenName: Hyprland.focusedMonitor?.name ?? ""
+
         screen: popupWindow.screen
-        
+
         visible: shellRoot.historyOpen
-        color: "#66000000"
+        color: "#99000000"
 
         WlrLayershell.namespace: "quickshell:notifications:history"
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
-        anchors {
-            top: true
-            bottom: true
-            left: true
-            right: true
-        }
-        
+        anchors { top: true; bottom: true; left: true; right: true }
+
+        // Backdrop — click outside to close
         MouseArea {
             anchors.fill: parent
             onClicked: shellRoot.historyOpen = false
         }
-        
+
         Shortcut {
             sequence: "Escape"
             onActivated: shellRoot.historyOpen = false
         }
 
         Rectangle {
-            width: 420
+            width: 400
             anchors {
                 top: parent.top
                 bottom: parent.bottom
                 right: parent.right
-                margins: 20
+                margins: 16
             }
             color: "#1e1e2e"
-            radius: 16
+            radius: 12
             border.color: "#313244"
-            border.width: 2
-            
+            border.width: 1
+
             MouseArea { anchors.fill: parent; preventStealing: true }
-            
+
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 20
-                spacing: 16
-                
+                anchors.margins: 16
+                spacing: 12
+
+                // Header: title left · "Clear all" pill right
                 RowLayout {
                     Layout.fillWidth: true
-                    
+
                     Text {
-                        text: "󰂚 Notifications"
-                        font.pixelSize: 20
+                        text: "󰂚  Notifications"
+                        font.pixelSize: 16
                         font.family: "JetBrainsMono Nerd Font"
                         font.bold: true
                         color: "#cdd6f4"
                         Layout.fillWidth: true
                     }
-                    
-                    Button {
-                        text: "Clear All"
-                        font.pixelSize: 13
-                        background: Rectangle { color: "#313244"; radius: 6 }
-                        contentItem: Text { text: parent.text; color: "#cdd6f4"; font.pixelSize: 13; horizontalAlignment: Text.AlignHCenter }
-                        onClicked: shellRoot.clearAllNotifications()
-                    }
-                    
-                    Button {
-                        text: "Close"
-                        font.pixelSize: 13
-                        background: Rectangle { color: "#f38ba8"; radius: 6 }
-                        contentItem: Text { text: parent.text; color: "#1e1e2e"; font.bold: true; font.pixelSize: 13; horizontalAlignment: Text.AlignHCenter }
-                        onClicked: shellRoot.historyOpen = false
+
+                    // Small "Clear all" pill — only visible when there are notifications
+                    Rectangle {
+                        visible: shellRoot.allNotifications.length > 0
+                        height: 26
+                        width: clearLabel.implicitWidth + 20
+                        color: clearArea.containsMouse ? "#45475a" : "#313244"
+                        radius: 13
+
+                        Behavior on color { ColorAnimation { duration: 120 } }
+
+                        Text {
+                            id: clearLabel
+                            anchors.centerIn: parent
+                            text: "Clear all"
+                            color: "#a6adc8"
+                            font.pixelSize: 12
+                            font.family: "JetBrainsMono Nerd Font"
+                        }
+
+                        MouseArea {
+                            id: clearArea
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
+                            onClicked: shellRoot.clearAllNotifications()
+                        }
                     }
                 }
-                
+
+                // Separator
                 Rectangle {
                     Layout.fillWidth: true
                     height: 1
-                    color: "#313244"
+                    color: "#45475a"
+                    opacity: 0.6
                 }
-                
+
+                // Notification list
                 ListView {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     clip: true
-                    spacing: 12
+                    spacing: 8
                     model: shellRoot.allNotifications
-                    
+                    boundsBehavior: Flickable.StopAtBounds
+
                     add: Transition {
-                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }
+                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200; easing.type: Easing.OutCubic }
                     }
-                    
+
                     remove: Transition {
-                        NumberAnimation { property: "opacity"; to: 0; duration: 200 }
+                        NumberAnimation { property: "opacity"; to: 0; duration: 160; easing.type: Easing.InCubic }
                     }
-                    
+
                     displaced: Transition {
-                        NumberAnimation { properties: "x,y"; duration: 200 }
+                        NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutCubic }
                     }
-                    
+
                     delegate: Item {
                         required property var modelData
                         width: ListView.view.width
                         height: card.height
-                        
+
                         NotificationCard {
                             id: card
                             width: parent.width
@@ -293,13 +333,25 @@ ShellRoot {
                             onActionClicked: (actionId) => shellRoot.invokeAction(parent.modelData.id, actionId)
                         }
                     }
-                    
+
+                    // Empty state
                     Text {
                         anchors.centerIn: parent
                         text: "No notifications"
-                        color: "#a6adc8"
-                        font.pixelSize: 16
+                        color: "#6c7086"
+                        font.pixelSize: 14
+                        font.family: "JetBrainsMono Nerd Font"
                         visible: parent.count === 0
+                    }
+
+                    ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
+                        contentItem: Rectangle {
+                            implicitWidth: 3
+                            radius: 1.5
+                            color: "#585b70"
+                            opacity: 0.7
+                        }
                     }
                 }
             }
