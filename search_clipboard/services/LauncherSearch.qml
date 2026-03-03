@@ -1,68 +1,57 @@
 pragma Singleton
-pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
 import "../common"
 import "../common/functions"
-import "./"
+import "."
 
 Singleton {
     id: root
 
     property string query: ""
-    property var results: []
-
-    Timer {
-        id: debounceTimer
-        interval: Config.options.search.debounceMs
-        repeat: false
-        onTriggered: root.computeResults()
-    }
-
-    onQueryChanged: debounceTimer.restart()
-
-    // Refresh entries when opened
-    Connections {
-        target: GlobalStates
-        function onSearchOpenChanged() {
-            if (GlobalStates.searchOpen) {
-                ClipboardSearch.refresh()
-            }
-        }
-    }
-
-    function computeResults() {
-        const q = (root.query ?? "").toLowerCase();
-        const allEntries = ClipboardSearch.entries;
-
-        if (q.length === 0) {
-            results = allEntries.map(entry => formatEntry(entry));
-            return;
+    property var results: {
+        if (!ClipboardSearch.ready) return [];
+        
+        let filtered = ClipboardSearch.entries;
+        if (query.length > 0) {
+            filtered = filtered.filter(entry => 
+                entry.toLowerCase().includes(query.toLowerCase())
+            );
         }
 
-        results = allEntries
-            .filter(entry => entry.toLowerCase().includes(q))
-            .map(entry => formatEntry(entry))
-            .slice(0, Config.options.search.resultLimit);
-    }
+        return filtered.map(entry => {
+            const parts = entry.split(/\t/);
+            const id = parts[0] ? parts[0].trim() : "";
+            let content = parts[1] ? parts[1].trim() : entry;
+            
+            let iconType = "image";
+            let iconName = "../../assets/clipboard.svg";
+            let isImage = content.includes("[[ binary data");
 
-    function formatEntry(entry) {
-        // cliphist format: "id  content"
-        const parts = entry.split(/\s+/);
-        const id = parts[0];
-        const content = entry.substring(entry.indexOf(parts[1]) || 0);
-
-        return {
-            type: "Clipboard",
-            name: content,
-            comment: "ID: " + id,
-            iconName: "../../assets/clipboard.svg",
-            iconType: "image",
-            execute: () => {
-                ClipboardSearch.decode(entry);
-                GlobalStates.searchOpen = false;
+            if (isImage) {
+                // Return a placeholder or the actual preview path if available
+                iconName = "file:///tmp/quickshell-clipboard-previews/" + id + ".png";
+                // Trigger background generation
+                ClipboardSearch.generatePreview(entry, (path) => {
+                    // This might not trigger a re-render automatically 
+                    // since we are mapping in a property, but usually 
+                    // image components will reload when file appears.
+                });
             }
-        };
+
+            return {
+                type: "Clipboard",
+                name: isImage ? "Image Entry" : content,
+                comment: "ID: " + id + (isImage ? " (" + content.split("data ")[1].split(" ]]")[0] + ")" : ""),
+                iconName: iconName,
+                iconType: "image",
+                isImage: isImage,
+                execute: () => {
+                    ClipboardSearch.decode(entry);
+                    GlobalStates.searchOpen = false;
+                }
+            };
+        });
     }
 }

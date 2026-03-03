@@ -61,11 +61,18 @@ Rectangle {
 
             Image {
                 anchors.centerIn: parent
-                width: 22
-                height: 22
+                width: parent.width - 4
+                height: parent.height - 4
+                fillMode: Image.PreserveAspectFit
+                asynchronous: true
                 visible: root.entry.iconType === "image"
-                source: visible ? (root.entry.iconName ? (root.entry.iconName.startsWith("/") ? "file://" + root.entry.iconName : Qt.resolvedUrl(root.entry.iconName)) : "") : ""
-                sourceSize: Qt.size(22, 22)
+                source: visible ? (root.entry.iconName ? (root.entry.iconName.startsWith("/") ? "file://" + root.entry.iconName : (root.entry.iconName.startsWith("file://") ? root.entry.iconName : Qt.resolvedUrl(root.entry.iconName))) : "") : ""
+                
+                onStatusChanged: {
+                    if (status === Image.Error && root.entry.isImage) {
+                        source = "../../assets/clipboard.svg"
+                    }
+                }
             }
         }
 

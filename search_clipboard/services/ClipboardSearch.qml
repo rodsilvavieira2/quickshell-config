@@ -12,6 +12,7 @@ Singleton {
 
     property var entries: []
     property bool ready: false
+    readonly property string previewDir: "/tmp/quickshell-clipboard-previews"
 
     Process {
         id: listProcess
@@ -40,5 +41,29 @@ Singleton {
             decodeProcess.destroy();
         });
         decodeProcess.running = true;
+    }
+
+    function generatePreview(entry, callback) {
+        const id = entry.split(/\t/)[0].trim();
+        const previewPath = `${previewDir}/${id}.png`;
+        
+        // Check if it's binary/image
+        if (!entry.includes("[[ binary data")) {
+            return "";
+        }
+
+        const genProcess = Qt.createQmlObject('import Quickshell.Io; Process { }', root);
+        const safe = entry.replace(/'/g, "'\\''");
+        
+        // cliphist decode the specific ID to a file
+        genProcess.command = ["bash", "-c", `cliphist decode <<< '${safe}' > '${previewPath}'`];
+        genProcess.exited.connect((exitCode) => {
+            if (exitCode === 0) {
+                callback("file://" + previewPath);
+            }
+            genProcess.destroy();
+        });
+        genProcess.running = true;
+        return "file://" + previewPath; // Optimistic return or we handle async
     }
 }
