@@ -67,17 +67,32 @@ Item {
                 property var wsWindows: root.windowList.filter(w => w.workspace.id === wsId).slice(0, 4)
                 property bool hasWindows: wsWindows.length > 0
 
-                // We change width based on how many icons are shown
-                Layout.preferredWidth: hasWindows ? (wsWindows.length * 18 + 4) : (isActive ? 18 : 8)
-                Layout.preferredHeight: hasWindows ? 20 : 8
-                radius: hasWindows ? 4 : Root.Config.radius
-                color: hasWindows ? "transparent" : (isActive ? Root.Config.mauve : Root.Config.overlay0)
+                property int iconSpacing: 6
+                property int iconSize: 16
+                property int pillHorizontalPadding: 8
+
+                // Dynamic width: if it has windows, calculate width based on icons; if not, standard dot/pill
+                Layout.preferredWidth: hasWindows ? (wsWindows.length * iconSize + Math.max(0, wsWindows.length - 1) * iconSpacing + pillHorizontalPadding * 2) : (isActive ? 24 : 12)
+                Layout.preferredHeight: hasWindows ? 26 : 12
+                radius: hasWindows ? 13 : 6
+                
+                // Color logic: if active and has windows -> a slightly lighter surface or bordered
+                // If inactive and has windows -> standard surface
+                // If active and empty -> mauve pill
+                // If inactive and empty -> overlay0 dot
+                color: hasWindows ? (isActive ? Root.Config.surface2 : Root.Config.surface1) : (isActive ? Root.Config.mauve : Root.Config.overlay0)
+
+                border.color: isActive && hasWindows ? Root.Config.mauve : "transparent"
+                border.width: isActive && hasWindows ? 1 : 0
 
                 Behavior on Layout.preferredWidth {
-                    NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
+                    NumberAnimation { duration: 250; easing.type: Easing.OutQuint }
                 }
                 Behavior on Layout.preferredHeight {
-                    NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
+                    NumberAnimation { duration: 250; easing.type: Easing.OutQuint }
+                }
+                Behavior on radius {
+                    NumberAnimation { duration: 250; easing.type: Easing.OutQuint }
                 }
                 Behavior on color {
                     ColorAnimation { duration: 200; easing.type: Easing.InOutQuad }
@@ -85,7 +100,7 @@ Item {
 
                 Row {
                     anchors.centerIn: parent
-                    spacing: 2
+                    spacing: wsIndicator.iconSpacing
                     visible: parent.hasWindows
 
                     Repeater {
@@ -98,24 +113,12 @@ Item {
                             property string iconPath: Quickshell.iconPath(appEntry?.icon ?? modelData.class ?? modelData.initialClass ?? "application-x-executable", "image-missing")
 
                             source: iconPath
-                            width: 16
-                            height: 16
+                            width: wsIndicator.iconSize
+                            height: wsIndicator.iconSize
                             sourceSize: Qt.size(width, height)
                             fillMode: Image.PreserveAspectFit
                         }
                     }
-                }
-
-                // Small active indicator line for when an icon is showing
-                Rectangle {
-                    anchors.bottom: parent.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottomMargin: -6
-                    width: 12
-                    height: 2
-                    radius: 1
-                    color: Root.Config.mauve
-                    visible: parent.isActive && parent.hasWindows
                 }
 
                 MouseArea {
