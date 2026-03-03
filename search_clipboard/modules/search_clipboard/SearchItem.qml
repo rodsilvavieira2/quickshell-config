@@ -61,8 +61,8 @@ Rectangle {
 
             Image {
                 anchors.centerIn: parent
-                width: parent.width - 4
-                height: parent.height - 4
+                width: root.entry.isImage ? parent.width - 4 : 20
+                height: root.entry.isImage ? parent.height - 4 : 20
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
                 visible: root.entry.iconType === "image"
