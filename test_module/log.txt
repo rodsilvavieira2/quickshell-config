@@ -1,0 +1,6 @@
+[32m  INFO[0m: Launching config: "/home/rodrigo/.config/quickshell/test_module/shell.qml"
+[32m  INFO[0m: Shell ID: "234cedec6d0d2103e6b208fbbed483ef" Path ID "234cedec6d0d2103e6b208fbbed483ef"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/c7kf35wabt/log.qslog"
+[34m DEBUG[97m qml[0m: Hyprland toplevels length: 0
+[33m  WARN[0m: Signal QQmlEngine::quit() emitted, but no receivers connected to handle it.
+[32m  INFO[0m: Configuration Loaded
