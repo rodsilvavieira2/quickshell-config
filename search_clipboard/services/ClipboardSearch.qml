@@ -19,8 +19,7 @@ Singleton {
         stdout: StdioCollector {
             id: listCollector
             onStreamFinished: {
-                const lines = listCollector.text.split("
-").filter(l => l.length > 0);
+                const lines = listCollector.text.split(/\r?\n/).filter(l => l.length > 0);
                 root.entries = lines.slice(0, Config.options.clipboard.maxEntries);
                 root.ready = true;
             }
@@ -34,12 +33,12 @@ Singleton {
 
     function decode(entry, callback) {
         const decodeProcess = Qt.createQmlObject('import Quickshell.Io; Process { }', root);
-        const safe = entry.replace(/'/g, "'''");
+        const safe = entry.replace(/'/g, "'\\''");
         decodeProcess.command = ["bash", "-c", `cliphist decode <<< '${safe}' | wl-copy`];
-        decodeProcess.onFinished = () => {
+        decodeProcess.finished.connect((exitCode) => {
             if (callback) callback();
             decodeProcess.destroy();
-        };
+        });
         decodeProcess.running = true;
     }
 }

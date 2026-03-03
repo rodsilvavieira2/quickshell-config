@@ -22,7 +22,7 @@ Singleton {
 
     onQueryChanged: debounceTimer.restart()
 
-    // Refresh entries when query changes or when opened
+    // Refresh entries when opened
     Connections {
         target: GlobalStates
         function onSearchOpenChanged() {
@@ -57,12 +57,11 @@ Singleton {
             type: "Clipboard",
             name: content,
             comment: "ID: " + id,
-            iconName: "edit-paste",
-            iconType: "system",
+            iconName: "../../assets/clipboard.svg",
+            iconType: "image",
             execute: () => {
-                ClipboardSearch.decode(entry, () => {
-                    // Optional: notification or direct paste
-                });
+                ClipboardSearch.decode(entry);
+                GlobalStates.searchOpen = false;
             }
         };
     }

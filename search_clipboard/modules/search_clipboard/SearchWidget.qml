@@ -25,7 +25,6 @@ Item {
                 const entry = results.currentItem?.entry
                 if (entry && entry.execute) {
                     entry.execute()
-                    GlobalStates.searchOpen = false
                 }
             }
             onNavigateUp: results.decrementCurrentIndex()
@@ -56,11 +55,6 @@ Item {
     }
 
     Keys.onPressed: event => {
-        if (searchBar.input.activeFocus) {
-            event.accepted = true
-            return
-        }
-
         if (!GlobalStates.searchOpen) {
             event.accepted = true
             return

@@ -58,6 +58,15 @@ Rectangle {
                 source: visible ? Quickshell.iconPath(root.entry.iconName ?? "", "application-x-executable") : ""
                 sourceSize: Qt.size(22, 22)
             }
+
+            Image {
+                anchors.centerIn: parent
+                width: 22
+                height: 22
+                visible: root.entry.iconType === "image"
+                source: visible ? (root.entry.iconName ? (root.entry.iconName.startsWith("/") ? "file://" + root.entry.iconName : Qt.resolvedUrl(root.entry.iconName)) : "") : ""
+                sourceSize: Qt.size(22, 22)
+            }
         }
 
         // Name + comment
