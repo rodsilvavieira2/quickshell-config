@@ -35,7 +35,7 @@ Singleton {
         const decodeProcess = Qt.createQmlObject('import Quickshell.Io; Process { }', root);
         const safe = entry.replace(/'/g, "'\\''");
         decodeProcess.command = ["bash", "-c", `cliphist decode <<< '${safe}' | wl-copy`];
-        decodeProcess.finished.connect((exitCode) => {
+        decodeProcess.exited.connect((exitCode) => {
             if (callback) callback();
             decodeProcess.destroy();
         });
