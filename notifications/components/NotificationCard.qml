@@ -11,51 +11,47 @@ Rectangle {
     signal closeClicked()
     signal actionClicked(string actionId)
 
-    width: parent?.width ?? 360
-    height: layout.implicitHeight + 20
+    width: parent?.width ?? 380
+    height: layout.implicitHeight + 24
 
     color: notif.urgency === "critical" ? "#2d1b25" : (isPopup ? "#1e1e2e" : "#181825")
-    radius: 10
+    radius: 14
     border.color: notif.urgency === "critical" ? "#f38ba8" : "#313244"
     border.width: 1
-
-    // Left accent strip — normal popups only (mirrors search active-item strip)
-    Rectangle {
-        visible: isPopup && notif.urgency !== "critical"
-        width: 3
-        height: parent.height - 16
-        radius: 1.5
-        anchors {
-            left: parent.left
-            verticalCenter: parent.verticalCenter
-        }
-        color: "#89b4fa"
-    }
 
     ColumnLayout {
         id: layout
         anchors.fill: parent
-        anchors.margins: 10
-        anchors.leftMargin: (isPopup && notif.urgency !== "critical") ? 14 : 10
-        spacing: 6
+        anchors.margins: 12
+        spacing: 8
 
-        // Header row: icon · app name · time · ×
+        // ── Header: icon · app name · time · close ─────────────────────────
         RowLayout {
             Layout.fillWidth: true
-            spacing: 6
+            spacing: 7
 
-            Image {
-                Layout.preferredWidth: 18
-                Layout.preferredHeight: 18
-                source: Quickshell.iconPath(notif.appIcon || "dialog-information")
-                sourceSize: Qt.size(18, 18)
+            // App icon in a small rounded container
+            Rectangle {
+                width: 20
+                height: 20
+                radius: 5
+                color: "#313244"
+
+                Image {
+                    anchors.centerIn: parent
+                    width: 14
+                    height: 14
+                    source: Quickshell.iconPath(notif.appIcon || "dialog-information")
+                    sourceSize: Qt.size(14, 14)
+                    fillMode: Image.PreserveAspectFit
+                }
             }
 
             Text {
                 Layout.fillWidth: true
                 text: notif.appName || "Notification"
                 color: "#6c7086"
-                font.pixelSize: 12
+                font.pixelSize: 11
                 font.bold: true
                 font.family: "JetBrainsMono Nerd Font"
                 elide: Text.ElideRight
@@ -68,38 +64,51 @@ Rectangle {
                 font.family: "JetBrainsMono Nerd Font"
             }
 
+            // Close button — circle fills red on hover (macOS traffic-light feel)
             MouseArea {
                 id: closeArea
-                Layout.preferredWidth: 14
-                Layout.preferredHeight: 14
+                Layout.preferredWidth: 16
+                Layout.preferredHeight: 16
                 cursorShape: Qt.PointingHandCursor
                 hoverEnabled: true
                 onClicked: root.closeClicked()
 
-                Text {
+                Rectangle {
                     anchors.centerIn: parent
-                    text: "×"
-                    color: closeArea.containsMouse ? "#f38ba8" : "#6c7086"
-                    font.pixelSize: 14
-                    font.family: "JetBrainsMono Nerd Font"
+                    width: 14
+                    height: 14
+                    radius: 7
+                    color: closeArea.containsMouse ? "#f38ba8" : "transparent"
 
-                    Behavior on color { ColorAnimation { duration: 120 } }
+                    Behavior on color { ColorAnimation { duration: 150 } }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "×"
+                        color: closeArea.containsMouse ? "#1e1e2e" : "#585b70"
+                        font.pixelSize: 13
+                        font.bold: true
+                        font.family: "JetBrainsMono Nerd Font"
+
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                    }
                 }
             }
         }
 
-        // Body row: thumbnail · summary + body
+        // ── Body: thumbnail · summary + body ───────────────────────────────
         RowLayout {
             Layout.fillWidth: true
             spacing: 10
+            visible: notif.summary !== "" || notif.body !== "" || notif.image !== ""
 
             // Rounded thumbnail
             Rectangle {
                 visible: notif.image !== ""
-                Layout.preferredWidth: 44
-                Layout.preferredHeight: 44
+                Layout.preferredWidth: 42
+                Layout.preferredHeight: 42
                 Layout.alignment: Qt.AlignTop
-                radius: 6
+                radius: 8
                 clip: true
                 color: "transparent"
 
@@ -109,14 +118,14 @@ Rectangle {
                         ? (notif.image.startsWith("/") ? "file://" + notif.image : notif.image)
                         : ""
                     fillMode: Image.PreserveAspectCrop
-                    sourceSize: Qt.size(44, 44)
+                    sourceSize: Qt.size(42, 42)
                 }
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
-                spacing: 2
+                spacing: 3
 
                 Text {
                     Layout.fillWidth: true
@@ -126,6 +135,7 @@ Rectangle {
                     font.bold: true
                     font.family: "JetBrainsMono Nerd Font"
                     wrapMode: Text.Wrap
+                    visible: text !== ""
                 }
 
                 Text {
@@ -137,13 +147,13 @@ Rectangle {
                     wrapMode: Text.Wrap
                     textFormat: Text.RichText
                     visible: text !== ""
-                    maximumLineCount: isPopup ? 2 : 5
+                    maximumLineCount: isPopup ? 3 : 6
                     elide: Text.ElideRight
                 }
             }
         }
 
-        // Actions row
+        // ── Actions ────────────────────────────────────────────────────────
         RowLayout {
             Layout.fillWidth: true
             spacing: 6
@@ -154,9 +164,9 @@ Rectangle {
                 delegate: Rectangle {
                     required property var modelData
                     Layout.fillWidth: true
-                    height: 26
+                    height: 24
                     color: actionArea.containsMouse ? "#45475a" : "#313244"
-                    radius: 6
+                    radius: 12
 
                     Behavior on color { ColorAnimation { duration: 120 } }
 
@@ -164,7 +174,7 @@ Rectangle {
                         anchors.centerIn: parent
                         text: modelData.text
                         color: "#cdd6f4"
-                        font.pixelSize: 12
+                        font.pixelSize: 11
                         font.family: "JetBrainsMono Nerd Font"
                     }
 

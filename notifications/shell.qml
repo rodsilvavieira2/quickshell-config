@@ -132,11 +132,11 @@ ShellRoot {
         // restricting to top+right means the window surface covers only the
         // actual notification strip so the rest of the screen stays clickable.
         anchors { top: true; right: true }
-        width: 360 + 32  // card width + left margin + right margin
+        width: 380 + 32  // card width + right margin
 
         ListView {
             id: popupsList
-            width: 360
+            width: 380
             height: contentHeight  // shrinks/grows with the popup count
             spacing: 8
             model: shellRoot.popups
@@ -233,7 +233,7 @@ ShellRoot {
         }
 
         Rectangle {
-            width: 400
+            width: 420
             anchors {
                 top: parent.top
                 bottom: parent.bottom
@@ -241,7 +241,7 @@ ShellRoot {
                 margins: 16
             }
             color: "#1e1e2e"
-            radius: 12
+            radius: 14
             border.color: "#313244"
             border.width: 1
 
