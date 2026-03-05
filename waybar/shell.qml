@@ -89,9 +89,10 @@ PanelWindow {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             height: parent.height
-            width: rightContent.implicitWidth + Root.Config.pillPadding * 2
+            width: visible ? rightContent.implicitWidth + Root.Config.pillPadding * 2 : 0
             radius: Root.Config.radius
             color: Root.Config.pillColor
+            visible: TrayService.visibleItems.length > 0
 
             RowLayout {
                 id: rightContent
