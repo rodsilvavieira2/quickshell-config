@@ -122,6 +122,10 @@ ShellRoot {
 
         visible: shellRoot.popups.length > 0 && !shellRoot.historyOpen
         color: "transparent"
+        // Height must be explicit: PanelWindow with only top+right anchors derives its
+        // Wayland surface height from implicitHeight, which ListView never sets — so
+        // without this binding the surface stays at 0 and clips all card content.
+        height: popupsList.height + 16
 
         WlrLayershell.namespace: "quickshell:notifications:popups"
         WlrLayershell.layer: WlrLayer.Overlay
@@ -354,6 +358,9 @@ ShellRoot {
                             implicitWidth: 3
                             radius: 1.5
                             color: "#585b70"
+                            // Custom contentItem doesn't inherit ScrollBar's show/hide logic —
+                            // bind visibility explicitly: size < 1 means content overflows.
+                            visible: parent.size < 1.0
                             opacity: 0.7
                         }
                     }

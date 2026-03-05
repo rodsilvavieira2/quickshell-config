@@ -41,7 +41,13 @@ Rectangle {
                     anchors.centerIn: parent
                     width: 14
                     height: 14
-                    source: Quickshell.iconPath(notif.appIcon || "dialog-information")
+                    // Resolve app icon; fall back to bundled SVG when the theme
+                    // doesn't include the icon (iconPath returns "").
+                    source: {
+                        const themed = notif.appIcon ? Quickshell.iconPath(notif.appIcon) : "";
+                        return themed !== "" ? themed
+                            : Qt.resolvedUrl("../assets/notification-default.svg");
+                    }
                     sourceSize: Qt.size(14, 14)
                     fillMode: Image.PreserveAspectFit
                 }
