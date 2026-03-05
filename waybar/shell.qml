@@ -7,6 +7,7 @@ import Quickshell.Wayland
 import Quickshell.Services.SystemTray
 
 import "." as Root
+import "./services"
 import "modules" as Modules
 
 PanelWindow {
