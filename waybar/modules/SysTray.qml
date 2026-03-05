@@ -104,9 +104,10 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "▾"
+                        text: ""
                         color: Root.Config.text
-                        font.pixelSize: Root.Config.iconSize + 2
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: Root.Config.iconSize
                         rotation: root.overflowOpen ? 180 : 0
                         Behavior on rotation {
                             NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
@@ -118,6 +119,20 @@ Item {
 
         // Pinned items
         Repeater {
+            model: ScriptModel {
+                values: root.pinnedItems
+            }
+
+            delegate: SysTrayItem {
+                required property var modelData
+                item: modelData
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                onMenuClosed: root.releaseFocus();
+                onMenuOpened: (qsWindow) => root.setActiveMenuAndGrab(qsWindow);
+            }
+        }
+    }
 
     // Overflow popup (loaded on demand)
     Loader {
