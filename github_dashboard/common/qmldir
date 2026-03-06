@@ -1,0 +1,3 @@
+singleton Config Config.qml
+singleton Appearance Appearance.qml
+StyledRectangularShadow 1.0 widgets/StyledRectangularShadow.qml
