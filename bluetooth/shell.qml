@@ -76,52 +76,74 @@ ShellRoot {
                     spacing: 12
 
                     Text {
-                        text: "󰂯" // Bluetooth icon
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: 24
-                        color: "#89b4fa"
-                    }
-
-                    Text {
                         text: "Bluetooth"
                         font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: 20
+                        font.pixelSize: 22
                         font.bold: true
                         color: "#cdd6f4"
                         Layout.fillWidth: true
                     }
 
-                    // Adapter Power Toggle
-                    Switch {
-                        checked: Bluetooth.defaultAdapter ? Bluetooth.defaultAdapter.enabled : false
-                        onClicked: {
-                            if (Bluetooth.defaultAdapter) {
-                                Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled;
-                            }
-                        }
-                    }
-
-                    // Scan Button
+                    // Scan Icon Button
                     Button {
-                        text: (Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.discovering) ? "󰂰" : "󰂷"
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: 18
+                        id: scanButton
+                        property bool isDiscovering: Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.discovering
+                        visible: Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.enabled
                         
                         background: Rectangle {
-                            color: (Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.discovering) ? "#89b4fa" : "#313244"
-                            radius: 8
+                            color: "transparent"
                         }
+
                         contentItem: Text {
-                            text: parent.text
-                            font: parent.font
-                            color: (Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.discovering) ? "#1e1e2e" : "#cdd6f4"
+                            text: scanButton.isDiscovering ? "󰑐" : "󰑓"
+                            font.family: "JetBrainsMono Nerd Font"
+                            font.pixelSize: 18
+                            color: scanButton.isDiscovering ? "#89b4fa" : "#a6adc8"
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
+                            
+                            RotationAnimator on rotation {
+                                from: 0; to: 360; duration: 1000; loops: Animation.Infinite
+                                running: scanButton.isDiscovering
+                            }
                         }
                         
                         onClicked: {
                             if (Bluetooth.defaultAdapter) {
                                 Bluetooth.defaultAdapter.discovering = !Bluetooth.defaultAdapter.discovering;
+                            }
+                        }
+                    }
+
+                    // Adapter Power Toggle (macOS style)
+                    Switch {
+                        id: bluetoothToggle
+                        checked: Bluetooth.defaultAdapter ? Bluetooth.defaultAdapter.enabled : false
+                        
+                        indicator: Rectangle {
+                            implicitWidth: 42
+                            implicitHeight: 24
+                            radius: 12
+                            color: bluetoothToggle.checked ? "#89b4fa" : "#313244"
+                            border.color: bluetoothToggle.checked ? "#89b4fa" : "#45475a"
+
+                            Rectangle {
+                                x: bluetoothToggle.checked ? parent.width - width - 3 : 3
+                                y: 3
+                                width: 18
+                                height: 18
+                                radius: 9
+                                color: bluetoothToggle.checked ? "#1e1e2e" : "#cdd6f4"
+                                
+                                Behavior on x {
+                                    NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
+                                }
+                            }
+                        }
+
+                        onClicked: {
+                            if (Bluetooth.defaultAdapter) {
+                                Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled;
                             }
                         }
                     }
