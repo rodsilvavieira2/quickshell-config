@@ -82,12 +82,14 @@ ShellRoot {
                         font.bold: true
                         color: "#cdd6f4"
                         Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
                     }
 
                     // Adapter Power Toggle (macOS style)
                     Switch {
                         id: bluetoothToggle
                         checked: Bluetooth.defaultAdapter ? Bluetooth.defaultAdapter.enabled : false
+                        Layout.alignment: Qt.AlignVCenter
                         
                         indicator: Rectangle {
                             implicitWidth: 42
@@ -123,8 +125,9 @@ ShellRoot {
                         property bool isDiscovering: Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.discovering
                         visible: Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.enabled
                         
-                        width: 24
-                        height: 24
+                        Layout.preferredWidth: 32
+                        Layout.preferredHeight: 32
+                        Layout.alignment: Qt.AlignVCenter
                         
                         background: Rectangle {
                             color: "transparent"
@@ -133,7 +136,7 @@ ShellRoot {
                         contentItem: Text {
                             text: scanButton.isDiscovering ? "󰑐" : "󰑓"
                             font.family: "JetBrainsMono Nerd Font"
-                            font.pixelSize: 16
+                            font.pixelSize: 20
                             color: scanButton.isDiscovering ? "#89b4fa" : "#a6adc8"
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
