@@ -73,7 +73,7 @@ ShellRoot {
                 // Header
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: 12
+                    spacing: 16
 
                     Text {
                         text: "Bluetooth"
@@ -82,37 +82,6 @@ ShellRoot {
                         font.bold: true
                         color: "#cdd6f4"
                         Layout.fillWidth: true
-                    }
-
-                    // Scan Icon Button
-                    Button {
-                        id: scanButton
-                        property bool isDiscovering: Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.discovering
-                        visible: Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.enabled
-                        
-                        background: Rectangle {
-                            color: "transparent"
-                        }
-
-                        contentItem: Text {
-                            text: scanButton.isDiscovering ? "󰑐" : "󰑓"
-                            font.family: "JetBrainsMono Nerd Font"
-                            font.pixelSize: 18
-                            color: scanButton.isDiscovering ? "#89b4fa" : "#a6adc8"
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            
-                            RotationAnimator on rotation {
-                                from: 0; to: 360; duration: 1000; loops: Animation.Infinite
-                                running: scanButton.isDiscovering
-                            }
-                        }
-                        
-                        onClicked: {
-                            if (Bluetooth.defaultAdapter) {
-                                Bluetooth.defaultAdapter.discovering = !Bluetooth.defaultAdapter.discovering;
-                            }
-                        }
                     }
 
                     // Adapter Power Toggle (macOS style)
@@ -144,6 +113,40 @@ ShellRoot {
                         onClicked: {
                             if (Bluetooth.defaultAdapter) {
                                 Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled;
+                            }
+                        }
+                    }
+
+                    // Scan Icon Button
+                    Button {
+                        id: scanButton
+                        property bool isDiscovering: Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.discovering
+                        visible: Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.enabled
+                        
+                        width: 24
+                        height: 24
+                        
+                        background: Rectangle {
+                            color: "transparent"
+                        }
+
+                        contentItem: Text {
+                            text: scanButton.isDiscovering ? "󰑐" : "󰑓"
+                            font.family: "JetBrainsMono Nerd Font"
+                            font.pixelSize: 16
+                            color: scanButton.isDiscovering ? "#89b4fa" : "#a6adc8"
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            
+                            RotationAnimator on rotation {
+                                from: 0; to: 360; duration: 1000; loops: Animation.Infinite
+                                running: scanButton.isDiscovering
+                            }
+                        }
+                        
+                        onClicked: {
+                            if (Bluetooth.defaultAdapter) {
+                                Bluetooth.defaultAdapter.discovering = !Bluetooth.defaultAdapter.discovering;
                             }
                         }
                     }
