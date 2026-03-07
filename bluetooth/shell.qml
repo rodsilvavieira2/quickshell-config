@@ -90,6 +90,8 @@ ShellRoot {
                         id: bluetoothToggle
                         checked: Bluetooth.defaultAdapter ? Bluetooth.defaultAdapter.enabled : false
                         Layout.alignment: Qt.AlignVCenter
+                        Layout.preferredHeight: 24
+                        padding: 0
                         
                         indicator: Rectangle {
                             implicitWidth: 42
@@ -128,6 +130,7 @@ ShellRoot {
                         Layout.preferredWidth: 32
                         Layout.preferredHeight: 32
                         Layout.alignment: Qt.AlignVCenter
+                        padding: 0
                         
                         background: Rectangle {
                             color: "transparent"
