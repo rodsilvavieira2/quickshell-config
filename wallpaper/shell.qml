@@ -67,11 +67,31 @@ ShellRoot {
         }
     }
 
+    Process {
+        id: readActiveWallpaperProc
+        command: ["sh", "-c", "cat ~/.cache/current_wallpaper 2>/dev/null || true"]
+        running: false
+        stdout: StdioCollector {
+            id: readActiveCollector
+            onStreamFinished: {
+                let path = readActiveCollector.text.trim();
+                if (path !== "") {
+                    shellRoot.activeWallpaperPath = path;
+                    shellRoot.selectedWallpaperPath = path;
+                    let name = path.substring(path.lastIndexOf("/") + 1);
+                    name = name.substring(0, name.lastIndexOf("."));
+                    shellRoot.activeWallpaperName = name;
+                }
+            }
+        }
+    }
+
     function refreshWallpapers() {
         findWallpapersProc.running = true;
     }
 
     Component.onCompleted: {
+        readActiveWallpaperProc.running = true;
         refreshWallpapers();
     }
 
