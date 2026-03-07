@@ -144,7 +144,8 @@ ShellRoot {
                     keyNavigationEnabled: true
 
                     Keys.onReturnPressed: {
-                        if (currentItem && currentItem.deviceData) {
+                        if (currentItem && currentItem.deviceData && !currentItem.isProcessing) {
+                            currentItem.isProcessing = true;
                             let d = currentItem.deviceData;
                             if (d.connected) {
                                 d.connected = false;
@@ -171,6 +172,18 @@ ShellRoot {
 
                     delegate: Rectangle {
                         property var deviceData: modelData
+                        property bool isProcessing: false
+
+                        Connections {
+                            target: deviceData
+                            function onConnectedChanged() {
+                                isProcessing = false;
+                            }
+                            function onPairedChanged() {
+                                isProcessing = false;
+                            }
+                        }
+
                         width: ListView.view.width
                         height: 60
                         color: ListView.isCurrentItem ? Qt.rgba(205/255, 214/255, 244/255, 0.1) : (modelData.connected ? Qt.rgba(137/255, 180/255, 250/255, 0.15) : "#181825")
@@ -225,12 +238,29 @@ ShellRoot {
                                 }
                             }
 
+                            // Loading Indicator
+                            Text {
+                                text: "󰑐"
+                                font.family: "JetBrainsMono Nerd Font"
+                                font.pixelSize: 16
+                                color: "#89b4fa"
+                                visible: isProcessing
+                                Layout.alignment: Qt.AlignVCenter
+                                RotationAnimator on rotation {
+                                    from: 0
+                                    to: 360
+                                    duration: 1000
+                                    loops: Animation.Infinite
+                                    running: isProcessing
+                                }
+                            }
+
                             // Connect/Disconnect Button
                             Button {
                                 text: modelData.connected ? "󰌿" : "󰌷"
                                 font.family: "JetBrainsMono Nerd Font"
                                 font.pixelSize: 16
-                                visible: modelData.paired || modelData.connected
+                                visible: (modelData.paired || modelData.connected) && !isProcessing
                                 
                                 background: Rectangle {
                                     color: "transparent"
@@ -244,6 +274,7 @@ ShellRoot {
                                 }
 
                                 onClicked: {
+                                    isProcessing = true;
                                     if (modelData.connected) {
                                         modelData.connected = false;
                                     } else {
@@ -256,7 +287,7 @@ ShellRoot {
                             Button {
                                 text: "Pair"
                                 font.pixelSize: 12
-                                visible: !modelData.paired && !modelData.connected
+                                visible: !modelData.paired && !modelData.connected && !isProcessing
                                 
                                 background: Rectangle {
                                     color: "#313244"
@@ -271,6 +302,7 @@ ShellRoot {
                                 }
 
                                 onClicked: {
+                                    isProcessing = true;
                                     modelData.pair();
                                 }
                             }
