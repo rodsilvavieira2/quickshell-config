@@ -20,7 +20,7 @@ Rectangle {
         
         SidebarItem {
             icon: "󰈀"
-            tooltip: "Network Activity"
+            tooltip: "Dashboard"
             active: root.currentIndex === 0
             onClicked: {
                 root.currentIndex = 0
@@ -29,12 +29,32 @@ Rectangle {
         }
         
         SidebarItem {
-            icon: "󰓅"
-            tooltip: "Speed Test"
+            icon: "󰖟"
+            tooltip: "Connections"
             active: root.currentIndex === 1
             onClicked: {
                 root.currentIndex = 1
                 root.tabSelected(1)
+            }
+        }
+
+        SidebarItem {
+            icon: "󱪠"
+            tooltip: "Ports"
+            active: root.currentIndex === 2
+            onClicked: {
+                root.currentIndex = 2
+                root.tabSelected(2)
+            }
+        }
+        
+        SidebarItem {
+            icon: "󰓅"
+            tooltip: "Speed Test"
+            active: root.currentIndex === 3
+            onClicked: {
+                root.currentIndex = 3
+                root.tabSelected(3)
             }
         }
         
@@ -43,10 +63,10 @@ Rectangle {
         SidebarItem {
             icon: "󰒓"
             tooltip: "Settings"
-            active: root.currentIndex === 2
+            active: root.currentIndex === 4
             onClicked: {
-                root.currentIndex = 2
-                root.tabSelected(2)
+                root.currentIndex = 4
+                root.tabSelected(4)
             }
         }
     }

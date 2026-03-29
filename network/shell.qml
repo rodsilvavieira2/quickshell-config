@@ -19,7 +19,12 @@ ShellRoot {
 
     onPanelOpenChanged: {
         NetSpeed.active = panelOpen;
-        NetworkConnections.active = panelOpen && sidebar.currentIndex === 0;
+        updateConnectionStatus();
+    }
+
+    function updateConnectionStatus() {
+        const idx = sidebar.currentIndex;
+        NetworkConnections.active = panelOpen && (idx === 0 || idx === 1 || idx === 2);
     }
 
     IpcHandler {
@@ -88,7 +93,7 @@ ShellRoot {
                     Layout.fillHeight: true
                     onTabSelected: index => {
                         stackLayout.currentIndex = index;
-                        Connections.active = shellRoot.panelOpen && index === 0;
+                        shellRoot.updateConnectionStatus();
                     }
                 }
 
@@ -100,6 +105,14 @@ ShellRoot {
 
                     NetworkActivity {
                         id: networkActivity
+                    }
+
+                    ActiveConnectionsView {
+                        id: activeConnectionsView
+                    }
+
+                    PortUsageView {
+                        id: portUsageView
                     }
 
                     SpeedTestView {
