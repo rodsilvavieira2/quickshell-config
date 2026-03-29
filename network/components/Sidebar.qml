@@ -38,35 +38,15 @@ Rectangle {
             }
         }
         
-        SidebarItem {
-            icon: "󰖩"
-            tooltip: "Wi-Fi Scanner"
-            active: root.currentIndex === 2
-            onClicked: {
-                root.currentIndex = 2
-                root.tabSelected(2)
-            }
-        }
-        
-        SidebarItem {
-            icon: "󰓼"
-            tooltip: "Network Tools"
-            active: root.currentIndex === 3
-            onClicked: {
-                root.currentIndex = 3
-                root.tabSelected(3)
-            }
-        }
-        
         Item { Layout.fillHeight: true }
         
         SidebarItem {
             icon: "󰒓"
             tooltip: "Settings"
-            active: root.currentIndex === 4
+            active: root.currentIndex === 2
             onClicked: {
-                root.currentIndex = 4
-                root.tabSelected(4)
+                root.currentIndex = 2
+                root.tabSelected(2)
             }
         }
     }

@@ -106,14 +106,6 @@ ShellRoot {
                         id: speedTestView
                     }
 
-                    WifiScanner {
-                        id: wifiScanner
-                    }
-
-                    NetworkTools {
-                        id: networkTools
-                    }
-
                     NetworkSettings {
                         id: networkSettings
                     }
