@@ -36,65 +36,153 @@ ScrollView {
             spacing: 24
             Layout.alignment: Qt.AlignHCenter
             
-            CircularGauge {
-                id: gauge
+            Item {
                 Layout.alignment: Qt.AlignHCenter
-                isTesting: SpeedTest.isTesting
-                value: {
-                    if (SpeedTest.isTesting) {
-                        if (SpeedTest.downloadSpeed === "Testing...") return 0
-                        if (SpeedTest.uploadSpeed === "Waiting...") return parseFloat(SpeedTest.downloadSpeed)
-                        return parseFloat(SpeedTest.uploadSpeed)
+                width: 280
+                height: 280
+                
+                // Ping Pulse Animation
+                Rectangle {
+                    id: pulseRing
+                    anchors.centerIn: parent
+                    width: 240
+                    height: 240
+                    radius: width / 2
+                    color: "transparent"
+                    border.width: 4
+                    border.color: "#89b4fa"
+                    opacity: 0
+                    scale: 0.8
+                    
+                    SequentialAnimation {
+                        id: pulseAnim
+                        ParallelAnimation {
+                            NumberAnimation { target: pulseRing; property: "scale"; from: 0.8; to: 1.5; duration: 800; easing.type: Easing.OutCubic }
+                            NumberAnimation { target: pulseRing; property: "opacity"; from: 1.0; to: 0.0; duration: 800; easing.type: Easing.OutCubic }
+                        }
                     }
-                    return 0
+                    
+                    Connections {
+                        target: SpeedTest
+                        function onPingPulse() { pulseAnim.restart() }
+                    }
                 }
-                maxValue: 1000
-                color: SpeedTest.uploadSpeed === "Waiting..." ? "#94e2d5" : "#cba6f7"
-                label: SpeedTest.uploadSpeed === "Waiting..." ? "Mbps (Down)" : "Mbps (Up)"
+
+                CircularGauge {
+                    id: gauge
+                    anchors.centerIn: parent
+                    isTesting: SpeedTest.isTesting
+                    value: SpeedTest.isTesting ? SpeedTest.liveSpeed : 0
+                    maxValue: 1000
+                    color: {
+                        if (SpeedTest.currentStage === "download") return "#94e2d5"
+                        if (SpeedTest.currentStage === "upload") return "#cba6f7"
+                        if (SpeedTest.currentStage === "ping") return "#89b4fa"
+                        return "#313244"
+                    }
+                    label: {
+                        if (SpeedTest.currentStage === "download") return "Mbps (Down)"
+                        if (SpeedTest.currentStage === "upload") return "Mbps (Up)"
+                        if (SpeedTest.currentStage === "ping") return "Ping Test"
+                        return "Ready"
+                    }
+                }
             }
             
-            // Start Button with Glow
-            Item {
-                Layout.preferredWidth: 200
-                Layout.preferredHeight: 56
+            // Stage Status and Progress
+            ColumnLayout {
                 Layout.alignment: Qt.AlignHCenter
+                spacing: 4
+                visible: SpeedTest.isTesting
                 
-                Rectangle {
-                    id: startButton
-                    anchors.fill: parent
-                    color: SpeedTest.isTesting ? "#f38ba8" : "#94e2d5"
-                    radius: 12
-                    
+                Text {
+                    text: {
+                        const stage = SpeedTest.currentStage
+                        if (stage === "ping") return "Analyzing Latency..."
+                        if (stage === "download") return "Testing Download Speed..."
+                        if (stage === "upload") return "Testing Upload Speed..."
+                        return ""
+                    }
+                    color: "#cdd6f4"
+                    font.pixelSize: 16
+                    font.bold: true
+                    Layout.alignment: Qt.AlignHCenter
+                }
+                
+                Text {
+                    text: `${SpeedTest.stageTimeRemaining}s remaining`
+                    color: "#a6adc8"
+                    font.pixelSize: 12
+                    Layout.alignment: Qt.AlignHCenter
+                }
+            }
+            
+            // Controls
+            RowLayout {
+                Layout.alignment: Qt.AlignHCenter
+                spacing: 24
+                
+                // Continuous Toggle
+                RowLayout {
+                    spacing: 8
                     Text {
-                        anchors.centerIn: parent
-                        text: SpeedTest.isTesting ? "CANCEL TEST" : "START TEST"
-                        color: "#1e1e2e"
-                        font.pixelSize: 16
-                        font.bold: true
+                        text: "Continuous Mode"
+                        color: "#a6adc8"
+                        font.pixelSize: 14
                         font.family: "JetBrainsMono Nerd Font"
                     }
-                    
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            if (SpeedTest.isTesting) {
-                                SpeedTest.cancelTest()
-                            } else {
-                                SpeedTest.runTest(Nmcli.activeInterface)
-                            }
-                        }
-                        cursorShape: Qt.PointingHandCursor
+                    Switch {
+                        checked: SpeedTest.autoTestEnabled
+                        onToggled: SpeedTest.autoTestEnabled = checked
                     }
                 }
                 
-                MultiEffect {
-                    source: startButton
-                    anchors.fill: startButton
-                    shadowEnabled: true
-                    shadowColor: startButton.color
-                    shadowBlur: 0.8
-                    shadowOpacity: 0.6
-                    visible: !SpeedTest.isTesting
+                // Start Button with Glow
+                Item {
+                    Layout.preferredWidth: 200
+                    Layout.preferredHeight: 56
+                    
+                    Rectangle {
+                        id: startButton
+                        anchors.fill: parent
+                        color: SpeedTest.isTesting ? "#f38ba8" : (SpeedTest.countdown > 0 ? "#fab387" : "#94e2d5")
+                        radius: 12
+                        
+                        Text {
+                            anchors.centerIn: parent
+                            text: {
+                                if (SpeedTest.isTesting) return "CANCEL TEST"
+                                if (SpeedTest.countdown > 0) return `NEXT IN ${SpeedTest.countdown}S`
+                                return "START TEST"
+                            }
+                            color: "#1e1e2e"
+                            font.pixelSize: 16
+                            font.bold: true
+                            font.family: "JetBrainsMono Nerd Font"
+                        }
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                if (SpeedTest.isTesting || SpeedTest.countdown > 0) {
+                                    SpeedTest.cancelTest()
+                                } else {
+                                    SpeedTest.runTest()
+                                }
+                            }
+                            cursorShape: Qt.PointingHandCursor
+                        }
+                    }
+                    
+                    MultiEffect {
+                        source: startButton
+                        anchors.fill: startButton
+                        shadowEnabled: true
+                        shadowColor: startButton.color
+                        shadowBlur: 0.8
+                        shadowOpacity: 0.6
+                        visible: !SpeedTest.isTesting
+                    }
                 }
             }
         }
@@ -132,7 +220,7 @@ ScrollView {
             spacing: 16
             
             Text {
-                text: "Recent Tests"
+                text: "Recent Tests (Persistent)"
                 color: "#cdd6f4"
                 font.pixelSize: 18
                 font.bold: true

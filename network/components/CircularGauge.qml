@@ -5,6 +5,12 @@ Item {
     id: root
     
     property real value: 0
+    Behavior on value {
+        NumberAnimation {
+            duration: 800
+            easing.type: Easing.OutCubic
+        }
+    }
     property real maxValue: 1000
     property color color: "#94e2d5"
     property string label: "Mbps"

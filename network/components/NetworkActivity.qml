@@ -11,7 +11,7 @@ ScrollView {
     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
     
     property bool active: false
-    onActiveChanged: Connections.active = active
+    onActiveChanged: NetworkConnections.active = active
     
     ColumnLayout {
         width: root.width
@@ -158,7 +158,7 @@ ScrollView {
                 spacing: 4
                 
                 Repeater {
-                    model: (Connections.connections || []).filter(c => {
+                    model: (NetworkConnections.connections || []).filter(c => {
                         if (!searchInput.text) return true
                         return (c.appName || "").toLowerCase().includes(searchInput.text.toLowerCase()) ||
                                (c.pid || "").toString().includes(searchInput.text)
@@ -245,7 +245,7 @@ ScrollView {
                     color: "#585b70"
                     font.pixelSize: 14
                     Layout.alignment: Qt.AlignHCenter
-                    visible: (Connections.connections || []).length === 0
+                    visible: (NetworkConnections.connections || []).length === 0
                 }
             }
         }

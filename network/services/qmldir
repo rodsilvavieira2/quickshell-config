@@ -1,4 +1,4 @@
 singleton Nmcli 1.0 Nmcli.qml
 singleton SpeedTest 1.0 SpeedTest.qml
 singleton NetSpeed 1.0 NetSpeed.qml
-singleton Connections 1.0 Connections.qml
+singleton NetworkConnections 1.0 NetworkConnections.qml

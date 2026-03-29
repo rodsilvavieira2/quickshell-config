@@ -19,7 +19,7 @@ ShellRoot {
 
     onPanelOpenChanged: {
         NetSpeed.active = panelOpen;
-        Connections.active = panelOpen && sidebar.currentIndex === 0;
+        NetworkConnections.active = panelOpen && sidebar.currentIndex === 0;
     }
 
     IpcHandler {
