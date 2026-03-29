@@ -7,6 +7,7 @@ Singleton {
     id: root
     
     property var connections: []
+    property var listeningPorts: []
     property bool active: false
     
     // Internal state for deltas
@@ -18,7 +19,69 @@ Singleton {
         repeat: true
         running: root.active
         triggeredOnStart: true
-        onTriggered: ssProc.running = true
+        onTriggered: {
+            ssProc.running = true;
+            listeningProc.running = true;
+        }
+    }
+    
+    Process {
+        id: listeningProc
+        command: ["ss", "-nltup"]
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const lines = text.trim().split("\n");
+                if (lines.length <= 1) {
+                    root.listeningPorts = [];
+                    return;
+                }
+                
+                const ports = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    
+                    const parts = line.split(/\s+/);
+                    if (parts.length < 6) continue;
+                    
+                    const protocol = parts[0].toUpperCase();
+                    const localAddr = parts[4];
+                    
+                    // Extract port and address
+                    const lastColonIndex = localAddr.lastIndexOf(":");
+                    const port = localAddr.substring(lastColonIndex + 1);
+                    const address = localAddr.substring(0, lastColonIndex);
+                    
+                    let processName = "Unknown";
+                    let pid = "N/A";
+                    
+                    const processPart = parts.slice(6).join(" ");
+                    if (processPart) {
+                        const nameMatch = processPart.match(/"([^"]+)"/);
+                        const pidMatch = processPart.match(/pid=(\d+)/);
+                        if (nameMatch) processName = nameMatch[1];
+                        if (pidMatch) pid = pidMatch[1];
+                    }
+                    
+                    ports.push({
+                        protocol: protocol,
+                        port: port,
+                        address: address,
+                        processName: processName,
+                        pid: pid
+                    });
+                }
+                
+                // Deduplicate and sort
+                root.listeningPorts = ports.filter((v, i, a) => a.findIndex(t => (t.port === v.port && t.protocol === v.protocol)) === i)
+                    .sort((a, b) => {
+                        const portA = parseInt(a.port) || 0;
+                        const portB = parseInt(b.port) || 0;
+                        return portA - portB;
+                    });
+            }
+        }
     }
     
     Process {
