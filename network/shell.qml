@@ -17,7 +17,10 @@ ShellRoot {
 
     property bool panelOpen: false
 
-    onPanelOpenChanged: NetSpeed.active = panelOpen
+    onPanelOpenChanged: {
+        NetSpeed.active = panelOpen;
+        Connections.active = panelOpen && sidebar.currentIndex === 0;
+    }
 
     IpcHandler {
         target: "network"
@@ -74,96 +77,45 @@ ShellRoot {
             
             MouseArea { anchors.fill: parent; preventStealing: true }
             
-            ColumnLayout {
+            RowLayout {
                 id: layout
                 anchors.fill: parent
                 anchors.margins: 20
-                spacing: 16
+                spacing: 20
                 
-                // Header
-                RowLayout {
-                    Layout.fillWidth: true
-                    
-                    Text {
-                        text: "󰈀 Ethernet"
-                        font.pixelSize: 20
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.bold: true
-                        color: "#cdd6f4"
-                        Layout.fillWidth: true
+                Sidebar {
+                    id: sidebar
+                    Layout.fillHeight: true
+                    onTabSelected: index => {
+                        stackLayout.currentIndex = index;
+                        Connections.active = shellRoot.panelOpen && index === 0;
                     }
                 }
-                
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: 1
-                    color: "#313244"
-                }
 
-                // Ethernet List
-                ListView {
-                    id: networksList
+                StackLayout {
+                    id: stackLayout
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    clip: true
-                    spacing: 12
-                    focus: true
-                    keyNavigationEnabled: true
-                    keyNavigationWraps: true
-                    highlightMoveDuration: 150
-                    boundsBehavior: Flickable.StopAtBounds
+                    currentIndex: sidebar.currentIndex
 
-                    model: Nmcli.ethernetDevices
-
-                    // Reset to first card and focus list whenever panel opens
-                    Connections {
-                        target: shellRoot
-                        function onPanelOpenChanged() {
-                            if (shellRoot.panelOpen) {
-                                networksList.currentIndex = 0
-                                networksList.forceActiveFocus()
-                            }
-                        }
+                    NetworkActivity {
+                        id: networkActivity
                     }
 
-                    // Tab / Enter / Space — delegate to the focused card
-                    Keys.onPressed: event => {
-                        const item = networksList.currentItem
-                        if (!item) return
-
-                        if (event.key === Qt.Key_Tab) {
-                            item.card.cycleFocus(event.modifiers & Qt.ShiftModifier ? -1 : 1)
-                            event.accepted = true
-                        } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter
-                                   || event.key === Qt.Key_Space) {
-                            item.card.activateAction()
-                            event.accepted = true
-                        }
+                    SpeedTestView {
+                        id: speedTestView
                     }
 
-                    delegate: Item {
-                        id: delegateItem
-                        required property var modelData
-                        required property int index
-                        width: ListView.view.width
-                        height: card.height
-
-                        property alias card: card
-
-                        EthernetCard {
-                            id: card
-                            width: parent.width
-                            device: delegateItem.modelData
-                            isSelected: delegateItem.ListView.isCurrentItem
-                        }
+                    WifiScanner {
+                        id: wifiScanner
                     }
 
-                    Text {
-                        anchors.centerIn: parent
-                        text: "No Ethernet devices found"
-                        color: "#a6adc8"
-                        font.pixelSize: 16
-                        visible: parent.count === 0
+                    NetworkTools {
+                        id: networkTools
+                    }
+
+                    NetworkSettings {
+                        id: networkSettings
                     }
                 }
             }

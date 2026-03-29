@@ -1,0 +1,29 @@
+{
+  "id": "network-tabs-04",
+  "seq": "04",
+  "title": "Implement Active Connections Table",
+  "status": "pending",
+  "depends_on": ["02", "03"],
+  "parallel": false,
+  "suggested_agent": "OpenFrontendSpecialist",
+  "agent_id": null,
+  "context_files": [
+    "core/standards/code-quality.md",
+    "AGENTS.md"
+  ],
+  "reference_files": [
+    "network/modules/NetworkActivity.qml",
+    "network/services/Connections.qml"
+  ],
+  "acceptance_criteria": [
+    "Active Connections table added to NetworkActivity.qml.",
+    "Displays data from Connections.qml.",
+    "Follows Catppuccin Mocha styling."
+  ],
+  "deliverables": [
+    "network/modules/NetworkActivity.qml"
+  ],
+  "started_at": null,
+  "completed_at": null,
+  "completion_summary": null
+}

@@ -1,0 +1,30 @@
+{
+  "id": "network-tabs-05",
+  "seq": "05",
+  "title": "Implement Speed Test Tab",
+  "status": "pending",
+  "depends_on": ["01"],
+  "parallel": true,
+  "suggested_agent": "OpenFrontendSpecialist",
+  "agent_id": null,
+  "context_files": [
+    "core/standards/code-quality.md",
+    "AGENTS.md"
+  ],
+  "reference_files": [
+    "network/services/SpeedTest.qml"
+  ],
+  "acceptance_criteria": [
+    "SpeedTestView.qml created in network/modules/.",
+    "Includes a circular gauge for speed.",
+    "Includes cards for Ping, Jitter, and Packet Loss.",
+    "Includes a history table of previous tests.",
+    "Integrates with SpeedTest.qml service."
+  ],
+  "deliverables": [
+    "network/modules/SpeedTestView.qml"
+  ],
+  "started_at": null,
+  "completed_at": null,
+  "completion_summary": null
+}

@@ -1,0 +1,26 @@
+{
+  "id": "network-tabs-03",
+  "seq": "03",
+  "title": "Implement Active Connections Service",
+  "status": "pending",
+  "depends_on": [],
+  "parallel": true,
+  "suggested_agent": "CoderAgent",
+  "agent_id": null,
+  "context_files": [
+    "core/standards/code-quality.md",
+    "AGENTS.md"
+  ],
+  "reference_files": [],
+  "acceptance_criteria": [
+    "Connections.qml created in network/services/.",
+    "Uses ss -tunp to fetch active connections.",
+    "Parses output into a list of objects with local/remote address, port, and process name."
+  ],
+  "deliverables": [
+    "network/services/Connections.qml"
+  ],
+  "started_at": null,
+  "completed_at": null,
+  "completion_summary": null
+}
