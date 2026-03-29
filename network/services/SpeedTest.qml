@@ -22,10 +22,6 @@ Singleton {
     
     property list<var> testHistory: []
     
-    // Sequential Auto-Test
-    property bool autoTestEnabled: false
-    property int countdown: 0
-    
     readonly property string dbPath: Quickshell.shellPath("network/speedtests.db")
 
     signal testFinished()
@@ -33,7 +29,6 @@ Singleton {
 
     function runTest() {
         if (isTesting) return
-        stopCountdown()
         isTesting = true
         currentStage = "ping"
         stageTimeRemaining = 15
@@ -50,7 +45,6 @@ Singleton {
     }
 
     function cancelTest() {
-        stopCountdown()
         stageTimer.stop()
         if (!isTesting) return
 
@@ -69,18 +63,6 @@ Singleton {
 
         cleanupProc.running = true
     }
-    
-    function startCountdown() {
-        if (!autoTestEnabled) return
-        currentStage = "cooldown"
-        countdown = 30
-        autoTestTimer.start()
-    }
-    
-    function stopCountdown() {
-        autoTestTimer.stop()
-        countdown = 0
-    }
 
     Timer {
         id: stageTimer
@@ -89,20 +71,6 @@ Singleton {
         onTriggered: {
             if (root.stageTimeRemaining > 0) {
                 root.stageTimeRemaining--
-            }
-        }
-    }
-
-    Timer {
-        id: autoTestTimer
-        interval: 1000
-        repeat: true
-        onTriggered: {
-            if (root.countdown > 0) {
-                root.countdown--
-            } else {
-                autoTestTimer.stop()
-                root.runTest()
             }
         }
     }
@@ -282,10 +250,6 @@ Singleton {
             root.currentStage = "idle"
             root.testFinished()
             NetSpeed.active = false
-            
-            if (root.autoTestEnabled) {
-                root.startCountdown()
-            }
         }
     }
 }

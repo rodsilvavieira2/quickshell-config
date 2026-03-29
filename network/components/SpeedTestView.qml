@@ -122,21 +122,6 @@ ScrollView {
                 Layout.alignment: Qt.AlignHCenter
                 spacing: 24
                 
-                // Continuous Toggle
-                RowLayout {
-                    spacing: 8
-                    Text {
-                        text: "Continuous Mode"
-                        color: "#a6adc8"
-                        font.pixelSize: 14
-                        font.family: "JetBrainsMono Nerd Font"
-                    }
-                    Switch {
-                        checked: SpeedTest.autoTestEnabled
-                        onToggled: SpeedTest.autoTestEnabled = checked
-                    }
-                }
-                
                 // Start Button with Glow
                 Item {
                     Layout.preferredWidth: 200
@@ -145,16 +130,12 @@ ScrollView {
                     Rectangle {
                         id: startButton
                         anchors.fill: parent
-                        color: SpeedTest.isTesting ? "#f38ba8" : (SpeedTest.countdown > 0 ? "#fab387" : "#94e2d5")
+                        color: SpeedTest.isTesting ? "#f38ba8" : "#94e2d5"
                         radius: 12
                         
                         Text {
                             anchors.centerIn: parent
-                            text: {
-                                if (SpeedTest.isTesting) return "CANCEL TEST"
-                                if (SpeedTest.countdown > 0) return `NEXT IN ${SpeedTest.countdown}S`
-                                return "START TEST"
-                            }
+                            text: SpeedTest.isTesting ? "CANCEL TEST" : "START TEST"
                             color: "#1e1e2e"
                             font.pixelSize: 16
                             font.bold: true
@@ -164,7 +145,7 @@ ScrollView {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: {
-                                if (SpeedTest.isTesting || SpeedTest.countdown > 0) {
+                                if (SpeedTest.isTesting) {
                                     SpeedTest.cancelTest()
                                 } else {
                                     SpeedTest.runTest()
