@@ -4,12 +4,19 @@ import os
 import re
 import time
 from datetime import datetime, timedelta
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+
+try:
+    from selenium import webdriver
+    from selenium.webdriver.firefox.options import Options
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.common.exceptions import TimeoutException
+    SELENIUM_OK = True
+    SELENIUM_IMPORT_ERROR = ""
+except Exception as e:
+    SELENIUM_OK = False
+    SELENIUM_IMPORT_ERROR = str(e)
 
 # --- CONFIGURATION ---
 BASE_URL = "https://all.uddataplus.dk/skema/?id=id_menu_skema"
@@ -27,6 +34,33 @@ TOTAL_AVAILABLE_WIDTH_PX = 750
 # Base URLs
 GENERIC_URL = f"{BASE_URL}#menu_skema:"
 BASE_LINK_URL = BASE_URL
+
+def resolve_profile_path():
+    preferred = os.path.expanduser("~/.mozilla/firefox/schedule.special")
+    if os.path.isdir(preferred):
+        return preferred
+
+    root = os.path.expanduser("~/.mozilla/firefox")
+    if not os.path.isdir(root):
+        return preferred
+
+    candidates = []
+    for name in os.listdir(root):
+        full = os.path.join(root, name)
+        if not os.path.isdir(full):
+            continue
+        if name.endswith(".default-release"):
+            candidates.append((0, full))
+        elif ".default" in name:
+            candidates.append((1, full))
+        else:
+            candidates.append((2, full))
+
+    if not candidates:
+        return preferred
+
+    candidates.sort(key=lambda x: x[0])
+    return candidates[0][1]
 
 def get_specific_url(date_obj):
     date_str = date_obj.strftime("%Y-%m-%d")
@@ -170,13 +204,35 @@ def format_header(date_obj, now):
     return f"{date_str} {suffix}"
 
 def update_schedule():
+    output = {"header": "No Classes Found", "lessons": [], "link": GENERIC_URL}
+
+    if not SELENIUM_OK:
+        output = {
+            "header": "Schedule backend error",
+            "lessons": [{
+                "type": "class",
+                "time": "Error",
+                "subject": "Missing dependency",
+                "room": "selenium",
+                "teacher": SELENIUM_IMPORT_ERROR,
+                "start": 0,
+                "end": 0,
+                "width": 220,
+                "char_limit": 20
+            }],
+            "link": ""
+        }
+        os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
+        with open(CACHE_FILE, "w") as f:
+            json.dump(output, f)
+        return
+
     options = Options()
     options.add_argument("--headless") 
     options.add_argument("-profile")
-    options.add_argument(PROFILE_PATH)
+    options.add_argument(resolve_profile_path())
 
     driver = None
-    output = {"header": "No Classes Found", "lessons": [], "link": GENERIC_URL}
     
     try:
         driver = webdriver.Firefox(options=options)

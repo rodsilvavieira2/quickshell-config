@@ -372,28 +372,28 @@ ShellRoot {
         }
 
         // -------------------------------------------------------------------------
-        // SCHEDULE DATA
+        // NEWS DATA (Hacker News)
         // -------------------------------------------------------------------------
-        property var scheduleData: { "header": "Loading Schedule...", "link": "", "lessons": [] }
+        property var newsData: ({ "articles": [], "fetched_at": 0 })
 
         Process {
-            id: schedulePoller
-            command: ["bash", window.scriptsDir + "/schedule/schedule_manager.sh"]
+            id: newsPoller
+            command: ["bash", window.scriptsDir + "/news_manager.sh"]
             running: shellRoot.panelOpen
             stdout: StdioCollector {
                 onStreamFinished: {
                     let txt = this.text.trim();
                     if (txt !== "") {
-                        try { window.scheduleData = JSON.parse(txt); } catch(e) { console.log("Schedule Parse Error:", e); }
+                        try { window.newsData = JSON.parse(txt); } catch(e) { console.log("News Parse Error:", e); }
                     }
                 }
             }
         }
 
         Timer {
-            interval: 600000 
+            interval: 1800000 // 30 minutes
             running: shellRoot.panelOpen; repeat: true
-            onTriggered: schedulePoller.running = true
+            onTriggered: newsPoller.running = true
         }
 
         // -------------------------------------------------------------------------
@@ -1201,7 +1201,7 @@ ShellRoot {
                 }
 
                 // =======================================================
-                // BOTTOM SECTION: FRAMELESS FLUID DATA STREAM (SCHEDULE)
+                // BOTTOM SECTION: HACKER NEWS FEED
                 // =======================================================
                 Item {
                     id: bottomSection
@@ -1209,11 +1209,12 @@ ShellRoot {
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
                     height: 240
-                    z: 20 
+                    z: 20
 
                     opacity: window.introSchedule
                     transform: Translate { y: 50 * (1.0 - window.introSchedule) }
 
+                    // Subtle gradient backdrop
                     Rectangle {
                         anchors.fill: parent
                         gradient: Gradient {
@@ -1222,273 +1223,281 @@ ShellRoot {
                         }
                     }
 
+                    // Top separator line
                     Rectangle { anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right; height: 1; color: Qt.alpha(window.surface1, 0.5) }
-
-                    Canvas {
-                        anchors.fill: parent
-                        z: -1 
-                        opacity: 0.15
-                        
-                        property real phase1: 0
-                        property real phase2: 0
-                        property real phase3: 0
-                        
-                        NumberAnimation on phase1 { from: 0; to: Math.PI * 2; duration: 4000; loops: Animation.Infinite; running: true }
-                        NumberAnimation on phase2 { from: 0; to: Math.PI * 2; duration: 5500; loops: Animation.Infinite; running: true }
-                        NumberAnimation on phase3 { from: 0; to: Math.PI * 2; duration: 7000; loops: Animation.Infinite; running: true }
-                        
-                        onPhase1Changed: requestPaint()
-                        
-                        onPaint: {
-                            var ctx = getContext("2d");
-                            ctx.clearRect(0, 0, width, height);
-                            var cy = height / 2;
-                            
-                            ctx.beginPath();
-                            ctx.moveTo(0, cy);
-                            for(var x = 0; x <= width; x += 10) ctx.lineTo(x, cy + Math.sin(x/100 + phase1) * 30);
-                            ctx.strokeStyle = window.mauve;
-                            ctx.lineWidth = 2;
-                            ctx.stroke();
-                            
-                            ctx.beginPath();
-                            ctx.moveTo(0, cy);
-                            for(var x = 0; x <= width; x += 10) ctx.lineTo(x, cy + Math.sin(x/120 - phase2) * 40);
-                            ctx.strokeStyle = window.sapphire;
-                            ctx.lineWidth = 2;
-                            ctx.stroke();
-                            
-                            ctx.beginPath();
-                            ctx.moveTo(0, cy);
-                            for(var x = 0; x <= width; x += 10) ctx.lineTo(x, cy + Math.sin(x/80 + phase3) * 20);
-                            ctx.strokeStyle = window.peach;
-                            ctx.lineWidth = 2;
-                            ctx.stroke();
-                        }
-                    }
 
                     ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: 25
-                        spacing: 15
+                        anchors.topMargin: 18
+                        anchors.leftMargin: 25
+                        anchors.rightMargin: 25
+                        anchors.bottomMargin: 18
+                        spacing: 14
 
+                        // ── Header row ──────────────────────────────────────
                         RowLayout {
                             Layout.fillWidth: true
-                            spacing: 15
-                            
+                            spacing: 14
+
+                            // Teal icon circle
                             Rectangle {
-                                width: 40; height: 40; radius: 20; color: window.surface0
-                                Text { anchors.centerIn: parent; text: ""; font.family: "Iosevka Nerd Font"; font.pixelSize: 18; color: window.textAccent }
+                                width: 38; height: 38; radius: 19
+                                color: window.surface0
+                                border.color: Qt.alpha(window.mauve, 0.55); border.width: 1
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: ""
+                                    font.family: "JetBrains Mono Nerd Font"
+                                    font.pixelSize: 16
+                                    color: window.mauve
+                                }
                             }
-                            
-                            Text { 
-                                text: window.scheduleData ? window.scheduleData.header : "Loading Schedule..."
+
+                            Text {
+                                text: "TECH NEWS"
                                 font.family: "JetBrains Mono"
                                 font.weight: Font.Bold
-                                font.pixelSize: 16
-                                color: window.overlay0
+                                font.pixelSize: 15
+                                font.letterSpacing: 1.5
+                                color: window.mauve
                             }
-                            
+
                             Item { Layout.fillWidth: true }
-                            
+
+                            // HN badge + last-updated timestamp
                             Rectangle {
-                                width: 120; height: 36; radius: 10
-                                color: schLinkMa.containsMouse ? window.mauve : Qt.alpha(window.surface1, 0.5)
-                                border.color: window.mauve; border.width: 1
-                                Behavior on color { ColorAnimation { duration: 150 } }
-                                
+                                height: 28
+                                width: hnBadgeRow.implicitWidth + 20
+                                radius: 8
+                                color: Qt.alpha(window.surface1, 0.55)
+                                border.color: Qt.alpha(window.mauve, 0.3); border.width: 1
+
                                 RowLayout {
+                                    id: hnBadgeRow
                                     anchors.centerIn: parent
                                     spacing: 6
-                                    Text { text: "Open Web"; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: 14; color: schLinkMa.containsMouse ? window.base : window.text }
-                                    Text { text: ""; font.family: "Iosevka Nerd Font"; font.pixelSize: 14; color: schLinkMa.containsMouse ? window.base : window.text }
-                                }
-                                
-                                MouseArea {
-                                    id: schLinkMa; anchors.fill: parent; hoverEnabled: true
-                                    onClicked: if(window.scheduleData && window.scheduleData.link) Quickshell.execDetached(["xdg-open", window.scheduleData.link])
+
+                                    Text {
+                                        text: "  HN"
+                                        font.family: "JetBrains Mono Nerd Font"
+                                        font.weight: Font.Bold
+                                        font.pixelSize: 13
+                                        color: window.peach
+                                    }
+
+                                    Rectangle { width: 1; height: 16; color: Qt.alpha(window.surface2, 0.8) }
+
+                                    Text {
+                                        text: {
+                                            const ts = window.newsData.fetched_at || 0;
+                                            if (ts === 0) return "not yet fetched";
+                                            const diff = Math.floor((Date.now() / 1000) - ts);
+                                            if (diff < 60) return "just now";
+                                            const mins = Math.floor(diff / 60);
+                                            return mins + "m ago";
+                                        }
+                                        font.family: "JetBrains Mono"
+                                        font.pixelSize: 12
+                                        color: window.overlay0
+                                    }
                                 }
                             }
                         }
 
+                        // ── News cards area ──────────────────────────────────
                         Item {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
 
+                            // Empty / loading state
                             Text {
-                                text: "Data stream offline. No scheduled events."
+                                anchors.centerIn: parent
+                                text: "Fetching latest stories…"
                                 font.family: "JetBrains Mono"
                                 font.italic: true
                                 font.pixelSize: 14
                                 color: window.overlay0
-                                visible: window.scheduleData && window.scheduleData.lessons.length === 0
-                                anchors.centerIn: parent
+                                visible: (window.newsData.articles || []).length === 0
                             }
 
-                            Rectangle {
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                height: 2
-                                color: Qt.alpha(window.surface1, 0.4)
-                                visible: window.scheduleData && window.scheduleData.lessons.length > 0
-                            }
-
-                            ScrollView {
-                                id: schedScroll
+                            // Horizontal scroll of cards
+                            Flickable {
+                                id: newsScroll
                                 anchors.fill: parent
                                 clip: true
-                                ScrollBar.vertical.policy: ScrollBar.AlwaysOff
-                                ScrollBar.horizontal.policy: ScrollBar.AsNeeded
-                                visible: window.scheduleData && window.scheduleData.lessons.length > 0
-                                contentWidth: scheduleRow.width
-                                contentHeight: parent.height
+                                flickableDirection: Flickable.HorizontalFlick
+                                contentWidth: newsRow.implicitWidth
+                                contentHeight: height
+                                visible: (window.newsData.articles || []).length > 0
+                                ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AsNeeded }
 
                                 Row {
-                                    id: scheduleRow
-                                    height: parent.height
-                                    spacing: 0
-                                    
-                                    property real scaleRatio: schedScroll.width / 750.0
+                                    id: newsRow
+                                    height: newsScroll.height
+                                    spacing: 10
 
                                     Repeater {
-                                        model: window.scheduleData ? window.scheduleData.lessons : []
+                                        model: window.newsData.articles || []
 
                                         delegate: Item {
-                                            property bool isClass: modelData.type === "class"
-                                            property int baseDataWidth: modelData.width || 100
-                                            
-                                            width: baseDataWidth * scheduleRow.scaleRatio
-                                            height: parent.height
-                                            
-                                            Item {
-                                                id: classNode
+                                            id: cardRoot
+                                            required property var modelData
+                                            width: 260
+                                            height: newsRow.height
+
+                                            property bool hovered: cardMa.containsMouse
+
+                                            scale: hovered ? 1.03 : 1.0
+                                            Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
+
+                                             // Card background
+                                            Rectangle {
                                                 anchors.fill: parent
-                                                anchors.topMargin: 10
-                                                anchors.bottomMargin: 10
-                                                visible: parent.isClass
-                                                
-                                                property bool isActive: parent.isClass && window.currentEpoch >= (modelData.start || 0) && window.currentEpoch <= (modelData.end || 0)
-                                                property bool isPast: parent.isClass && window.currentEpoch > (modelData.end || 0)
-                                                
-                                                Canvas {
+                                                anchors.topMargin: 4
+                                                anchors.bottomMargin: 4
+                                                radius: 10
+                                                color: cardRoot.hovered ? Qt.alpha(window.mauve, 0.22) : Qt.alpha(window.mauve, 0.10)
+                                                border.color: cardRoot.hovered ? Qt.alpha(window.mauve, 0.70) : Qt.alpha(window.mauve, 0.30)
+                                                border.width: 1
+                                                Behavior on color { ColorAnimation { duration: 160 } }
+                                                Behavior on border.color { ColorAnimation { duration: 160 } }
+
+                                                // Hover glow
+                                                Rectangle {
                                                     anchors.fill: parent
-                                                    visible: classMa.containsMouse || classNode.isActive
-                                                    opacity: classMa.containsMouse ? 0.2 : 0.08
-                                                    Behavior on opacity { NumberAnimation { duration: 200 } }
-                                                    
-                                                    property real wavePhase: 0
-                                                    NumberAnimation on wavePhase {
-                                                        from: 0; to: Math.PI * 2; duration: 2000; loops: Animation.Infinite; running: parent.visible
-                                                    }
-                                                    onWavePhaseChanged: requestPaint()
-                                                    onPaint: {
-                                                        var ctx = getContext("2d");
-                                                        ctx.clearRect(0, 0, width, height);
-                                                        ctx.beginPath();
-                                                        ctx.moveTo(0, height);
-                                                        for(var x = 0; x <= width; x += 10) {
-                                                            ctx.lineTo(x, height/2 + Math.sin(x/25 + wavePhase) * 20);
-                                                        }
-                                                        ctx.lineTo(width, height);
-                                                        ctx.lineTo(0, height);
-                                                        var grad = ctx.createLinearGradient(0, 0, width, 0);
-                                                        grad.addColorStop(0, window.mauve);
-                                                        grad.addColorStop(1, "transparent");
-                                                        ctx.fillStyle = grad;
-                                                        ctx.fill();
-                                                    }
+                                                    radius: parent.radius
+                                                    color: Qt.alpha(window.mauve, 0.10)
+                                                    opacity: cardRoot.hovered ? 1.0 : 0.0
+                                                    Behavior on opacity { NumberAnimation { duration: 160 } }
                                                 }
 
+                                                // Left accent bar
                                                 Rectangle {
-                                                    id: accentLine
-                                                    width: classNode.isActive || classMa.containsMouse ? 4 : 2
                                                     anchors.left: parent.left
                                                     anchors.top: parent.top
                                                     anchors.bottom: parent.bottom
+                                                    anchors.topMargin: 6
+                                                    anchors.bottomMargin: 6
+                                                    width: cardRoot.hovered ? 4 : 3
                                                     radius: 2
-                                                    color: classNode.isActive ? window.mauve : (classNode.isPast ? window.surface1 : window.surface2)
-                                                    Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                                                    Behavior on color { ColorAnimation { duration: 200 } }
+                                                    color: window.mauve
+                                                    Behavior on width { NumberAnimation { duration: 160; easing.type: Easing.OutBack } }
                                                 }
 
                                                 ColumnLayout {
-                                                    anchors.left: accentLine.right
-                                                    anchors.right: parent.right
-                                                    anchors.verticalCenter: parent.verticalCenter
-                                                    anchors.leftMargin: classMa.containsMouse ? 25 : 15
-                                                    Behavior on anchors.leftMargin { NumberAnimation { duration: 300; easing.type: Easing.OutBack } }
-                                                    spacing: 6
-
-                                                    Text {
-                                                        text: modelData.subject || ""
-                                                        font.family: "JetBrains Mono"
-                                                        font.weight: Font.Black
-                                                        font.pixelSize: 16
-                                                        color: classNode.isActive ? window.mauve : (classNode.isPast ? window.overlay0 : window.text)
-                                                        elide: Text.ElideRight
-                                                        Layout.fillWidth: true
-                                                    }
-
-                                                    RowLayout {
-                                                        visible: !modelData.is_compact
-                                                        spacing: 8
-                                                        Text { text: "󰅐"; font.family: "Iosevka Nerd Font"; font.pixelSize: 14; color: classNode.isActive ? window.mauve : window.overlay1 }
-                                                        Text { text: modelData.time || ""; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: 14; color: classNode.isActive ? window.text : window.overlay1 }
-                                                    }
-
-                                                    RowLayout {
-                                                        visible: !modelData.is_compact && (modelData.room || "") !== ""
-                                                        spacing: 8
-                                                        Text { text: ""; font.family: "Iosevka Nerd Font"; font.pixelSize: 14; color: classNode.isPast ? window.surface2 : window.peach }
-                                                        Text { text: modelData.room || ""; font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: 14; color: window.subtext1; elide: Text.ElideRight; Layout.fillWidth: true }
-                                                    }
-                                                }
-
-                                                MouseArea { id: classMa; anchors.fill: parent; hoverEnabled: parent.visible }
-                                            }
-
-                                            Item {
-                                                anchors.fill: parent
-                                                visible: !parent.isClass
-                                                
-                                                Rectangle {
-                                                    anchors.verticalCenter: parent.verticalCenter
                                                     anchors.left: parent.left
                                                     anchors.right: parent.right
-                                                    height: gapMa.containsMouse ? 4 : 2
-                                                    color: gapMa.containsMouse ? window.mauve : "transparent"
-                                                    Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-                                                    Behavior on color { ColorAnimation { duration: 150 } }
-                                                }
+                                                    anchors.top: parent.top
+                                                    anchors.bottom: parent.bottom
+                                                    anchors.leftMargin: 16
+                                                    anchors.rightMargin: 12
+                                                    anchors.topMargin: 10
+                                                    anchors.bottomMargin: 10
+                                                    spacing: 6
 
-                                                Rectangle {
-                                                    anchors.centerIn: parent
-                                                    width: breakText.width + 16
-                                                    height: 24
-                                                    radius: 6
-                                                    color: window.mantle
-                                                    border.color: window.surface2
-                                                    border.width: 1
-                                                    opacity: gapMa.containsMouse ? 1.0 : 0.0
-                                                    scale: gapMa.containsMouse ? 1.0 : 0.8
-                                                    Behavior on opacity { NumberAnimation { duration: 150 } }
-                                                    Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
+                                                    // Domain pill
+                                                    Rectangle {
+                                                        visible: (cardRoot.modelData.domain || "") !== ""
+                                                        height: 18
+                                                        width: domainText.implicitWidth + 12
+                                                        radius: 5
+                                                        color: window.surface1
+                                                        border.color: Qt.alpha(window.mauve, 0.35); border.width: 1
 
+                                                        Text {
+                                                            id: domainText
+                                                            anchors.centerIn: parent
+                                                            text: cardRoot.modelData.domain || ""
+                                                            font.family: "JetBrains Mono"
+                                                            font.pixelSize: 10
+                                                            color: window.mauve
+                                                            elide: Text.ElideRight
+                                                        }
+                                                    }
+
+                                                    // Title
                                                     Text {
-                                                        id: breakText
-                                                        anchors.centerIn: parent
-                                                        text: modelData.desc || ""
+                                                        Layout.fillWidth: true
+                                                        Layout.fillHeight: true
+                                                        text: cardRoot.modelData.title || ""
                                                         font.family: "JetBrains Mono"
                                                         font.weight: Font.Bold
-                                                        font.pixelSize: 14
-                                                        color: window.mauve
+                                                        font.pixelSize: 13
+                                                        color: cardRoot.hovered ? window.text : window.subtext1
+                                                        wrapMode: Text.WordWrap
+                                                        maximumLineCount: 3
+                                                        elide: Text.ElideRight
+                                                        Behavior on color { ColorAnimation { duration: 160 } }
+                                                    }
+
+                                                    // Score + Comments + Author row
+                                                    RowLayout {
+                                                        Layout.fillWidth: true
+                                                        spacing: 10
+
+                                                        // Score
+                                                        RowLayout {
+                                                            spacing: 4
+                                                            Text { text: "▲"; font.pixelSize: 10; color: window.green }
+                                                            Text {
+                                                                text: cardRoot.modelData.score || "0"
+                                                                font.family: "JetBrains Mono"
+                                                                font.weight: Font.Bold
+                                                                font.pixelSize: 12
+                                                                color: window.green
+                                                            }
+                                                        }
+
+                                                        // Comments
+                                                        RowLayout {
+                                                            spacing: 4
+                                                            Text { text: ""; font.family: "JetBrains Mono Nerd Font"; font.pixelSize: 11; color: window.sapphire }
+                                                            Text {
+                                                                text: cardRoot.modelData.comments || "0"
+                                                                font.family: "JetBrains Mono"
+                                                                font.weight: Font.Bold
+                                                                font.pixelSize: 12
+                                                                color: window.sapphire
+                                                            }
+                                                        }
+
+                                                        Item { Layout.fillWidth: true }
+
+                                                        // Author
+                                                        Text {
+                                                            text: cardRoot.modelData.by || ""
+                                                            font.family: "JetBrains Mono"
+                                                            font.pixelSize: 11
+                                                            color: window.subtext0
+                                                            elide: Text.ElideRight
+                                                            Layout.maximumWidth: 90
+                                                        }
                                                     }
                                                 }
+                                            }
 
-                                                MouseArea { id: gapMa; anchors.fill: parent; hoverEnabled: parent.visible }
+                                            MouseArea {
+                                                id: cardMa
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: {
+                                                    const url = cardRoot.modelData.url || "";
+                                                    if (url !== "") Quickshell.execDetached(["xdg-open", url]);
+                                                }
                                             }
                                         }
+                                    }
+                                }
+
+                                // Convert vertical wheel events to horizontal scroll
+                                WheelHandler {
+                                    orientation: Qt.Vertical
+                                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                                    onWheel: function(event) {
+                                        const delta = -event.angleDelta.y * 1.5;
+                                        const maxX = Math.max(0, newsScroll.contentWidth - newsScroll.width);
+                                        newsScroll.contentX = Math.max(0, Math.min(maxX, newsScroll.contentX + delta));
                                     }
                                 }
                             }
