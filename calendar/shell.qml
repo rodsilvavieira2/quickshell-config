@@ -226,6 +226,27 @@ ShellRoot {
         property int weatherView: 0
         property color activeWeatherHex: weatherData && weatherData.forecast && weatherData.forecast[weatherView] ? weatherData.forecast[weatherView].hex : window.mauve
 
+        function normalizeWeatherIcon(icon) {
+            if (icon === "") return "";
+            if (icon === "") return "";
+            if (!icon || icon === "") return "";
+            return icon;
+        }
+
+        function normalizeWeatherPayload(payload) {
+            if (!payload || !payload.forecast || !payload.forecast.length) return payload;
+            for (let i = 0; i < payload.forecast.length; i++) {
+                let day = payload.forecast[i];
+                day.icon = window.normalizeWeatherIcon(day.icon);
+                if (day.hourly && day.hourly.length) {
+                    for (let j = 0; j < day.hourly.length; j++) {
+                        day.hourly[j].icon = window.normalizeWeatherIcon(day.hourly[j].icon);
+                    }
+                }
+            }
+            return payload;
+        }
+
         // Transition Properties
         property int targetWeatherView: 0
         property real weatherContentOpacity: 1.0
@@ -335,7 +356,10 @@ ShellRoot {
                 onStreamFinished: {
                     let txt = this.text.trim();
                     if (txt !== "") {
-                        try { window.weatherData = JSON.parse(txt); } catch(e) {}
+                        try {
+                            const parsed = JSON.parse(txt);
+                            window.weatherData = window.normalizeWeatherPayload(parsed);
+                        } catch(e) {}
                     }
                 }
             }
@@ -370,6 +394,27 @@ ShellRoot {
             interval: 600000 
             running: shellRoot.panelOpen; repeat: true
             onTriggered: schedulePoller.running = true
+        }
+
+        // -------------------------------------------------------------------------
+        // DIARY NOTES TRACKING
+        // -------------------------------------------------------------------------
+        property var existingNotes: []
+        property int notesYear: -1
+
+        Process {
+            id: notesPoller
+            // Command to list all .md files in the current targeted year
+            command: ["bash", "-c", "for f in \"$HOME/Life/Obsidian/Diary/" + window.notesYear + "\"/*.md; do [ -e \"$f\" ] || exit 0; basename \"$f\"; done"]
+            running: false
+            stdout: StdioCollector {
+                onStreamFinished: {
+                    let txt = this.text.trim();
+                    let files = txt === "" ? [] : txt.split("\n");
+                    window.existingNotes = files;
+                    window.updateCalendarGrid();
+                }
+            }
         }
 
         // -------------------------------------------------------------------------
@@ -423,6 +468,13 @@ ShellRoot {
             let targetMonth = d.getMonth();
             let targetYear = d.getFullYear();
             
+            // If we are looking at a different year, refresh the notes list
+            if (targetYear !== window.notesYear) {
+                window.notesYear = targetYear;
+                notesPoller.running = true;
+                return; // The poller will call updateCalendarGrid again when it finishes
+            }
+
             let actualToday = new Date();
             let isRealCurrentMonth = (actualToday.getMonth() === targetMonth && actualToday.getFullYear() === targetYear);
             let todayDate = actualToday.getDate();
@@ -437,15 +489,45 @@ ShellRoot {
 
             calendarModel.clear();
 
+            // Helper to check if a day has a note
+            function checkNote(day, monthNum) {
+                let mStr = monthNum < 10 ? "0" + monthNum : monthNum;
+                let dStr = day < 10 ? "0" + day : day;
+                return window.existingNotes.indexOf(dStr + "." + mStr + ".md") !== -1;
+            }
+
+            // Previous Month Days
+            let prevMonth = new Date(targetYear, targetMonth, 0).getMonth() + 1;
             for (let i = firstDay - 1; i >= 0; i--) {
-                calendarModel.append({ dayNum: (daysInPrevMonth - i).toString(), isCurrentMonth: false, isToday: false });
+                let dNum = daysInPrevMonth - i;
+                calendarModel.append({ 
+                    dayNum: dNum.toString(), 
+                    isCurrentMonth: false, 
+                    isToday: false,
+                    hasNote: checkNote(dNum, prevMonth)
+                });
             }
+
+            // Current Month Days
             for (let i = 1; i <= daysInMonth; i++) {
-                calendarModel.append({ dayNum: i.toString(), isCurrentMonth: true, isToday: (isRealCurrentMonth && i === todayDate) });
+                calendarModel.append({ 
+                    dayNum: i.toString(), 
+                    isCurrentMonth: true, 
+                    isToday: (isRealCurrentMonth && i === todayDate),
+                    hasNote: checkNote(i, targetMonth + 1)
+                });
             }
+
+            // Next Month Days
             let remaining = 42 - calendarModel.count;
+            let nextMonth = new Date(targetYear, targetMonth + 1, 1).getMonth() + 1;
             for (let i = 1; i <= remaining; i++) {
-                calendarModel.append({ dayNum: i.toString(), isCurrentMonth: false, isToday: false });
+                calendarModel.append({ 
+                    dayNum: i.toString(), 
+                    isCurrentMonth: false, 
+                    isToday: false,
+                    hasNote: checkNote(i, nextMonth)
+                });
             }
         }
 
@@ -879,6 +961,17 @@ ShellRoot {
                                         Behavior on color { ColorAnimation { duration: 200 } }
                                     }
 
+                                    // Diary Note Indicator (Dot)
+                                    Rectangle {
+                                        anchors.bottom: parent.bottom
+                                        anchors.bottomMargin: 4
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        width: 4; height: 4; radius: 2
+                                        color: isToday ? window.base : window.mauve
+                                        visible: hasNote
+                                        opacity: isCurrentMonth ? 1.0 : 0.4
+                                    }
+
                                     MouseArea { id: dayMa; anchors.fill: parent; hoverEnabled: true }
                                 }
                             }
@@ -1002,9 +1095,9 @@ ShellRoot {
 
                             Repeater {
                                 model: window.weatherData && window.weatherData.forecast[window.weatherView] ? [
-                                    { icon: "", val: window.weatherData.forecast[window.weatherView].wind + "m/s", lbl: "WIND", fill: Math.min(1.0, window.weatherData.forecast[window.weatherView].wind / 25.0) },
+                                    { icon: "", val: window.weatherData.forecast[window.weatherView].wind + "m/s", lbl: "WIND", fill: Math.min(1.0, window.weatherData.forecast[window.weatherView].wind / 25.0) },
                                     { icon: "", val: window.weatherData.forecast[window.weatherView].humidity + "%", lbl: "HUMID", fill: window.weatherData.forecast[window.weatherView].humidity / 100.0 },
-                                    { icon: "", val: window.weatherData.forecast[window.weatherView].pop + "%", lbl: "RAIN", fill: window.weatherData.forecast[window.weatherView].pop / 100.0 },
+                                    { icon: "", val: window.weatherData.forecast[window.weatherView].pop + "%", lbl: "RAIN", fill: window.weatherData.forecast[window.weatherView].pop / 100.0 },
                                     { icon: "", val: window.weatherData.forecast[window.weatherView].feels_like + "°", lbl: "FEELS", fill: Math.max(0.0, Math.min(1.0, (window.weatherData.forecast[window.weatherView].feels_like + 15) / 55.0)) }
                                 ] : []
 

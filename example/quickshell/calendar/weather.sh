@@ -7,29 +7,29 @@ view_file="${cache_dir}/view_id"
 daily_cache_file="${cache_dir}/daily_weather_cache.json"
 next_day_cache_file="${cache_dir}/next_day_precache.json"
 
-# # API Settings
-# # Load environment variables
-# if [ -f "$(dirname "$0")/.env" ]; then
-#     export $(grep -v '^#' "$(dirname "$0")/.env" | xargs)
-# else
-#     echo ".env file not found!"
-#     exit 1
-# fi
+# API Settings
+# Load environment variables
+if [ -f "$(dirname "$0")/.env" ]; then
+    export $(grep -v '^#' "$(dirname "$0")/.env" | xargs)
+else
+    echo ".env file not found!"
+    exit 1
+fi
 
 # API Settings from .env
-KEY="aaff97f31c8c0a85e573a0a53c5e5584"
-ID="3754135"
-UNIT="metric"
+KEY="$OPENWEATHER_KEY"
+ID="$OPENWEATHER_CITY_ID"
+UNIT="$OPENWEATHER_UNIT"
 
 mkdir -p "${cache_dir}"
 
 get_icon() {
     case $1 in
-        "50d"|"50n") icon=""; quote="Mist" ;;
+        "50d"|"50n") icon=""; quote="Mist" ;;
         "01d") icon=""; quote="Sunny" ;;
         "01n") icon=""; quote="Clear" ;;
         "02d"|"02n"|"03d"|"03n"|"04d"|"04n") icon=""; quote="Cloudy" ;;
-        "09d"|"09n"|"10d"|"10n") icon=""; quote="Rainy" ;;
+        "09d"|"09n"|"10d"|"10n") icon=""; quote="Rainy" ;;
         "11d"|"11n") icon=""; quote="Storm" ;;
         "13d"|"13n") icon=""; quote="Snow" ;;
         *) icon=""; quote="Unknown" ;;

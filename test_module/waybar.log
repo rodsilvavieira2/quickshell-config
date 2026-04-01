@@ -1,6 +1,0 @@
-[32m  INFO[0m: Launching config: "/home/rodrigo/.config/quickshell/waybar/shell.qml"
-[32m  INFO[0m: Shell ID: "e78353ce74209a9ebf69acb7e97a5aec" Path ID "e78353ce74209a9ebf69acb7e97a5aec"
-[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/7rhfvtvabt/log.qslog"
-[32m  INFO[0m: Configuration Loaded
-[33m  WARN[97m qt.svg[0m: /usr/share/pixmaps/Alacritty.svg:444:273: Could not resolve property: #linearGradient10962
-[33m  WARN[97m qt.svg[0m: /usr/share/pixmaps/Alacritty.svg:444:273: Could not resolve property: #linearGradient10962
