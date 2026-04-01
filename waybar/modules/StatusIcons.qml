@@ -77,7 +77,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "bluetooth", "call", "bluetooth", "toggle"])
+                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "network_desktop", "call", "networkdesktop", "toggle"])
             }
         }
 
@@ -127,7 +127,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "audio", "call", "audio", "toggle"])
+                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "music", "call", "music", "toggle"])
             }
         }
 
@@ -153,7 +153,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "network", "call", "network", "toggle"])
+                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "network_desktop", "call", "networkdesktop", "toggle"])
             }
         }
     }

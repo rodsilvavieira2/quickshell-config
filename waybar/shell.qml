@@ -63,6 +63,31 @@ PanelWindow {
         }
 
         // ═══════════════════════════════════
+        //  MUSIC PILL (left of status icons)
+        // ═══════════════════════════════════
+        Rectangle {
+            id: musicPill
+            anchors.right: statusIconsPill.left
+            anchors.rightMargin: Root.Config.barMargin
+            anchors.verticalCenter: parent.verticalCenter
+            height: parent.height
+            width: MusicService.isActive ? musicContent.implicitWidth + Root.Config.pillPadding * 2 : 0
+            radius: Root.Config.radius
+            color: Root.Config.pillColor
+            clip: true
+            visible: width > 0
+
+            Behavior on width {
+                NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
+            }
+
+            Modules.MusicIndicator {
+                id: musicContent
+                anchors.centerIn: parent
+            }
+        }
+
+        // ═══════════════════════════════════
         //  STATUS ICONS PILL (left of tray)
         // ═══════════════════════════════════
         Rectangle {

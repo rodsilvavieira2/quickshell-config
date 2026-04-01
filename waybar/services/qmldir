@@ -1,1 +1,2 @@
 singleton TrayService 1.0 TrayService.qml
+singleton MusicService 1.0 MusicService.qml
