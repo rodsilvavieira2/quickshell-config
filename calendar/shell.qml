@@ -397,27 +397,6 @@ ShellRoot {
         }
 
         // -------------------------------------------------------------------------
-        // DIARY NOTES TRACKING
-        // -------------------------------------------------------------------------
-        property var existingNotes: []
-        property int notesYear: -1
-
-        Process {
-            id: notesPoller
-            // Command to list all .md files in the current targeted year
-            command: ["bash", "-c", "for f in \"$HOME/Life/Obsidian/Diary/" + window.notesYear + "\"/*.md; do [ -e \"$f\" ] || exit 0; basename \"$f\"; done"]
-            running: false
-            stdout: StdioCollector {
-                onStreamFinished: {
-                    let txt = this.text.trim();
-                    let files = txt === "" ? [] : txt.split("\n");
-                    window.existingNotes = files;
-                    window.updateCalendarGrid();
-                }
-            }
-        }
-
-        // -------------------------------------------------------------------------
         // CALENDAR GRID LOGIC & TRANSITIONS
         // -------------------------------------------------------------------------
         property int monthOffset: 0
@@ -467,13 +446,6 @@ ShellRoot {
 
             let targetMonth = d.getMonth();
             let targetYear = d.getFullYear();
-            
-            // If we are looking at a different year, refresh the notes list
-            if (targetYear !== window.notesYear) {
-                window.notesYear = targetYear;
-                notesPoller.running = true;
-                return; // The poller will call updateCalendarGrid again when it finishes
-            }
 
             let actualToday = new Date();
             let isRealCurrentMonth = (actualToday.getMonth() === targetMonth && actualToday.getFullYear() === targetYear);
@@ -489,22 +461,13 @@ ShellRoot {
 
             calendarModel.clear();
 
-            // Helper to check if a day has a note
-            function checkNote(day, monthNum) {
-                let mStr = monthNum < 10 ? "0" + monthNum : monthNum;
-                let dStr = day < 10 ? "0" + day : day;
-                return window.existingNotes.indexOf(dStr + "." + mStr + ".md") !== -1;
-            }
-
             // Previous Month Days
-            let prevMonth = new Date(targetYear, targetMonth, 0).getMonth() + 1;
             for (let i = firstDay - 1; i >= 0; i--) {
                 let dNum = daysInPrevMonth - i;
                 calendarModel.append({ 
                     dayNum: dNum.toString(), 
                     isCurrentMonth: false, 
-                    isToday: false,
-                    hasNote: checkNote(dNum, prevMonth)
+                    isToday: false
                 });
             }
 
@@ -513,20 +476,17 @@ ShellRoot {
                 calendarModel.append({ 
                     dayNum: i.toString(), 
                     isCurrentMonth: true, 
-                    isToday: (isRealCurrentMonth && i === todayDate),
-                    hasNote: checkNote(i, targetMonth + 1)
+                    isToday: (isRealCurrentMonth && i === todayDate)
                 });
             }
 
             // Next Month Days
             let remaining = 42 - calendarModel.count;
-            let nextMonth = new Date(targetYear, targetMonth + 1, 1).getMonth() + 1;
             for (let i = 1; i <= remaining; i++) {
                 calendarModel.append({ 
                     dayNum: i.toString(), 
                     isCurrentMonth: false, 
-                    isToday: false,
-                    hasNote: checkNote(i, nextMonth)
+                    isToday: false
                 });
             }
         }
@@ -897,17 +857,6 @@ ShellRoot {
                                 Text { anchors.centerIn: parent; text: ""; font.family: "Iosevka Nerd Font"; color: window.text; font.pixelSize: 16 }
                                 MouseArea { id: nextMa; anchors.fill: parent; hoverEnabled: true; onClicked: window.setMonthOffset(window.targetMonthOffset + 1) }
                             }
-
-                            Rectangle {
-                                width: 32; height: 32; radius: 16
-                                color: diaryMa.containsMouse ? window.surface1 : "transparent"
-                                Text { anchors.centerIn: parent; text: "+"; font.family: "Iosevka Nerd Font"; color: diaryMa.containsMouse ? window.mauve : window.text; font.pixelSize: 32 }
-                                MouseArea { 
-                                    id: diaryMa; anchors.fill: parent; hoverEnabled: true; 
-                                    onClicked: Quickshell.execDetached(["bash", window.scriptsDir + "/diary_manager.sh"]) 
-                                }
-                                Behavior on color { ColorAnimation { duration: 150 } }
-                            }
                         }
 
                         RowLayout {
@@ -959,17 +908,6 @@ ShellRoot {
                                         font.pixelSize: 14
                                         color: isToday ? window.base : (isCurrentMonth ? window.text : window.surface0)
                                         Behavior on color { ColorAnimation { duration: 200 } }
-                                    }
-
-                                    // Diary Note Indicator (Dot)
-                                    Rectangle {
-                                        anchors.bottom: parent.bottom
-                                        anchors.bottomMargin: 4
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                        width: 4; height: 4; radius: 2
-                                        color: isToday ? window.base : window.mauve
-                                        visible: hasNote
-                                        opacity: isCurrentMonth ? 1.0 : 0.4
                                     }
 
                                     MouseArea { id: dayMa; anchors.fill: parent; hoverEnabled: true }
