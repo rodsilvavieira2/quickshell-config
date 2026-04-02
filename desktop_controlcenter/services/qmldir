@@ -1,0 +1,4 @@
+AudioService 1.0 AudioService.qml
+NetworkService 1.0 NetworkService.qml
+SystemStatsService 1.0 SystemStatsService.qml
+MusicService 1.0 MusicService.qml

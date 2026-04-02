@@ -111,7 +111,8 @@ PanelWindow {
         // ═══════════════════════════
         Rectangle {
             id: rightPill
-            anchors.right: parent.right
+            anchors.right: settingsPill.left
+            anchors.rightMargin: Root.Config.barMargin
             anchors.verticalCenter: parent.verticalCenter
             height: parent.height
             width: visible ? rightContent.implicitWidth + Root.Config.pillPadding * 2 : 0
@@ -127,6 +128,24 @@ PanelWindow {
                 Modules.SysTray {}
 
                 Modules.StatusTray {}
+            }
+        }
+
+        // ═════════════════════════════
+        //  SETTINGS PILL (standalone)
+        // ═════════════════════════════
+        Rectangle {
+            id: settingsPill
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            height: parent.height
+            width: settingsContent.implicitWidth + Root.Config.pillPadding * 2
+            radius: Root.Config.radius
+            color: Root.Config.pillColor
+
+            Modules.ControlCenterLauncher {
+                id: settingsContent
+                anchors.centerIn: parent
             }
         }
     }
