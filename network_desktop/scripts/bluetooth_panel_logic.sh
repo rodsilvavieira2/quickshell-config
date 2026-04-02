@@ -50,6 +50,17 @@ get_audio_profile() {
     echo "Connected"
 }
 
+property_is_yes() {
+    local info="$1"
+    local key="$2"
+    printf '%s\n' "$info" | grep -q "${key}: yes"
+}
+
+device_name_from_line() {
+    local line="$1"
+    printf '%s\n' "$line" | cut -d ' ' -f 3-
+}
+
 get_status() {
     local power="off"
     if bluetoothctl show 2>/dev/null | grep -q "Powered: yes"; then
@@ -60,95 +71,104 @@ get_status() {
     local devices_json="[]"
 
     if [[ "$power" == "on" ]]; then
-        local paired_macs
-        paired_macs=$(bluetoothctl devices Paired 2>/dev/null | cut -d ' ' -f 2)
-        mapfile -t devices < <(bluetoothctl devices 2>/dev/null)
+        local -a connected_lines=()
+        mapfile -t connected_lines < <(bluetoothctl devices Connected 2>/dev/null)
 
-        local -a connected_list_objs
-        local -a paired_list_objs
-        local -a discovered_list_objs
+        declare -A connected_map
+        local connected_count=0
+        local c_line c_mac
+        for c_line in "${connected_lines[@]}"; do
+            c_mac=$(printf '%s\n' "$c_line" | awk '{print $2}')
+            if [[ -n "$c_mac" ]]; then
+                connected_map["$c_mac"]=1
+                connected_count=$((connected_count + 1))
+            fi
+        done
 
-        mapfile -t connected_info_lines < <(bluetoothctl devices Connected 2>/dev/null)
-        local connected_macs
-        connected_macs=$(printf '%s\n' "${connected_info_lines[@]}" | awk '{for(i=1;i<=NF;i++) if($i~/^([0-9A-F]{2}:){5}[0-9A-F]{2}$/) print $i}')
+        local -a all_device_lines=()
+        mapfile -t all_device_lines < <(
+            {
+                printf '%s\n' "${connected_lines[@]}"
+                bluetoothctl devices Paired 2>/dev/null
+                bluetoothctl devices 2>/dev/null
+            } | awk 'NF' | awk '!seen[$2]++'
+        )
 
-        for c_line in "${connected_info_lines[@]}"; do
-            if [[ -z "$c_line" ]]; then
+        local -a connected_list_objs=()
+        local -a paired_list_objs=()
+        local -a discovered_list_objs=()
+
+        for line in "${all_device_lines[@]}"; do
+            if [[ -z "$line" ]]; then
                 continue
             fi
 
-            local connected_mac cache_file name info icon_type icon profile bat obj
-            connected_mac=$(echo "$c_line" | cut -d ' ' -f 2)
-            cache_file="$CACHE_DIR/bt_stat_${connected_mac//:/_}"
+            local mac info fallback_name name icon_type icon profile obj
+            mac=$(printf '%s\n' "$line" | awk '{print $2}')
+            if [[ -z "$mac" ]]; then
+                continue
+            fi
 
-            if [[ -f "$cache_file" ]]; then
-                # shellcheck disable=SC1090
-                source "$cache_file"
+            info=$(bluetoothctl info "$mac" 2>/dev/null)
+            fallback_name=$(device_name_from_line "$line")
+
+            name=$(printf '%s\n' "$info" | awk -F': ' '/\tName:/ {print $2; exit}')
+            if [[ -z "$name" ]]; then
+                name="$fallback_name"
+            fi
+            if [[ -z "$name" ]]; then
+                name="$mac"
+            fi
+
+            icon_type=$(printf '%s\n' "$info" | awk -F': ' '/\tIcon:/ {print $2; exit}')
+            icon=$(get_icon "$icon_type" "$name")
+
+            local is_connected="false"
+            if [[ -n "${connected_map[$mac]+x}" ]]; then
+                is_connected="true"
+            elif [[ $connected_count -eq 0 ]] && property_is_yes "$info" "Connected"; then
+                is_connected="true"
+            fi
+
+            if [[ "$is_connected" == "true" ]]; then
+                profile=$(get_audio_profile "$mac")
+                obj=$(jq -n -c \
+                    --arg id "$mac" \
+                    --arg name "$name" \
+                    --arg mac "$mac" \
+                    --arg icon "$icon" \
+                    --arg profile "$profile" \
+                    '{id: $id, name: $name, mac: $mac, icon: $icon, profile: $profile}')
+                connected_list_objs+=("$obj")
             else
-                name=$(echo "$c_line" | cut -d ' ' -f 3-)
-                info=$(bluetoothctl info "$connected_mac" 2>/dev/null)
-                icon_type=$(echo "$info" | grep "Icon:" | cut -d: -f2 | xargs)
-                icon=$(get_icon "$icon_type" "$name")
-                profile=$(get_audio_profile "$connected_mac")
-                {
-                    echo "CACHE_NAME=\"$name\""
-                    echo "CACHE_ICON=\"$icon\""
-                    echo "CACHE_PROFILE=\"$profile\""
-                } > "$cache_file"
-                CACHE_NAME="$name"
-                CACHE_ICON="$icon"
-                CACHE_PROFILE="$profile"
-            fi
+                local action
+                if property_is_yes "$info" "Paired"; then
+                    action="Connect"
+                else
+                    action="Pair"
+                fi
 
-            bat=$(bluetoothctl info "$connected_mac" 2>/dev/null | awk '/Battery Percentage:/ {gsub(/.*\(/,""); gsub(/\).*/,""); print}')
-            if [[ -z "$bat" || "$bat" == "?" ]]; then
-                bat="0"
-            fi
+                obj=$(jq -n -c \
+                    --arg id "$mac" \
+                    --arg name "$name" \
+                    --arg mac "$mac" \
+                    --arg icon "$icon" \
+                    --arg action "$action" \
+                    '{id: $id, name: $name, mac: $mac, icon: $icon, action: $action}')
 
-            obj=$(jq -n -c \
-                --arg id "$connected_mac" \
-                --arg name "$CACHE_NAME" \
-                --arg mac "$connected_mac" \
-                --arg icon "$CACHE_ICON" \
-                \
-                --arg profile "$CACHE_PROFILE" \
-                '{id: $id, name: $name, mac: $mac, icon: $icon, profile: $profile}')
-            connected_list_objs+=("$obj")
+                if [[ "$action" == "Connect" ]]; then
+                    paired_list_objs+=("$obj")
+                else
+                    discovered_list_objs+=("$obj")
+                fi
+            fi
         done
 
         if [[ ${#connected_list_objs[@]} -gt 0 ]]; then
             connected_json=$(printf '%s\n' "${connected_list_objs[@]}" | jq -s -c '.')
         fi
 
-        for line in "${devices[@]}"; do
-            if [[ -z "$line" ]]; then
-                continue
-            fi
-
-            local mac name icon action obj
-            mac=$(echo "$line" | cut -d ' ' -f 2)
-            if echo "$connected_macs" | grep -q "$mac"; then
-                continue
-            fi
-
-            name=$(echo "$line" | cut -d ' ' -f 3-)
-            icon=$(get_icon "unknown" "$name")
-
-            if echo "$paired_macs" | grep -q "$mac"; then
-                action="Connect"
-            else
-                action="Pair"
-            fi
-
-            obj=$(jq -n -c --arg id "$mac" --arg name "$name" --arg mac "$mac" --arg icon "$icon" --arg action "$action" '{id: $id, name: $name, mac: $mac, icon: $icon, action: $action}')
-            if [[ "$action" == "Connect" ]]; then
-                paired_list_objs+=("$obj")
-            else
-                discovered_list_objs+=("$obj")
-            fi
-        done
-
-        local -a all_objs
+        local -a all_objs=()
         all_objs=("${paired_list_objs[@]}" "${discovered_list_objs[@]}")
         if [[ ${#all_objs[@]} -gt 0 ]]; then
             devices_json=$(printf '%s\n' "${all_objs[@]}" | jq -s -c '.')
@@ -175,6 +195,9 @@ connect_dev() {
     if [[ -z "$mac" ]]; then
         return
     fi
+    if ! bluetoothctl info "$mac" 2>/dev/null | grep -q "Paired: yes"; then
+        bluetoothctl pair "$mac" >/dev/null 2>&1
+    fi
     bluetoothctl trust "$mac" >/dev/null 2>&1
     bluetoothctl connect "$mac" >/dev/null 2>&1
 }
@@ -188,11 +211,21 @@ disconnect_dev() {
     bluetoothctl disconnect "$mac" >/dev/null 2>&1
 }
 
+scan_on() {
+    timeout 5 bluetoothctl scan on >/dev/null 2>&1 || true
+}
+
+scan_off() {
+    timeout 5 bluetoothctl scan off >/dev/null 2>&1 || true
+}
+
 cmd="${1:---status}"
 case "$cmd" in
     --status) get_status ;;
     --toggle) toggle_power ;;
     --connect) connect_dev "${2:-}" ;;
     --disconnect) disconnect_dev "${2:-}" ;;
+    --scan-on) scan_on ;;
+    --scan-off) scan_off ;;
     *) get_status ;;
 esac

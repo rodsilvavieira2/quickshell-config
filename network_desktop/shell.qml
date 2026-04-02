@@ -84,6 +84,7 @@ ShellRoot {
             NetworkPopup {
                 anchors.fill: parent
                 anchors.margins: 18
+                panelVisible: shellRoot.panelOpen
             }
         }
     }

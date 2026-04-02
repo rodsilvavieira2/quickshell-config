@@ -8,6 +8,8 @@ import "./common"
 
 Item {
     id: window
+
+    property bool panelVisible: false
     
     // 1. Give the root window focus so it actively listens for keystrokes
     focus: true
@@ -60,6 +62,11 @@ Item {
         if (cache.lastEthernetJson !== "") processEthernetJson(cache.lastEthernetJson);
         if (cache.lastBtJson !== "") processBtJson(cache.lastBtJson);
         introState = 1.0;
+        updateBtScanState();
+    }
+
+    Component.onDestruction: {
+        Quickshell.execDetached(["bash", window.scriptsDir + "/bluetooth_panel_logic.sh", "--scan-off"]);
     }
 
     function playSfx(filename) {
@@ -72,6 +79,14 @@ Item {
             let cmd = "pw-play '" + cleanPath + "' 2>/dev/null || paplay '" + cleanPath + "' 2>/dev/null";
             Quickshell.execDetached(["sh", "-c", cmd]);
         } catch(e) {}
+    }
+
+    function updateBtScanState() {
+        if (window.panelVisible && window.activeMode === "bt" && window.btPower === "on") {
+            Quickshell.execDetached(["bash", window.scriptsDir + "/bluetooth_panel_logic.sh", "--scan-on"]);
+        } else {
+            Quickshell.execDetached(["bash", window.scriptsDir + "/bluetooth_panel_logic.sh", "--scan-off"]);
+        }
     }
 
     readonly property QtObject _theme: Appearance.colors
@@ -186,6 +201,8 @@ Item {
         if (currentConn) updateInfoNodes();
     }
 
+    onPanelVisibleChanged: updateBtScanState()
+
     onActiveModeChanged: {
         if (!window.ignoreNextModeFileUpdate) {
             Quickshell.execDetached(["bash", "-c", "echo '" + window.activeMode + "' > /tmp/qs_network_mode"]);
@@ -202,6 +219,7 @@ Item {
         syncCores();
         window.showInfoView = window.currentConn;
         if (window.showInfoView) window.updateInfoNodes();
+        updateBtScanState();
     }
 
     ListModel { id: ethernetListModel }
@@ -295,6 +313,8 @@ Item {
         if (window.currentConn && window.activeMode === "bt") updateInfoNodes() 
     }
 
+    onBtPowerChanged: updateBtScanState()
+
     readonly property bool currentPower: activeMode === "ethernet" ? window.ethernetPower === "on" : window.btPower === "on"
     onCurrentPowerChanged: { syncCores(); }
 
@@ -339,7 +359,9 @@ Item {
                 }
             }
             // Always bind to -1 to prevent index jump 'pops'. We'll control its layout via pure math.
-            nodes.push({ id: "action_scan", name: "Scan Devices", icon: "󰍉", action: "Switch View", isInfoNode: true, isActionable: true, cmdStr: "TOGGLE_VIEW", parentIndex: -1 });
+            if (window.activeMode === "bt") {
+                nodes.push({ id: "action_scan", name: "Scan Devices", icon: "󰍉", action: "Switch View", isInfoNode: true, isActionable: true, cmdStr: "TOGGLE_VIEW", parentIndex: -1 });
+            }
         }
         
         if (window.isListLocked) window.nextInfoList = nodes;
@@ -380,10 +402,6 @@ Item {
             } else { window.strongestEthernetIface = ""; }
 
             newNetworks.sort((a, b) => a.id.localeCompare(b.id));
-
-            if (window.isEthernetConn && window.activeMode === "ethernet") {
-                newNetworks.push({ id: "action_settings", mac: "", name: "Current Device", icon: "󰒓", security: "", action: "View Info", isInfoNode: false, isActionable: true, cmdStr: "TOGGLE_VIEW", parentIndex: -1 });
-            }
 
             if (JSON.stringify(window.ethernetList) !== JSON.stringify(newNetworks)) {
                 if (window.isListLocked) window.nextEthernetList = newNetworks;
