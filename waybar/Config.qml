@@ -23,25 +23,35 @@ QtObject {
 
     // Geometry
     readonly property int radius: 10
-    readonly property int barHeight: 32
-    readonly property int barMargin: 4
+    readonly property int barRadius: 0
+    readonly property int barHeight: 31
+    readonly property int barTopMargin: 0
+    readonly property int barBottomGap: 0
+    readonly property int barPaddingHorizontal: 12
+    readonly property int barPaddingTop: 4
+    readonly property int barPaddingBottom: 5
     readonly property int pillPadding: 6
-    readonly property int pillSpacing: 4
-    readonly property int iconSize: 14
+    readonly property int pillSpacing: 6
+    readonly property int sectionSpacing: 12
+    readonly property int iconSize: 15
+    readonly property int iconButtonSize: 22
 
     // InfoChip properties
-    readonly property int chipRadius: 6
+    readonly property int chipRadius: 7
     readonly property int chipPaddingHorizontal: 8
     readonly property int chipPaddingVertical: 4
     readonly property color chipColor: "transparent"
     readonly property color chipHoverColor: surface0
     readonly property color chipActiveColor: surface1
-    readonly property color activeAccent: mauve
+    readonly property color activeAccent: blue
 
     // Configurable
     readonly property int workspaceCount: 10
 
-    // Transparent pill background
-    readonly property color pillColor: Qt.rgba(49/255, 50/255, 68/255, 0.85)
+    // Bar styling
+    readonly property color barColor: mantle
+    readonly property color barBorderColor: surface0
+    readonly property color dividerColor: surface0
+    readonly property color pillColor: barColor
     readonly property color pillHoverColor: surface1
 }

@@ -39,26 +39,30 @@ Item {
     RowLayout {
         id: contentRow
         anchors.centerIn: parent
-        spacing: 16
+        spacing: 8
 
-        ColumnLayout {
-            spacing: -2
+        Text {
+            text: root.timeString
+            color: Root.Config.text
+            font.family: "JetBrainsMono Nerd Font"
+            font.pixelSize: 13
+            font.bold: true
+        }
 
-            Text {
-                text: root.timeString
-                color: Root.Config.blue
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 14
-                font.bold: true
-            }
+        Rectangle {
+            Layout.alignment: Qt.AlignVCenter
+            implicitWidth: 3
+            implicitHeight: 3
+            radius: 1.5
+            color: Root.Config.overlay0
+        }
 
-            Text {
-                text: root.dateString
-                color: Root.Config.subtext0
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 10
-                font.bold: true
-            }
+        Text {
+            text: root.dateString
+            color: Root.Config.subtext0
+            font.family: "JetBrainsMono Nerd Font"
+            font.pixelSize: 10
+            font.bold: true
         }
     }
 }

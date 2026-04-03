@@ -19,107 +19,87 @@ PanelWindow {
         right: true
     }
 
-    implicitHeight: Root.Config.barHeight + Root.Config.barMargin * 2
+    implicitHeight: Root.Config.barHeight + Root.Config.barBottomGap
     color: "transparent"
 
-    RowLayout {
-        anchors.fill: parent
-        anchors.topMargin: Root.Config.barMargin
-        anchors.bottomMargin: Root.Config.barMargin
-        anchors.leftMargin: Root.Config.barMargin + 2
-        anchors.rightMargin: Root.Config.barMargin + 2
-        spacing: Root.Config.pillSpacing
+    Rectangle {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.topMargin: Root.Config.barTopMargin
+        height: Root.Config.barHeight
+        radius: Root.Config.barRadius
+        color: Root.Config.barColor
+        border.width: 1
+        border.color: Root.Config.barBorderColor
 
-        // Group 1: Left
-        Rectangle {
-            Layout.preferredHeight: parent.height
-            Layout.preferredWidth: workspacesContent.implicitWidth + Root.Config.pillPadding * 2
-            radius: Root.Config.radius
-            color: Root.Config.pillColor
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: Root.Config.barPaddingHorizontal
+            anchors.rightMargin: Root.Config.barPaddingHorizontal
+            anchors.topMargin: Root.Config.barPaddingTop
+            anchors.bottomMargin: Root.Config.barPaddingBottom
+            spacing: Root.Config.sectionSpacing
 
             Modules.Workspaces {
                 id: workspacesContent
-                anchors.centerIn: parent
+                Layout.alignment: Qt.AlignVCenter
             }
-        }
 
-        // Spacer
-        Item { Layout.fillWidth: true }
-
-        // Group 2: Center
-        Rectangle {
-            Layout.preferredHeight: parent.height
-            Layout.preferredWidth: clockContent.implicitWidth + Root.Config.pillPadding * 2
-            radius: Root.Config.radius
-            color: Root.Config.pillColor
+            Item { Layout.fillWidth: true }
 
             Modules.Clock {
                 id: clockContent
-                anchors.centerIn: parent
-            }
-        }
-
-        // Spacer
-        Item { Layout.fillWidth: true }
-
-        // Group 3: Right
-        Rectangle {
-            Layout.preferredHeight: parent.height
-            Layout.preferredWidth: MusicService.isActive ? musicContent.implicitWidth + Root.Config.pillPadding * 2 : 0
-            radius: Root.Config.radius
-            color: Root.Config.pillColor
-            clip: true
-            visible: width > 0
-
-            Behavior on Layout.preferredWidth {
-                NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
+                Layout.alignment: Qt.AlignVCenter
             }
 
-            Modules.MusicIndicator {
-                id: musicContent
-                anchors.centerIn: parent
-            }
-        }
-
-        Rectangle {
-            Layout.preferredHeight: parent.height
-            Layout.preferredWidth: statusIconsContent.implicitWidth + Root.Config.pillPadding * 2
-            radius: Root.Config.radius
-            color: Root.Config.pillColor
-
-            Modules.StatusIcons {
-                id: statusIconsContent
-                anchors.centerIn: parent
-            }
-        }
-
-        Rectangle {
-            Layout.preferredHeight: parent.height
-            Layout.preferredWidth: visible ? trayContent.implicitWidth + Root.Config.pillPadding * 2 : 0
-            radius: Root.Config.radius
-            color: Root.Config.pillColor
-            visible: TrayService.visibleItems.length > 0
+            Item { Layout.fillWidth: true }
 
             RowLayout {
-                id: trayContent
-                anchors.centerIn: parent
-                spacing: Root.Config.pillSpacing
+                Layout.alignment: Qt.AlignVCenter
+                spacing: Root.Config.sectionSpacing
 
-                Modules.SysTray {}
+                Item {
+                    Layout.preferredWidth: MusicService.isActive ? musicContent.implicitWidth : 0
+                    Layout.preferredHeight: MusicService.isActive ? musicContent.implicitHeight : 0
+                    visible: width > 0
+                    clip: true
 
-                Modules.StatusTray {}
-            }
-        }
+                    Behavior on Layout.preferredWidth {
+                        NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
+                    }
 
-        Rectangle {
-            Layout.preferredHeight: parent.height
-            Layout.preferredWidth: launcherContent.implicitWidth + Root.Config.pillPadding * 2
-            radius: Root.Config.radius
-            color: Root.Config.pillColor
+                    Modules.MusicIndicator {
+                        id: musicContent
+                        anchors.centerIn: parent
+                    }
+                }
 
-            Modules.ControlCenterLauncher {
-                id: launcherContent
-                anchors.centerIn: parent
+                Modules.StatusIcons {
+                    id: statusIconsContent
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
+                RowLayout {
+                    id: trayContent
+                    visible: TrayService.visibleItems.length > 0
+                    spacing: Root.Config.pillSpacing
+
+                    Modules.SysTray {}
+                    Modules.StatusTray {}
+                }
+
+                Rectangle {
+                    Layout.preferredWidth: 1
+                    Layout.preferredHeight: 14
+                    radius: 1
+                    color: Root.Config.dividerColor
+                }
+
+                Modules.ControlCenterLauncher {
+                    id: launcherContent
+                    Layout.alignment: Qt.AlignVCenter
+                }
             }
         }
     }

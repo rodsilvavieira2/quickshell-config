@@ -6,6 +6,7 @@ import ".." as Root
 Rectangle {
     id: root
 
+    property url iconSource: ""
     property string iconText: ""
     property string valueText: ""
     property color iconColor: Root.Config.text
@@ -18,6 +19,7 @@ Rectangle {
     property color borderColor: highlighted ? Root.Config.activeAccent : "transparent"
     property bool clickable: false
     property bool highlighted: false
+    property int valueMaxWidth: -1
 
     signal clicked()
 
@@ -39,7 +41,19 @@ Rectangle {
         anchors.centerIn: parent
         spacing: 6
 
+        LucideIcon {
+            visible: root.iconSource.toString().length > 0
+            source: root.iconSource
+            color: root.hovered && root.clickable ? root.hoverIconColor : root.iconColor
+            iconSize: Root.Config.iconSize
+
+            Behavior on color {
+                ColorAnimation { duration: 140 }
+            }
+        }
+
         Text {
+            visible: !root.iconSource.toString().length && root.iconText.length > 0
             text: root.iconText
             color: root.hovered && root.clickable ? root.hoverIconColor : root.iconColor
             font.family: "JetBrainsMono Nerd Font"
@@ -53,11 +67,13 @@ Rectangle {
 
         Text {
             visible: root.valueText.length > 0
+            Layout.preferredWidth: root.valueMaxWidth > 0 ? Math.min(implicitWidth, root.valueMaxWidth) : implicitWidth
             text: root.valueText
             color: root.hovered && root.clickable ? root.hoverLabelColor : root.labelColor
             font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: Root.Config.iconSize - 2
+            font.pixelSize: Root.Config.iconSize - 3
             font.bold: root.highlighted
+            elide: Text.ElideRight
 
             Behavior on color {
                 ColorAnimation { duration: 140 }

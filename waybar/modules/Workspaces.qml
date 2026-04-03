@@ -52,7 +52,7 @@ Item {
     RowLayout {
         id: layout
         anchors.centerIn: parent
-        spacing: 6
+        spacing: 4
 
         Repeater {
             model: Root.Config.workspaceCount
@@ -66,9 +66,9 @@ Item {
                 property var wsWindows: root.windowList.filter(w => w.workspace.id === wsId)
                 property bool hasWindows: wsWindows.length > 0
 
-                Layout.preferredWidth: 26
-                Layout.preferredHeight: 26
-                radius: 6
+                Layout.preferredWidth: 22
+                Layout.preferredHeight: 22
+                radius: 7
                 
                 color: isActive ? Root.Config.mauve : (hasWindows ? Root.Config.surface0 : "transparent")
 
@@ -81,7 +81,7 @@ Item {
                     text: wsIndicator.wsId
                     color: wsIndicator.isActive ? Root.Config.crust : Root.Config.subtext1
                     font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: 13
+                    font.pixelSize: 11
                     font.bold: wsIndicator.isActive
 
                     Behavior on color {

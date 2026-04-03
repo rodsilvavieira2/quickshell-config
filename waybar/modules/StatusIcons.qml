@@ -80,11 +80,16 @@ Item {
 
             InfoChip {
                 id: btChip
-                iconText: btItem.btConnected ? "󰂱" : (btItem.btEnabled ? "󰂯" : "󰂲")
-                valueText: btItem.btConnected ? (btItem.connectedDevice.name + " ✖") : ""
+                iconSource: btItem.btConnected
+                    ? Qt.resolvedUrl("../assets/bluetooth-connected.svg")
+                    : (btItem.btEnabled
+                        ? Qt.resolvedUrl("../assets/bluetooth.svg")
+                        : Qt.resolvedUrl("../assets/bluetooth-off.svg"))
+                valueText: btItem.btConnected ? btItem.connectedDevice.name : ""
                 backgroundColor: btItem.btConnected ? Root.Config.mauve : Root.Config.chipColor
                 iconColor: btItem.btConnected ? Root.Config.crust : Root.Config.subtext0
                 labelColor: btItem.btConnected ? Root.Config.crust : Root.Config.subtext0
+                valueMaxWidth: 110
                 clickable: true
                 onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "network_desktop", "call", "networkdesktop", "toggle"])
             }
@@ -105,7 +110,11 @@ Item {
 
             InfoChip {
                 id: volChip
-                iconText: volItem.muted ? "󰖁" : (volItem.volume > 0.66 ? "󰕾" : (volItem.volume > 0.33 ? "󰖀" : "󰕿"))
+                iconSource: volItem.muted
+                    ? Qt.resolvedUrl("../assets/volume-x.svg")
+                    : (volItem.volume > 0.33
+                        ? Qt.resolvedUrl("../assets/volume-2.svg")
+                        : Qt.resolvedUrl("../assets/volume-1.svg"))
                 valueText: Math.round(volItem.volume * 100) + "%"
                 iconColor: volItem.muted ? Root.Config.red : Root.Config.text
                 labelColor: volItem.muted ? Root.Config.red : Root.Config.subtext0
@@ -123,11 +132,16 @@ Item {
 
             InfoChip {
                 id: netChip
-                iconText: root.networkConnected ? (root.networkIsWifi ? "󰤨" : "󰈀") : "󰤭"
+                iconSource: root.networkConnected
+                    ? (root.networkIsWifi
+                        ? Qt.resolvedUrl("../assets/wifi.svg")
+                        : Qt.resolvedUrl("../assets/ethernet.svg"))
+                    : Qt.resolvedUrl("../assets/wifi-off.svg")
                 valueText: root.networkConnected ? root.activeSsid : ""
                 backgroundColor: root.networkConnected ? Root.Config.blue : Root.Config.chipColor
                 iconColor: root.networkConnected ? Root.Config.crust : Root.Config.subtext0
                 labelColor: root.networkConnected ? Root.Config.crust : Root.Config.subtext0
+                valueMaxWidth: 110
                 clickable: true
                 onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "network_desktop", "call", "networkdesktop", "toggle"])
             }

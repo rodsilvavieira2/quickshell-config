@@ -7,6 +7,7 @@ import Quickshell.Services.SystemTray
 import Quickshell.Wayland
 
 import ".." as Root
+import "../components"
 import "../services"
 
 Item {
@@ -71,7 +72,7 @@ Item {
     Row {
         id: trayRow
         anchors.centerIn: parent
-        spacing: 6
+        spacing: 4
 
         // Overflow button
         Item {
@@ -81,11 +82,15 @@ Item {
 
             Rectangle {
                 id: overflowButton
-                width: Root.Config.iconSize + 2
-                height: Root.Config.iconSize + 2
-                radius: 4
+                width: Root.Config.iconButtonSize + Root.Config.chipPaddingHorizontal
+                height: Root.Config.iconButtonSize + Root.Config.chipPaddingVertical
+                radius: Root.Config.chipRadius
                 color: root.overflowOpen ? Root.Config.surface0 : "transparent"
                 border.width: 0
+
+                Behavior on color {
+                    ColorAnimation { duration: 140 }
+                }
 
                 MouseArea {
                     anchors.fill: parent
@@ -102,13 +107,13 @@ Item {
                         root.overflowOpen = !root.overflowOpen;
                     }
 
-                    Text {
+                    LucideIcon {
                         anchors.centerIn: parent
-                        text: ""
+                        source: Qt.resolvedUrl("../assets/chevron-down.svg")
                         color: Root.Config.text
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: Root.Config.iconSize
+                        iconSize: Root.Config.iconSize
                         rotation: root.overflowOpen ? 180 : 0
+
                         Behavior on rotation {
                             NumberAnimation { duration: 200; easing.type: Easing.InOutQuad }
                         }
