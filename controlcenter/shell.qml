@@ -1,537 +1,488 @@
 //@ pragma UseQApplication
 //@ pragma Env QT_QUICK_CONTROLS_STYLE=Basic
-//@ pragma IconTheme "Suru++"
-//@ pragma Env QS_ICON_THEME=Suru++
 
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Controls
 import Quickshell
-import Quickshell.Io
 import Quickshell.Wayland
+import Quickshell.Io
 import Quickshell.Hyprland
+import Quickshell.Bluetooth
+import Quickshell.Services.Notifications
 
+import "./common"
 import "./components"
+import "./services"
+import "./shared/ui" as DS
 import "./shared/designsystem" as Design
 
-ShellRoot {
-    id: shellRoot
+PanelWindow {
+    id: root
 
-    property bool panelOpen: false
+    AudioService { id: audioService }
+    NetworkService { id: networkService }
+    BrightnessService { id: brightnessService }
+    NotificationService { id: notificationService }
 
-    // CPU State
-    property real cpuUsage: 0
-    property string cpuTemp: "..."
-    property var cpuHistory: []
+    Process {
+        id: settingsProcess
+        command: ["nm-connection-editor"]
+        onStarted: root.shouldShow = false
+    }
 
-    // RAM State
-    property real memUsed: 0
-    property real memTotal: 1
-    property real memCached: 0
-    property real memFree: 0
+    Process {
+        id: lockProcess
+        command: ["loginctl", "lock-session"]
+        onStarted: root.shouldShow = false
+    }
 
-    // GPU State
-    property real gpuUsage: 0
-    property string gpuTemp: "..."
-    property real gpuMemUsed: 0
-    property real gpuMemTotal: 1
+    Process {
+        id: powerProcess
+        command: ["wlogout"]
+        onStarted: root.shouldShow = false
+    }
 
-    // Process State
-    ListModel { id: processModel }
-    property string selectedPid: ""
-    property int processMaxRows: 50
-    property string uiFontFamily: Design.Tokens.font.family.body
-    readonly property color panelBackground: Design.Tokens.color.bg.surface
-    readonly property color panelBorder: Design.ThemePalette.withAlpha(Design.Tokens.color.accent.primary, Design.ThemeSettings.isDark ? 0.55 : 0.35)
-    readonly property color cardBackground: Design.Tokens.color.bg.elevated
-    readonly property color cardBorder: Design.Tokens.color.border.subtle
-    readonly property color mutedText: Design.Tokens.color.text.secondary
-    readonly property color selectedText: Design.Tokens.color.text.inverse
-    readonly property color selectedRow: Design.Tokens.color.accent.hover
-    readonly property color processAccent: Design.ThemePalette.mix(Design.Tokens.color.error, Design.Tokens.color.accent.primary, 0.35)
-    readonly property color cpuAccent: Design.ThemePalette.mix(Design.Tokens.color.accent.primary, Design.ThemePalette.white, Design.ThemeSettings.isDark ? 0.22 : 0.08)
-    readonly property color warmColor: Design.Tokens.color.warning
-    readonly property color hotColor: Design.Tokens.color.error
+    Process {
+        id: logoffProcess
+        command: ["sh", "-c", "loginctl terminate-user \"$USER\""]
+        onStarted: root.shouldShow = false
+    }
 
-    onPanelOpenChanged: {
-        if (panelOpen) {
-            focusCatcher.forceActiveFocus();
-            refreshStats();
-            pollTimer.start();
-        } else {
-            pollTimer.stop();
+    readonly property color cSurface: Appearance.colors.cSurface
+    readonly property color cSurfaceContainer: Appearance.colors.cSurfaceContainer
+    readonly property color cSurfaceContainerHigh: Appearance.colors.cSurfaceContainerHigh
+    readonly property color cBorder: Appearance.colors.cBorder
+    readonly property color cPrimary: Appearance.colors.cPrimary
+    readonly property color cSecondary: Appearance.colors.cSecondary
+    readonly property color cOnSurface: Appearance.colors.cOnSurface
+    readonly property color cOnSurfaceVariant: Appearance.colors.cOnSurfaceVariant
+    readonly property color cOnSurfaceDim: Appearance.colors.cOnSurfaceDim
+
+    property bool shouldShow: false
+    property var focusedScreenName: Hyprland.focusedMonitor?.name ?? ""
+
+    screen: {
+        for (let i = 0; i < Quickshell.screens.values.length; i++) {
+            if (Quickshell.screens.values[i].name === focusedScreenName) {
+                return Quickshell.screens.values[i];
+            }
         }
+        return Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null;
     }
 
-    function refreshStats() {
-        cpuProc.running = true;
-        memProc.running = true;
-        gpuProc.running = true;
-        processProc.running = true;
+    anchors {
+        top: true
+        right: true
     }
 
-    function parseProcessLines(rawText) {
-        const trimmed = rawText.trim();
-        if (trimmed === "") return [];
-
-        const lines = trimmed.split("\n");
-        const results = [];
-
-        for (let i = 0; i < lines.length; i++) {
-            if (results.length >= shellRoot.processMaxRows) break;
-
-            const line = lines[i].trim();
-            if (line === "") continue;
-
-            const tokens = line.split(/\s+/);
-            if (tokens.length < 5) continue;
-
-            const user = tokens.pop();
-            const rss = tokens.pop();
-            const cpu = tokens.pop();
-            const pid = tokens.shift();
-            const name = tokens.join(" ");
-
-            if (!/^\d+$/.test(pid)) continue;
-            if (!/^[\d.]+$/.test(cpu)) continue;
-            if (!/^\d+$/.test(rss)) continue;
-
-            const rssMb = parseFloat(rss) / 1024.0;
-            results.push({
-                pid: pid,
-                name: name,
-                cpu: cpu,
-                ram: rssMb.toFixed(1) + " MB",
-                user: user
-            });
-        }
-
-        return results;
+    margins {
+        top: 12
+        right: 12
     }
+
+    implicitWidth: 456
+    implicitHeight: Math.max(320, Math.floor((screen?.height ?? 900) * 0.9))
+    color: "transparent"
+    visible: shouldShow || panelContent.opacity > 0
+
+    WlrLayershell.namespace: "quickshell:controlcenter"
+    WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.keyboardFocus: shouldShow ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     IpcHandler {
         target: "controlcenter"
-        function toggle() {
-            shellRoot.panelOpen = !shellRoot.panelOpen;
-        }
-        function open() {
-            shellRoot.panelOpen = true;
-        }
-        function close() {
-            shellRoot.panelOpen = false;
+
+        function toggle() { root.shouldShow = !root.shouldShow; }
+        function open() { root.shouldShow = true; }
+        function close() { root.shouldShow = false; }
+    }
+
+    NotificationServer {
+        id: notificationServer
+        actionsSupported: true
+        bodySupported: true
+        bodyMarkupSupported: true
+        bodyHyperlinksSupported: true
+        bodyImagesSupported: true
+        imageSupported: true
+
+        onNotification: notification => {
+            notificationService.addNotification(notification);
         }
     }
 
-    Timer {
-        id: pollTimer
-        interval: 2000
-        repeat: true
-        onTriggered: {
-            if (shellRoot.panelOpen) {
-                shellRoot.refreshStats();
-            }
-        }
-    }
+    FocusScope {
+        id: panelContent
+        anchors.fill: parent
 
-    Process {
-        id: cpuProc
-        command: ["bash", "-c", "read cpu user nice system idle iowait irq softirq steal guest guest_nice < /proc/stat; previdle=$idle; prevtotal=$((user+nice+system+idle+iowait+irq+softirq+steal)); sleep 0.2; read cpu user nice system idle iowait irq softirq steal guest guest_nice < /proc/stat; idle=$idle; total=$((user+nice+system+idle+iowait+irq+softirq+steal)); diff_idle=$((idle-previdle)); diff_total=$((total-prevtotal)); usage=$((100*(diff_total-diff_idle)/diff_total)); temp=$(sensors | awk '/Package id 0:/ {print $4; exit} /Tctl:/ {print $2; exit} /Core 0:/ {print $3; exit}'); if [ -z \"$temp\" ]; then temp=$(sensors | grep -Eo '\\+[0-9]+\\.[0-9]°C' | head -n1); fi; echo \"${usage}|${temp//+/}\""]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let parts = text.trim().split("|");
-                if (parts.length === 2) {
-                    shellRoot.cpuUsage = parseFloat(parts[0]) / 100.0;
-                    shellRoot.cpuTemp = parts[1];
-                    
-                    let hist = shellRoot.cpuHistory.slice();
-                    hist.push(parseFloat(parts[0]));
-                    if (hist.length > 40) hist.shift();
-                    shellRoot.cpuHistory = hist;
+        focus: true
+        transformOrigin: Item.TopRight
+        scale: 0.96
+        opacity: 0
+
+        property bool mouseHasEntered: false
+        property bool mouseInside: hoverHandler.hovered
+
+        Keys.onEscapePressed: root.shouldShow = false
+
+        Connections {
+            target: root
+
+            function onShouldShowChanged() {
+                if (root.shouldShow) {
+                    panelContent.mouseHasEntered = false;
+                    closeTimer.stop();
                 }
             }
         }
-    }
 
-    Process {
-        id: memProc
-        command: ["bash", "-c", "free -m | awk 'NR==2{printf \"%.1f|%.1f|%.1f|%.1f\", $3/1024, $2/1024, $6/1024, $4/1024}'"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let parts = text.trim().split("|");
-                if (parts.length === 4) {
-                    shellRoot.memUsed = parseFloat(parts[0]);
-                    shellRoot.memTotal = parseFloat(parts[1]);
-                    shellRoot.memCached = parseFloat(parts[2]);
-                    shellRoot.memFree = parseFloat(parts[3]);
+        Timer {
+            id: closeTimer
+            interval: 400
+            onTriggered: {
+                if (!panelContent.mouseInside && panelContent.mouseHasEntered && root.shouldShow) {
+                    root.shouldShow = false;
                 }
             }
         }
-    }
 
-    Process {
-        id: gpuProc
-        command: ["bash", "-c", "if command -v nvidia-smi &> /dev/null; then nvidia-smi --query-gpu=utilization.gpu,temperature.gpu,memory.used,memory.total --format=csv,noheader,nounits | awk -F', ' '{printf \"%s|%s|%.1f|%.1f\\n\", $1, $2, $3/1024, $4/1024}'; else echo \"0|N/A|0|1\"; fi"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                let parts = text.trim().split("|");
-                if (parts.length === 4) {
-                    shellRoot.gpuUsage = parseFloat(parts[0]) / 100.0;
-                    shellRoot.gpuTemp = parts[1] + "°C";
-                    shellRoot.gpuMemUsed = parseFloat(parts[2]);
-                    shellRoot.gpuMemTotal = parseFloat(parts[3]);
+        HoverHandler {
+            id: hoverHandler
+            onHoveredChanged: {
+                if (hovered) {
+                    panelContent.mouseHasEntered = true;
+                    closeTimer.stop();
+                } else if (panelContent.mouseHasEntered && root.shouldShow) {
+                    closeTimer.restart();
                 }
             }
         }
-    }
 
-    Process {
-        id: processProc
-        command: ["bash", "-c", "ps -eo pid,comm,%cpu,rss,user --sort=-%cpu --no-headers"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const parsed = shellRoot.parseProcessLines(text);
-                if (parsed.length > 0) {
-                    for (let i = 0; i < parsed.length; i++) {
-                        if (i < processModel.count) {
-                            processModel.set(i, parsed[i]);
-                        } else {
-                            processModel.append(parsed[i]);
-                        }
-                    }
-                    while (processModel.count > parsed.length) {
-                        processModel.remove(processModel.count - 1, 1);
-                    }
-                }
+        onVisibleChanged: {
+            if (visible) {
+                forceActiveFocus();
             }
         }
-    }
 
-    PanelWindow {
-        id: window
-
-        property var focusedScreenName: Hyprland.focusedMonitor?.name ?? ""
-        screen: {
-            for (let i = 0; i < Quickshell.screens.values.length; i++) {
-                if (Quickshell.screens.values[i].name === focusedScreenName) {
-                    return Quickshell.screens.values[i];
-                }
-            }
-            return Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null;
-        }
-
-        visible: shellRoot.panelOpen
-        color: "transparent"
-
-        WlrLayershell.namespace: "quickshell:controlcenter"
-        WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
-
-        anchors {
-            top: true
-            bottom: true
-            left: true
-            right: true
-        }
-
-        // Invisible background area to catch clicks and close the menu
         MouseArea {
             anchors.fill: parent
-            onClicked: shellRoot.panelOpen = false
+            z: -1
+            onClicked: root.shouldShow = false
         }
 
-        Item {
-            id: focusCatcher
-            anchors.fill: parent
-            focus: true
-            Keys.onEscapePressed: event => {
-                shellRoot.panelOpen = false;
-                event.accepted = true
+        ParallelAnimation {
+            running: root.shouldShow
+
+            NumberAnimation {
+                target: panelContent
+                property: "scale"
+                from: 0.96
+                to: 1
+                duration: Appearance.animation.medium2
+                easing.type: Appearance.animation.emphasizedDecelerate
+            }
+
+            NumberAnimation {
+                target: panelContent
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: Appearance.animation.medium1
+                easing.type: Appearance.animation.standard
+            }
+        }
+
+        ParallelAnimation {
+            running: !root.shouldShow && panelContent.opacity > 0
+
+            NumberAnimation {
+                target: panelContent
+                property: "scale"
+                to: 0.96
+                duration: Appearance.animation.short4
+                easing.type: Appearance.animation.emphasizedAccelerate
+            }
+
+            NumberAnimation {
+                target: panelContent
+                property: "opacity"
+                to: 0
+                duration: Appearance.animation.short4
+                easing.type: Appearance.animation.standardAccelerate
             }
         }
 
         Rectangle {
-            id: mainPanel
+            id: panel
+            anchors.fill: parent
+            radius: 34
+            clip: true
+            color: Qt.rgba(root.cSurface.r, root.cSurface.g, root.cSurface.b, 0.96)
+            border.color: Qt.rgba(1, 1, 1, 0.10)
+            border.width: 1
 
-            property int panelPadding: 20
-            property int panelSpacing: 20
-            property int topRowMinHeight: 260
-            property int topRowMaxHeight: 300
-            property real contentWidth: width - (panelPadding * 2)
-            property real contentHeight: height - (panelPadding * 2)
-            property real topRowHeight: {
-                const cardWidth = (contentWidth - (panelSpacing * 2)) / 3;
-                const idealHeight = cardWidth * 0.7;
-                const cappedHeight = Math.min(idealHeight, topRowMaxHeight);
-                const availableHeight = (contentHeight - panelSpacing) * 0.48;
-                return Math.max(topRowMinHeight, Math.min(cappedHeight, availableHeight));
-            }
-
-            // 80% screen width, 75% height for a spacious dashboard
-            width: window.width * 0.8
-            height: window.height * 0.75
-            anchors.centerIn: parent
-            color: shellRoot.panelBackground
-            radius: Design.Tokens.radius.xl
-            border.color: shellRoot.panelBorder
-            border.width: Design.Tokens.border.width.strong
-
-            // Consume clicks inside the main panel
             MouseArea {
                 anchors.fill: parent
-                hoverEnabled: true
-                preventStealing: true
+                onClicked: mouse => { mouse.accepted = true; }
             }
 
             ColumnLayout {
+                id: panelLayout
                 anchors.fill: parent
-                anchors.margins: mainPanel.panelPadding
-                spacing: mainPanel.panelSpacing
+                anchors.margins: 20
+                spacing: 16
 
-                // Top Row: 3 Cards (CPU, RAM, GPU)
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: mainPanel.topRowHeight
-                    Layout.maximumHeight: mainPanel.topRowHeight
-                    spacing: mainPanel.panelSpacing
+                    Layout.preferredHeight: 66
+                    spacing: 12
 
-                    // CPU CORE
-                    Card {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        title: "CPU CORE"
-                        titleColor: shellRoot.cpuAccent
-                        fontFamily: shellRoot.uiFontFamily
+                    RowLayout {
+                        spacing: 8
 
-                        CircularProgress {
-                            width: 140
-                            height: 140
-                            anchors.centerIn: parent
-                            anchors.verticalCenterOffset: -22
-                            value: shellRoot.cpuUsage
-                            progressColor: shellRoot.cpuAccent
-                            title: Math.round(shellRoot.cpuUsage * 100) + "%"
-                            subTitle: "Load"
-                            fontFamily: shellRoot.uiFontFamily
+                        HeaderButton {
+                            iconName: "log-out"
+                            label: "Logoff"
+                            tooltip: "Log Off"
+                            tint: Appearance.colors.warning
+                            onClicked: logoffProcess.running = true
                         }
 
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.bottom: sparkline.top
-                            anchors.bottomMargin: 12
-                            text: "Temp: <font color='" + shellRoot.warmColor + "'>" + shellRoot.cpuTemp + "</font>"
-                            color: shellRoot.mutedText
-                            font.family: shellRoot.uiFontFamily
-                            font.pixelSize: 14
-                            textFormat: Text.RichText
+                        HeaderButton {
+                            iconName: "lock"
+                            label: "Lock"
+                            tooltip: "Lock Session"
+                            tint: Appearance.colors.info
+                            onClicked: lockProcess.running = true
                         }
 
-                        Sparkline {
-                            id: sparkline
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.bottom: parent.bottom
-                            anchors.leftMargin: 20
-                            anchors.rightMargin: 20
-                            anchors.bottomMargin: 16
-                            height: 40
-                            history: shellRoot.cpuHistory
-                            lineColor: shellRoot.warmColor
+                        HeaderButton {
+                            iconName: "power"
+                            label: "Power"
+                            tooltip: "Power Menu"
+                            tint: Appearance.colors.error
+                            onClicked: powerProcess.running = true
                         }
                     }
 
-                    // MEMORY (RAM)
-                    Card {
+                    Item {
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        title: "MEMORY (RAM)"
-                        titleColor: Design.Tokens.color.accent.primary
-                        fontFamily: shellRoot.uiFontFamily
-
-                        Column {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.verticalCenterOffset: 10
-                            width: 320
-                            spacing: 16
-
-                            ProgressBar {
-                                width: parent.width
-                                height: 32
-                                cornerRadius: 6
-                                value: shellRoot.memTotal > 0 ? (shellRoot.memUsed / shellRoot.memTotal) : 0
-                                progressColor: Design.Tokens.color.accent.primary
-                                text: "used: " + shellRoot.memUsed.toFixed(1) + " GB / " + shellRoot.memTotal.toFixed(1) + " GB"
-                                fontFamily: shellRoot.uiFontFamily
-                            }
-                        }
                     }
 
-                    // GPU ENGINE
-                    Card {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        title: "GPU ENGINE"
-                        titleColor: Design.Tokens.color.success
-                        fontFamily: shellRoot.uiFontFamily
+                    ColumnLayout {
+                        spacing: 2
 
-                        CircularProgress {
-                            width: 140
-                            height: 140
-                            anchors.centerIn: parent
-                            anchors.verticalCenterOffset: -22
-                            value: shellRoot.gpuUsage
-                            progressColor: Design.Tokens.color.success
-                            title: Math.round(shellRoot.gpuUsage * 100) + "%"
-                            subTitle: "Load"
-                            fontFamily: shellRoot.uiFontFamily
+                        Text {
+                            id: timeText
+                            Layout.alignment: Qt.AlignRight
+                            text: Qt.formatTime(new Date(), "hh:mm")
+                            font.family: Appearance.font.family
+                            font.pixelSize: Appearance.font.sizeHeader
+                            font.bold: true
+                            color: root.cOnSurface
                         }
 
                         Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.bottom: gpuBar.top
-                            anchors.bottomMargin: 10
-                            property bool isHot: parseInt(shellRoot.gpuTemp) > 75
-                            text: "Temp: <font color='" + (isHot ? shellRoot.hotColor : shellRoot.warmColor) + "'>" + shellRoot.gpuTemp + "</font>"
-                            color: shellRoot.mutedText
-                            font.family: shellRoot.uiFontFamily
-                            font.pixelSize: 14
-                            textFormat: Text.RichText
+                            Layout.alignment: Qt.AlignRight
+                            text: Qt.formatDate(new Date(), "dddd, MMMM d")
+                            font.family: Appearance.font.family
+                            font.pixelSize: 11
+                            font.bold: true
+                            color: root.cOnSurfaceVariant
                         }
 
-                        ProgressBar {
-                            id: gpuBar
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.bottom: parent.bottom
-                            width: 360
-                            height: 28
-                            cornerRadius: 6
-                            anchors.bottomMargin: 16
-                            value: shellRoot.gpuMemTotal > 0 ? (shellRoot.gpuMemUsed / shellRoot.gpuMemTotal) : 0
-                            progressColor: Design.Tokens.color.success
-                            backgroundColor: Design.Tokens.color.bg.interactive
-                            text: "VRAM: " + shellRoot.gpuMemUsed.toFixed(1) + " GB / " + shellRoot.gpuMemTotal.toFixed(1) + " GB"
-                            fontFamily: shellRoot.uiFontFamily
+                        Timer {
+                            interval: 1000
+                            running: true
+                            repeat: true
+                            onTriggered: timeText.text = Qt.formatTime(new Date(), "hh:mm")
                         }
                     }
                 }
 
-                // Bottom Row: Process List
-                Rectangle {
-                    id: processCard
-
-                    property int columnPadding: 16
-                    property int columnSpacing: 12
-                    property int headerHeight: 32
-                    property int rowHeight: 28
-                    property int pidWidth: 100
-                    property int cpuWidth: 120
-                    property int ramWidth: 150
-                    property int userWidth: 0
-                    property int nameMinWidth: 350
-                    property int scrollBarWidth: 12
-
+                Flickable {
+                    id: contentFlick
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    color: shellRoot.cardBackground
-                    radius: Design.Tokens.radius.lg
-                    border.color: shellRoot.cardBorder
-                    border.width: Design.Tokens.border.width.thin
+                    contentHeight: contentColumn.height
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    flickDeceleration: 3200
+                    maximumFlickVelocity: 2200
+
+                    ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
+                        width: 4
+
+                        contentItem: Rectangle {
+                            radius: 2
+                            color: Qt.rgba(1, 1, 1, 0.18)
+                        }
+                    }
 
                     ColumnLayout {
-                        anchors.fill: parent
-                        anchors.margins: 16
-                        spacing: 12
+                        id: contentColumn
+                        width: contentFlick.width
+                        height: Math.max(implicitHeight, contentFlick.height)
+                        spacing: 14
 
-                        Text {
-                            Layout.alignment: Qt.AlignHCenter
-                            text: "RUNNING PROCESSES"
-                            color: shellRoot.processAccent
-                            font.family: shellRoot.uiFontFamily
-                            font.pixelSize: Design.Tokens.font.size.title
-                            font.bold: true
-                            font.letterSpacing: 1.1
+                        SectionLabel {
+                            label: "Controls"
+                            badge: notificationService.dnd ? "Focus On" : ""
                         }
 
-                        // Header Row
-                        Rectangle {
+                        GridLayout {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: processCard.headerHeight
-                            color: "transparent"
+                            columns: 2
+                            columnSpacing: 10
+                            rowSpacing: 10
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: processCard.columnPadding
-                                anchors.rightMargin: processCard.columnPadding + processCard.scrollBarWidth + 4
-                                spacing: processCard.columnSpacing
-
-                                Text { Layout.preferredWidth: processCard.pidWidth; text: "PID"; color: shellRoot.mutedText; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
-                                Text { Layout.preferredWidth: processCard.nameMinWidth; text: "Process Name"; color: shellRoot.mutedText; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
-                                Text { Layout.preferredWidth: processCard.cpuWidth; text: "CPU %"; color: shellRoot.mutedText; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
-                                Text { Layout.preferredWidth: processCard.ramWidth; text: "RAM (MB)"; color: shellRoot.mutedText; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
-                                Text { Layout.fillWidth: true; text: "User"; color: shellRoot.mutedText; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
+                            QuickToggle {
+                                iconName: "ethernet"
+                                label: "Ethernet"
+                                subLabel: networkService.activeEthernet ? "Connected" : "Disconnected"
+                                active: networkService.activeEthernet !== null
+                                activeColor: Appearance.colors.info
+                                onClicked: settingsProcess.running = true
                             }
 
-                            Rectangle {
-                                width: parent.width
-                                height: 1
-                                color: shellRoot.cardBorder
-                                anchors.bottom: parent.bottom
+                            QuickToggle {
+                                iconName: "bluetooth"
+                                label: "Bluetooth"
+                                subLabel: Bluetooth.defaultAdapter?.enabled ? "Available" : "Disabled"
+                                active: Bluetooth.defaultAdapter?.enabled ?? false
+                                activeColor: Appearance.colors.info
+                                onClicked: {
+                                    if (Bluetooth.defaultAdapter) {
+                                        Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled;
+                                    }
+                                }
+                            }
+
+                            QuickToggle {
+                                iconName: notificationService.dnd ? "bell-off" : "bell"
+                                label: "Notifications"
+                                subLabel: notificationService.dnd ? "Do Not Disturb" : "Alerts Enabled"
+                                active: notificationService.dnd
+                                activeColor: Appearance.colors.warning
+                                onClicked: notificationService.toggleDnd()
+                            }
+
+                            QuickToggle {
+                                iconName: "settings-2"
+                                label: "System Settings"
+                                subLabel: "Connections and adapters"
+                                active: false
+                                activeColor: Appearance.colors.cSecondary
+                                onClicked: settingsProcess.running = true
                             }
                         }
 
-                        // Process List
-                        ListView {
-                            id: procList
+                        SectionLabel {
+                            label: "Levels"
+                            badge: brightnessService.available ? "" : "Brightness unavailable"
+                        }
+
+                        ColumnLayout {
                             Layout.fillWidth: true
+                            spacing: 10
+
+                            VolumeSlider {
+                                audio: audioService
+                            }
+
+                            BrightnessSlider {
+                                visible: brightnessService.available
+                                brightness: brightnessService
+                            }
+                        }
+
+                        SectionLabel {
+                            label: "Notifications"
+                        }
+
+                        NotificationList {
                             Layout.fillHeight: true
-                            clip: true
-                            model: processModel
-                            boundsBehavior: Flickable.StopAtBounds
+                            Layout.minimumHeight: 280
+                            notifs: notificationService
+                        }
 
-                            ScrollBar.vertical: ScrollBar {
-                                active: true
-                                width: processCard.scrollBarWidth
-                                contentItem: Rectangle {
-                                    implicitWidth: processCard.scrollBarWidth
-                                    implicitHeight: 100
-                                    radius: 6
-                                    color: Design.Tokens.color.bg.interactive
-                                }
-                            }
-
-                            delegate: Rectangle {
-                                id: rowItem
-                                width: ListView.view.width
-                                height: processCard.rowHeight
-                                color: shellRoot.selectedPid === pid
-                                    ? shellRoot.selectedRow
-                                    : (index % 2 === 0 ? shellRoot.cardBackground : shellRoot.panelBackground)
-                                property color textColor: shellRoot.selectedPid === pid
-                                    ? shellRoot.selectedText
-                                    : Design.Tokens.color.text.primary
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    onClicked: shellRoot.selectedPid = pid
-                                }
-
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: processCard.columnPadding
-                                    anchors.rightMargin: processCard.columnPadding + processCard.scrollBarWidth + 4
-                                    spacing: processCard.columnSpacing
-
-                                    Text { Layout.preferredWidth: processCard.pidWidth; text: pid; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13 }
-                                    Text { Layout.preferredWidth: processCard.nameMinWidth; text: name; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; elide: Text.ElideRight }
-                                    Text { Layout.preferredWidth: processCard.cpuWidth; text: cpu; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13 }
-                                    Text { Layout.preferredWidth: processCard.ramWidth; text: ram; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13 }
-                                    Text { Layout.fillWidth: true; text: user; color: rowItem.textColor; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; elide: Text.ElideRight }
-                                }
-                            }
+                        Item {
+                            Layout.preferredHeight: 6
                         }
                     }
                 }
             }
+        }
+    }
+
+    component HeaderButton: DS.Chip {
+        id: headerBtn
+
+        property string iconName: ""
+        property string label: ""
+        property string tooltip: ""
+        property color tint: Appearance.colors.info
+
+        clickable: true
+        horizontalPadding: 12
+        verticalPadding: 6
+        text: headerBtn.label
+        contentColor: Appearance.colors.cOnSurface
+        containerColor: Design.ThemePalette.withAlpha(Design.Tokens.color.surfaceContainerHigh, 0.96)
+        hoverContainerColor: Design.ThemePalette.withAlpha(tint, 0.18)
+        pressedContainerColor: Design.ThemePalette.withAlpha(tint, 0.24)
+        borderColor: Design.ThemePalette.withAlpha(tint, 0.30)
+        leading: Component {
+            DS.LucideIcon {
+                name: headerBtn.iconName
+                iconSize: 13
+                color: headerBtn.tint
+            }
+        }
+        ToolTip.visible: hovered && headerBtn.tooltip !== ""
+        ToolTip.text: headerBtn.tooltip
+        ToolTip.delay: 400
+    }
+
+    component SectionLabel: RowLayout {
+        property string label: ""
+        property string badge: ""
+
+        Layout.fillWidth: true
+        spacing: 8
+
+        Text {
+            text: label
+            font.family: Appearance.font.family
+            font.pixelSize: 10
+            font.bold: true
+            color: root.cOnSurfaceDim
+        }
+
+        DS.Chip {
+            visible: badge !== ""
+            text: badge
+            clickable: false
+            horizontalPadding: 10
+            verticalPadding: 4
+            contentFontSize: 9
+            containerColor: Design.ThemePalette.withAlpha(Design.Tokens.color.surfaceContainerHigh, 0.88)
+            hoverContainerColor: containerColor
+            pressedContainerColor: containerColor
+            borderColor: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.72)
+            contentColor: root.cOnSurfaceVariant
+        }
+
+        Item {
+            Layout.fillWidth: true
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 1
+            color: Qt.rgba(1, 1, 1, 0.06)
         }
     }
 }

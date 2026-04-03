@@ -13,7 +13,7 @@ ShellRoot {
     property bool panelOpen: false
 
     IpcHandler {
-        target: "networkdesktop"
+        target: "network_bluetooth"
 
         function toggle() {
             shellRoot.panelOpen = !shellRoot.panelOpen;
@@ -46,7 +46,7 @@ ShellRoot {
         visible: shellRoot.panelOpen
         color: "#66000000"
 
-        WlrLayershell.namespace: "quickshell:network_desktop"
+        WlrLayershell.namespace: "quickshell:network_bluetooth"
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
