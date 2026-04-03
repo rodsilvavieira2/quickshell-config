@@ -7,58 +7,93 @@ import Quickshell
 Singleton {
     id: root
 
-    readonly property QtObject palette: ThemeSettings.isDark ? ThemePalette.dark : ThemePalette.light
     readonly property color accentBase: ThemeSettings.accent
 
     readonly property QtObject color: QtObject {
+        readonly property color primary: MaterialRoles.primary
+        readonly property color primaryForeground: MaterialRoles.primaryForeground
+        readonly property color primaryContainer: MaterialRoles.primaryContainer
+        readonly property color primaryContainerForeground: MaterialRoles.primaryContainerForeground
+        readonly property color secondary: MaterialRoles.secondary
+        readonly property color secondaryForeground: MaterialRoles.secondaryForeground
+        readonly property color secondaryContainer: MaterialRoles.secondaryContainer
+        readonly property color secondaryContainerForeground: MaterialRoles.secondaryContainerForeground
+        readonly property color tertiary: MaterialRoles.tertiary
+        readonly property color tertiaryForeground: MaterialRoles.tertiaryForeground
+        readonly property color tertiaryContainer: MaterialRoles.tertiaryContainer
+        readonly property color tertiaryContainerForeground: MaterialRoles.tertiaryContainerForeground
+        readonly property color surface: MaterialRoles.surface
+        readonly property color surfaceDim: MaterialRoles.surfaceDim
+        readonly property color surfaceBright: MaterialRoles.surfaceBright
+        readonly property color surfaceContainerLowest: MaterialRoles.surfaceContainerLowest
+        readonly property color surfaceContainerLow: MaterialRoles.surfaceContainerLow
+        readonly property color surfaceContainer: MaterialRoles.surfaceContainer
+        readonly property color surfaceContainerHigh: MaterialRoles.surfaceContainerHigh
+        readonly property color surfaceContainerHighest: MaterialRoles.surfaceContainerHighest
+        readonly property color surfaceVariant: MaterialRoles.surfaceVariant
+        readonly property color surfaceForeground: MaterialRoles.surfaceForeground
+        readonly property color surfaceVariantForeground: MaterialRoles.surfaceVariantForeground
+        readonly property color outline: MaterialRoles.outline
+        readonly property color outlineVariant: MaterialRoles.outlineVariant
+        readonly property color inverseSurface: MaterialRoles.inverseSurface
+        readonly property color inverseSurfaceForeground: MaterialRoles.inverseSurfaceForeground
+        readonly property color inversePrimary: MaterialRoles.inversePrimary
+
         readonly property QtObject bg: QtObject {
-            readonly property color canvas: root.palette.bgCanvas
-            readonly property color surface: root.palette.bgSurface
-            readonly property color elevated: root.palette.bgElevated
-            readonly property color interactive: root.palette.bgInteractive
-            readonly property color hover: root.palette.bgHover
-            readonly property color active: root.palette.bgActive
+            readonly property color canvas: MaterialRoles.surfaceDim
+            readonly property color surface: MaterialRoles.surface
+            readonly property color elevated: MaterialRoles.surfaceContainer
+            readonly property color interactive: MaterialRoles.surfaceContainerHigh
+            readonly property color hover: ThemePalette.mix(MaterialRoles.surfaceContainerHigh, MaterialRoles.surfaceForeground, ThemeSettings.isDark ? 0.06 : 0.04)
+            readonly property color active: ThemePalette.mix(MaterialRoles.surfaceContainerHighest, MaterialRoles.surfaceForeground, ThemeSettings.isDark ? 0.08 : 0.06)
         }
 
         readonly property QtObject border: QtObject {
-            readonly property color subtle: root.palette.borderSubtle
-            readonly property color strong: root.palette.borderStrong
+            readonly property color subtle: MaterialRoles.outlineVariant
+            readonly property color strong: MaterialRoles.outline
         }
 
         readonly property QtObject text: QtObject {
-            readonly property color primary: root.palette.textPrimary
-            readonly property color secondary: root.palette.textSecondary
-            readonly property color muted: root.palette.textMuted
-            readonly property color inverse: root.palette.textInverse
+            readonly property color primary: MaterialRoles.surfaceForeground
+            readonly property color secondary: MaterialRoles.surfaceVariantForeground
+            readonly property color muted: ThemeSettings.isDark ? ThemePalette.dark.textMuted : ThemePalette.light.textMuted
+            readonly property color inverse: ThemeSettings.isDark ? ThemePalette.dark.textInverse : ThemePalette.light.textInverse
         }
 
         readonly property QtObject icon: QtObject {
-            readonly property color primary: root.palette.iconPrimary
-            readonly property color secondary: root.palette.iconSecondary
+            readonly property color primary: ThemeSettings.isDark ? ThemePalette.dark.iconPrimary : ThemePalette.light.iconPrimary
+            readonly property color secondary: ThemeSettings.isDark ? ThemePalette.dark.iconSecondary : ThemePalette.light.iconSecondary
         }
 
         readonly property QtObject accent: QtObject {
-            readonly property color primary: root.accentBase
+            readonly property color primary: MaterialRoles.primary
             readonly property color hover: ThemeSettings.isDark
-                ? ThemePalette.mix(root.accentBase, ThemePalette.white, 0.12)
-                : ThemePalette.mix(root.accentBase, ThemePalette.black, 0.08)
+                ? ThemePalette.mix(MaterialRoles.primary, ThemePalette.white, 0.12)
+                : ThemePalette.mix(MaterialRoles.primary, ThemePalette.black, 0.08)
             readonly property color active: ThemeSettings.isDark
-                ? ThemePalette.mix(root.accentBase, ThemePalette.white, 0.22)
-                : ThemePalette.mix(root.accentBase, ThemePalette.black, 0.16)
+                ? ThemePalette.mix(MaterialRoles.primary, ThemePalette.white, 0.22)
+                : ThemePalette.mix(MaterialRoles.primary, ThemePalette.black, 0.16)
         }
 
-        readonly property color success: root.palette.success
-        readonly property color warning: root.palette.warning
-        readonly property color error: root.palette.error
-        readonly property color info: root.palette.info
-        readonly property color focusRing: ThemePalette.withAlpha(root.accentBase, ThemeSettings.isDark ? 0.55 : 0.35)
-        readonly property color scrim: root.palette.scrim
-        readonly property color shadow: root.palette.shadow
+        readonly property color success: MaterialRoles.success
+        readonly property color successContainer: MaterialRoles.successContainer
+        readonly property color warning: MaterialRoles.warning
+        readonly property color warningContainer: MaterialRoles.warningContainer
+        readonly property color error: MaterialRoles.error
+        readonly property color errorForeground: MaterialRoles.errorForeground
+        readonly property color errorContainer: MaterialRoles.errorContainer
+        readonly property color errorContainerForeground: MaterialRoles.errorContainerForeground
+        readonly property color info: MaterialRoles.info
+        readonly property color infoContainer: MaterialRoles.infoContainer
+        readonly property color focusRing: ThemePalette.withAlpha(MaterialRoles.primary, ThemeSettings.isDark ? 0.55 : 0.35)
+        readonly property color scrim: MaterialRoles.scrim
+        readonly property color shadow: MaterialRoles.shadow
     }
 
     readonly property QtObject font: QtObject {
         readonly property QtObject family: QtObject {
             readonly property string display: ThemeSettings.resolvedFontFamily
+            readonly property string headline: ThemeSettings.resolvedFontFamily
             readonly property string title: ThemeSettings.resolvedFontFamily
             readonly property string body: ThemeSettings.resolvedFontFamily
             readonly property string label: ThemeSettings.resolvedFontFamily
@@ -68,6 +103,7 @@ Singleton {
 
         readonly property QtObject size: QtObject {
             readonly property int display: Math.round(32 * ThemeSettings.uiScale)
+            readonly property int headline: Math.round(24 * ThemeSettings.uiScale)
             readonly property int title: Math.round(18 * ThemeSettings.uiScale)
             readonly property int body: Math.round(14 * ThemeSettings.uiScale)
             readonly property int label: Math.round(13 * ThemeSettings.uiScale)
@@ -95,11 +131,22 @@ Singleton {
     }
 
     readonly property QtObject radius: QtObject {
+        readonly property int xs: 4
         readonly property int sm: 8
         readonly property int md: 12
         readonly property int lg: 16
         readonly property int xl: 20
+        readonly property int xxl: 28
         readonly property int pill: 999
+    }
+
+    readonly property QtObject shape: QtObject {
+        readonly property int extraSmall: root.radius.xs
+        readonly property int small: root.radius.sm
+        readonly property int medium: root.radius.md
+        readonly property int large: root.radius.lg
+        readonly property int extraLarge: root.radius.xl
+        readonly property int full: root.radius.pill
     }
 
     readonly property QtObject shadow: QtObject {
@@ -137,10 +184,18 @@ Singleton {
         readonly property real overlay: 0.72
     }
 
+    readonly property QtObject stateLayer: QtObject {
+        readonly property real hover: 0.08
+        readonly property real focus: 0.12
+        readonly property real pressed: 0.12
+        readonly property real dragged: 0.16
+        readonly property real selected: 0.10
+    }
+
     readonly property QtObject component: QtObject {
         readonly property QtObject panel: QtObject {
             readonly property int padding: root.space.s24
-            readonly property int radius: root.radius.xl
+            readonly property int radius: root.radius.xxl
             readonly property int gap: root.space.s16
         }
 
@@ -154,6 +209,7 @@ Singleton {
             readonly property int heightMd: 40
             readonly property int heightLg: 48
             readonly property int paddingX: root.space.s16
+            readonly property int iconSize: 18
         }
 
         readonly property QtObject input: QtObject {
@@ -166,6 +222,32 @@ Singleton {
             readonly property int minHeight: 52
             readonly property int paddingX: root.space.s16
             readonly property int paddingY: root.space.s12
+        }
+
+        readonly property QtObject topAppBar: QtObject {
+            readonly property int height: 72
+            readonly property int paddingX: root.space.s24
+            readonly property int paddingY: root.space.s16
+        }
+
+        readonly property QtObject drawer: QtObject {
+            readonly property int width: 264
+            readonly property int railWidth: 84
+            readonly property int itemHeight: 48
+            readonly property int itemRadius: root.radius.lg
+            readonly property int sectionGap: root.space.s8
+        }
+
+        readonly property QtObject searchBar: QtObject {
+            readonly property int height: 48
+            readonly property int radius: root.radius.pill
+        }
+
+        readonly property QtObject settingRow: QtObject {
+            readonly property int minHeight: 64
+            readonly property int paddingX: root.space.s16
+            readonly property int paddingY: root.space.s12
+            readonly property int radius: root.radius.lg
         }
     }
 }

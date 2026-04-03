@@ -8,6 +8,7 @@ Item {
     property alias from: control.from
     property alias to: control.to
     property alias value: control.value
+    readonly property bool pressed: control.pressed
 
     implicitWidth: 240
     implicitHeight: 30
@@ -21,14 +22,14 @@ Item {
             y: control.topPadding + control.availableHeight / 2 - height / 2
             width: control.availableWidth
             height: 6
-            radius: Tokens.radius.pill
-            color: Tokens.color.bg.interactive
+            radius: Tokens.shape.full
+            color: Tokens.color.surfaceContainerHighest
 
             Rectangle {
                 width: control.visualPosition * parent.width
                 height: parent.height
                 radius: parent.radius
-                color: Tokens.color.accent.primary
+                color: Tokens.color.primary
             }
         }
 
@@ -38,9 +39,9 @@ Item {
             implicitWidth: 18
             implicitHeight: 18
             radius: width / 2
-            color: Tokens.color.text.primary
+            color: Tokens.color.primary
             border.width: Tokens.border.width.thin
-            border.color: Tokens.color.border.subtle
+            border.color: control.pressed ? Tokens.color.text.inverse : Tokens.color.primary
         }
     }
 }

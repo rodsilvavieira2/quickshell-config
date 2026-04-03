@@ -91,7 +91,7 @@ Item {
                 labelColor: btItem.btConnected ? Root.Config.crust : Root.Config.subtext0
                 valueMaxWidth: 110
                 clickable: true
-                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "network_desktop", "call", "networkdesktop", "toggle"])
+                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "toggle"])
             }
         }
 
@@ -119,7 +119,7 @@ Item {
                 iconColor: volItem.muted ? Root.Config.red : Root.Config.text
                 labelColor: volItem.muted ? Root.Config.red : Root.Config.subtext0
                 clickable: true
-                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "music", "call", "music", "toggle"])
+                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "toggle"])
             }
         }
 
@@ -143,7 +143,7 @@ Item {
                 labelColor: root.networkConnected ? Root.Config.crust : Root.Config.subtext0
                 valueMaxWidth: 110
                 clickable: true
-                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "network_desktop", "call", "networkdesktop", "toggle"])
+                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "toggle"])
             }
         }
     }

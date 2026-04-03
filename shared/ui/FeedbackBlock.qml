@@ -15,11 +15,17 @@ Rectangle {
         if (kind === "error") return Tokens.color.error;
         return Tokens.color.info;
     }
+    readonly property color backgroundTone: {
+        if (kind === "success") return Tokens.color.successContainer;
+        if (kind === "warning") return Tokens.color.warningContainer;
+        if (kind === "error") return Tokens.color.errorContainer;
+        return Tokens.color.infoContainer;
+    }
 
-    radius: Tokens.radius.lg
-    color: ThemePalette.withAlpha(tone, ThemeSettings.isDark ? 0.14 : 0.1)
+    radius: Tokens.shape.large
+    color: backgroundTone
     border.width: Tokens.border.width.thin
-    border.color: ThemePalette.withAlpha(tone, 0.32)
+    border.color: ThemePalette.withAlpha(tone, 0.30)
 
     implicitHeight: column.implicitHeight + Tokens.space.s16 * 2
 

@@ -3,457 +3,272 @@
 
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Window
 import Quickshell
 import Quickshell.Io
-import Quickshell.Wayland
 import Quickshell.Hyprland
 
 import "./shared/designsystem" as Design
 import "./shared/ui" as DS
+import "./components"
+import "./services"
 
 ShellRoot {
     id: shellRoot
 
-    property bool panelOpen: false
-    property string draftMode: Design.ThemeSettings.mode
-    property string draftAccentColor: Design.ThemeSettings.accentColor
-    property string draftFontFamily: Design.ThemeSettings.fontFamily
-    property real draftUiScale: Design.ThemeSettings.uiScale
-    readonly property bool hasPendingChanges:
-        draftMode !== Design.ThemeSettings.mode
-        || draftAccentColor !== Design.ThemeSettings.accentColor
-        || draftFontFamily !== Design.ThemeSettings.fontFamily
-        || Math.abs(draftUiScale - Design.ThemeSettings.uiScale) > 0.001
+    property bool appOpen: false
+    property string selectedCategoryId: "appearance"
+    property string searchQuery: ""
+    property string pendingEntryId: ""
 
-    readonly property var accentOptions: [
-        { name: "Blue", value: "#4f8cff" },
-        { name: "Cyan", value: "#22c3ee" },
-        { name: "Emerald", value: "#2fbf71" },
-        { name: "Amber", value: "#f5a524" },
-        { name: "Rose", value: "#f25f7a" },
-        { name: "Violet", value: "#8b5cf6" }
-    ]
+    readonly property var pageContext: ({
+        themeAdapter: themeAdapter,
+        gtkAdapter: gtkAdapter,
+        wallpaperAdapter: wallpaperAdapter,
+        displayAdapter: displayAdapter,
+        inputAdapter: inputAdapter
+    })
+    readonly property var currentCategory: registry.categoryById(selectedCategoryId)
+    readonly property var searchResults: registry.search(searchQuery)
 
-    readonly property var scaleOptions: [
-        { label: "90%", value: 0.9 },
-        { label: "100%", value: 1.0 },
-        { label: "110%", value: 1.1 }
-    ]
-
-    function resetDrafts() {
-        draftMode = Design.ThemeSettings.mode;
-        draftAccentColor = Design.ThemeSettings.accentColor;
-        draftFontFamily = Design.ThemeSettings.fontFamily;
-        draftUiScale = Design.ThemeSettings.uiScale;
-    }
-
-    function applyDrafts() {
-        Design.ThemeSettings.apply(draftMode, draftAccentColor, draftFontFamily, draftUiScale);
-        resetDrafts();
-    }
-
-    onPanelOpenChanged: {
-        if (panelOpen) {
-            resetDrafts();
+    function focusedScreen() {
+        const focusedName = Hyprland.focusedMonitor?.name ?? "";
+        for (let i = 0; i < Quickshell.screens.values.length; i++) {
+            const screen = Quickshell.screens.values[i];
+            if (screen.name === focusedName)
+                return screen;
         }
+        return Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null;
+    }
+
+    function centerWindow() {
+        const screen = focusedScreen();
+        if (!screen)
+            return;
+
+        settingsWindow.x = screen.x + Math.round((screen.width - settingsWindow.width) / 2);
+        settingsWindow.y = screen.y + Math.round((screen.height - settingsWindow.height) / 2);
+    }
+
+    function openPage(categoryId, entryId) {
+        selectedCategoryId = categoryId || selectedCategoryId;
+        pendingEntryId = entryId || "";
+        appOpen = true;
+        centerWindow();
+        wallpaperAdapter.refresh();
+        displayAdapter.refresh();
+        inputAdapter.refresh();
+        gtkAdapter.refresh();
+        Qt.callLater(() => settingsWindow.requestActivate());
+    }
+
+    function closeApp() {
+        appOpen = false;
+        searchQuery = "";
+    }
+
+    ThemeAdapter {
+        id: themeAdapter
+    }
+
+    GtkAppearanceAdapter {
+        id: gtkAdapter
+        Component.onCompleted: refresh()
+    }
+
+    WallpaperAdapter {
+        id: wallpaperAdapter
+        Component.onCompleted: refresh()
+    }
+
+    HyprDisplayAdapter {
+        id: displayAdapter
+        Component.onCompleted: refresh()
+    }
+
+    HyprInputAdapter {
+        id: inputAdapter
+        Component.onCompleted: refresh()
+    }
+
+    SettingsRegistry {
+        id: registry
     }
 
     IpcHandler {
         target: "settings"
 
         function toggle() {
-            shellRoot.panelOpen = !shellRoot.panelOpen;
+            if (shellRoot.appOpen) shellRoot.closeApp();
+            else shellRoot.openPage(shellRoot.selectedCategoryId, "");
         }
 
         function open() {
-            shellRoot.panelOpen = true;
+            shellRoot.openPage(shellRoot.selectedCategoryId, "");
         }
 
         function close() {
-            shellRoot.panelOpen = false;
+            shellRoot.closeApp();
         }
     }
 
-    PanelWindow {
-        id: window
+    FloatingWindow {
+        id: settingsWindow
 
-        property string focusedScreenName: Hyprland.focusedMonitor?.name ?? ""
-
-        screen: {
-            for (let i = 0; i < Quickshell.screens.values.length; i++) {
-                const currentScreen = Quickshell.screens.values[i];
-                if (currentScreen.name === focusedScreenName) {
-                    return currentScreen;
-                }
-            }
-
-            return Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null;
-        }
-
-        visible: shellRoot.panelOpen || panelContent.opacity > 0
+        title: "Desktop Settings"
+        implicitWidth: 1320
+        implicitHeight: 880
+        visible: shellRoot.appOpen
         color: "transparent"
 
-        WlrLayershell.namespace: "quickshell:settings"
-        WlrLayershell.layer: WlrLayer.Overlay
-        WlrLayershell.keyboardFocus: shellRoot.panelOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-
-        anchors {
-            top: true
-            bottom: true
-            left: true
-            right: true
+        onVisibleChanged: {
+            if (visible) {
+                shellRoot.centerWindow();
+                requestActivate();
+            }
         }
 
-        DS.OverlayScrim {
+        FocusScope {
             anchors.fill: parent
-            opacity: panelContent.opacity
+            focus: settingsWindow.visible
 
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: Design.Tokens.motion.duration.fast
-                    easing.type: Design.Tokens.motion.easing.standard
-                }
-            }
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            enabled: shellRoot.panelOpen
-            onClicked: shellRoot.panelOpen = false
-        }
-
-        Item {
-            id: panelContent
-            anchors.centerIn: parent
-            width: Math.min((window.screen?.width ?? 1280) * 0.82, 980)
-            height: Math.min((window.screen?.height ?? 900) * 0.86, 860)
-            opacity: shellRoot.panelOpen ? 1 : 0
-            scale: shellRoot.panelOpen ? 1 : 0.98
-
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: Design.Tokens.motion.duration.normal
-                    easing.type: Design.Tokens.motion.easing.standard
-                }
+            Keys.onEscapePressed: event => {
+                shellRoot.closeApp();
+                event.accepted = true;
             }
 
-            Behavior on scale {
-                NumberAnimation {
-                    duration: Design.Tokens.motion.duration.normal
-                    easing.type: Design.Tokens.motion.easing.decelerate
-                }
-            }
-
-            FocusScope {
+            Rectangle {
                 anchors.fill: parent
-                focus: shellRoot.panelOpen
+                radius: Design.Tokens.component.panel.radius
+                color: Design.Tokens.color.surface
+                border.width: Design.Tokens.border.width.thin
+                border.color: Design.Tokens.color.outlineVariant
+            }
 
-                Keys.onEscapePressed: event => {
-                    shellRoot.panelOpen = false;
-                    event.accepted = true;
-                }
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: Design.Tokens.space.s20
+                spacing: Design.Tokens.space.s16
 
-                DS.Panel {
-                    id: panel
-                    anchors.fill: parent
-                    backgroundColor: Design.Tokens.color.bg.surface
-                    borderColor: Design.Tokens.color.border.strong
+                DS.TopAppBar {
+                    Layout.fillWidth: true
+                    title: "Settings"
+                    subtitle: "Material 3 adapted system settings for your Quickshell desktop"
 
-                    ColumnLayout {
-                        anchors.fill: parent
-                        spacing: Design.Tokens.space.s20
-
-                        DS.HeaderBlock {
-                            Layout.fillWidth: true
-                            title: "Desktop UI"
-                            subtitle: "Global design system settings for your Quickshell modules"
-
-                            DS.Button {
-                                text: "Apply"
-                                variant: "primary"
-                                preferredHeight: 36
-                                disabled: !shellRoot.hasPendingChanges
-                                onClicked: shellRoot.applyDrafts()
-                            }
-
-                            DS.IconButton {
-                                icon: "󰅖"
-                                preferredHeight: 36
-                                onClicked: shellRoot.panelOpen = false
+                    DS.SearchBar {
+                        id: searchBar
+                        implicitWidth: 340
+                        text: shellRoot.searchQuery
+                        placeholderText: "Search settings"
+                        onTextChanged: shellRoot.searchQuery = text
+                        onAccepted: {
+                            if (shellRoot.searchResults.length > 0) {
+                                const firstResult = shellRoot.searchResults[0];
+                                shellRoot.selectedCategoryId = firstResult.categoryId;
+                                shellRoot.pendingEntryId = firstResult.entryId;
+                                shellRoot.searchQuery = "";
                             }
                         }
+                    }
 
-                        Flickable {
-                            id: flickable
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            contentWidth: width
-                            contentHeight: contentColumn.implicitHeight
-                            boundsBehavior: Flickable.StopAtBounds
-                            clip: true
+                    DS.IconButton {
+                        icon: "󰅖"
+                        preferredHeight: 40
+                        onClicked: shellRoot.closeApp()
+                    }
+                }
 
-                            ColumnLayout {
-                                id: contentColumn
-                                width: flickable.width
-                                spacing: Design.Tokens.space.s20
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    spacing: Design.Tokens.space.s20
 
-                                DS.Card {
+                    DS.Surface {
+                        Layout.preferredWidth: Design.Tokens.component.drawer.width
+                        Layout.fillHeight: true
+                        padding: Design.Tokens.space.s12
+                        backgroundColor: Design.Tokens.color.surfaceContainerLow
+
+                        ColumnLayout {
+                            width: parent.width
+                            spacing: Design.Tokens.component.drawer.sectionGap
+
+                            Repeater {
+                                model: registry.categories
+
+                                DS.NavigationDrawerItem {
+                                    required property var modelData
                                     Layout.fillWidth: true
+                                    icon: modelData.icon
+                                    text: modelData.label
+                                    selected: shellRoot.selectedCategoryId === modelData.id
+                                    onClicked: {
+                                        shellRoot.selectedCategoryId = modelData.id;
+                                        shellRoot.pendingEntryId = "";
+                                        shellRoot.searchQuery = "";
+                                    }
+                                }
+                            }
+                        }
+                    }
 
-                                    ColumnLayout {
-                                        width: parent.width
-                                        spacing: Design.Tokens.space.s16
+                    DS.Panel {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        padding: Design.Tokens.space.s20
 
-                                        DS.HeaderBlock {
+                        ColumnLayout {
+                            anchors.fill: parent
+                            spacing: Design.Tokens.space.s16
+
+                            DS.Card {
+                                visible: shellRoot.searchQuery.trim().length > 0
+                                Layout.fillWidth: true
+
+                                ColumnLayout {
+                                    width: parent.width
+                                    spacing: Design.Tokens.space.s8
+
+                                    DS.HeaderBlock {
+                                        Layout.fillWidth: true
+                                        title: "Search results"
+                                        subtitle: shellRoot.searchResults.length > 0
+                                            ? `${shellRoot.searchResults.length} matching settings`
+                                            : "No matching settings"
+                                    }
+
+                                    Repeater {
+                                        model: shellRoot.searchResults
+
+                                        DS.ListItem {
+                                            required property var modelData
                                             Layout.fillWidth: true
-                                            title: "Appearance"
-                                            subtitle: "Choose the global mode and accent without recoloring the whole interface"
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: Design.Tokens.space.s12
-
-                                            DS.Button {
-                                                Layout.fillWidth: true
-                                                text: "Dark"
-                                                variant: shellRoot.draftMode === "dark" ? "primary" : "secondary"
-                                                onClicked: shellRoot.draftMode = "dark"
-                                            }
-
-                                            DS.Button {
-                                                Layout.fillWidth: true
-                                                text: "Light"
-                                                variant: shellRoot.draftMode === "light" ? "primary" : "secondary"
-                                                onClicked: shellRoot.draftMode = "light"
-                                            }
-                                        }
-
-                                        Flow {
-                                            Layout.fillWidth: true
-                                            width: parent.width
-                                            spacing: Design.Tokens.space.s12
-
-                                            Repeater {
-                                                model: shellRoot.accentOptions
-
-                                                Rectangle {
-                                                    required property var modelData
-
-                                                    width: 68
-                                                    height: 68
-                                                    radius: Design.Tokens.radius.lg
-                                                    color: modelData.value
-                                                    border.width: shellRoot.draftAccentColor === modelData.value
-                                                        ? Design.Tokens.border.width.strong
-                                                        : Design.Tokens.border.width.thin
-                                                    border.color: shellRoot.draftAccentColor === modelData.value
-                                                        ? Design.Tokens.color.text.primary
-                                                        : Design.ThemePalette.withAlpha(Design.Tokens.color.text.primary, 0.15)
-
-                                                    Text {
-                                                        anchors.horizontalCenter: parent.horizontalCenter
-                                                        anchors.bottom: parent.bottom
-                                                        anchors.bottomMargin: Design.Tokens.space.s8
-                                                        text: modelData.name
-                                                        color: "#ffffff"
-                                                        font.family: Design.Tokens.font.family.label
-                                                        font.pixelSize: Design.Tokens.font.size.caption
-                                                        font.weight: Design.Tokens.font.weight.semibold
-                                                    }
-
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        cursorShape: Qt.PointingHandCursor
-                                                        onClicked: shellRoot.draftAccentColor = parent.modelData.value
-                                                    }
-                                                }
+                                            icon: modelData.categoryIcon
+                                            title: modelData.title
+                                            subtitle: modelData.description
+                                            valueText: modelData.categoryLabel
+                                            onClicked: {
+                                                shellRoot.selectedCategoryId = modelData.categoryId;
+                                                shellRoot.pendingEntryId = modelData.entryId;
+                                                shellRoot.searchQuery = "";
                                             }
                                         }
                                     }
                                 }
+                            }
 
-                                DS.Card {
-                                    Layout.fillWidth: true
+                            Loader {
+                                id: pageLoader
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                source: shellRoot.currentCategory?.pageSource ?? ""
 
-                                    ColumnLayout {
-                                        width: parent.width
-                                        spacing: Design.Tokens.space.s16
-
-                                        DS.HeaderBlock {
-                                            Layout.fillWidth: true
-                                            title: "Typography"
-                                            subtitle: "Text fonts are configurable; icon glyphs stay fixed for reliability"
-                                        }
-
-                                        Repeater {
-                                            model: Design.FontCatalog.entries
-
-                                            DS.ListItem {
-                                                required property var modelData
-
-                                                Layout.fillWidth: true
-                                                title: modelData.label
-                                                subtitle: modelData.category
-                                                valueText: shellRoot.draftFontFamily === modelData.family ? "Selected" : ""
-                                                selected: shellRoot.draftFontFamily === modelData.family
-                                                onClicked: shellRoot.draftFontFamily = modelData.family
-                                            }
-                                        }
-
-                                        DS.HeaderBlock {
-                                            Layout.fillWidth: true
-                                            title: "Scale"
-                                            subtitle: "Small controlled size steps for text and control heights"
-                                        }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: Design.Tokens.space.s12
-
-                                            Repeater {
-                                                model: shellRoot.scaleOptions
-
-                                                DS.Button {
-                                                    required property var modelData
-
-                                                    Layout.fillWidth: true
-                                                    text: modelData.label
-                                                    variant: Math.abs(shellRoot.draftUiScale - modelData.value) < 0.001 ? "primary" : "secondary"
-                                                    onClicked: shellRoot.draftUiScale = modelData.value
-                                                }
-                                            }
-                                        }
-
-                                        DS.FeedbackBlock {
-                                            Layout.fillWidth: true
-                                            kind: shellRoot.hasPendingChanges ? "warning" : "info"
-                                            title: shellRoot.hasPendingChanges ? "Pending changes" : "Applied style"
-                                            message: shellRoot.hasPendingChanges
-                                                ? "Your changes are staged. Click Apply to propagate them to running modules."
-                                                : "This panel is showing the currently applied theme values."
-                                        }
-                                    }
-                                }
-
-                                DS.Card {
-                                    Layout.fillWidth: true
-
-                                    ColumnLayout {
-                                        width: parent.width
-                                        spacing: Design.Tokens.space.s16
-
-                                        DS.HeaderBlock {
-                                            Layout.fillWidth: true
-                                            title: "Preview"
-                                            subtitle: "Shared components update live from the active token set"
-                                        }
-
-                                        DS.Panel {
-                                            Layout.fillWidth: true
-                                            padding: Design.Tokens.space.s20
-
-                                            ColumnLayout {
-                                                width: parent.width
-                                                spacing: Design.Tokens.space.s16
-
-                                                DS.HeaderBlock {
-                                                    Layout.fillWidth: true
-                                                    title: "Now Playing"
-                                                    subtitle: "Panel / Header / Action anatomy"
-
-                                                    DS.Button {
-                                                        text: "Open"
-                                                        variant: "ghost"
-                                                        preferredHeight: 34
-                                                    }
-                                                }
-
-                                                RowLayout {
-                                                    Layout.fillWidth: true
-                                                    spacing: Design.Tokens.space.s12
-
-                                                    DS.ToggleTile {
-                                                        Layout.fillWidth: true
-                                                        icon: "󰖩"
-                                                        title: "Wi-Fi"
-                                                        subtitle: "Connected"
-                                                        checked: true
-                                                    }
-
-                                                    DS.ToggleTile {
-                                                        Layout.fillWidth: true
-                                                        icon: "󰂯"
-                                                        title: "Bluetooth"
-                                                        subtitle: "Idle"
-                                                        checked: false
-                                                    }
-                                                }
-
-                                                DS.Card {
-                                                    Layout.fillWidth: true
-
-                                                    ColumnLayout {
-                                                        width: parent.width
-                                                        spacing: Design.Tokens.space.s12
-
-                                                        Text {
-                                                            text: "Output volume"
-                                                            color: Design.Tokens.color.text.primary
-                                                            font.family: Design.Tokens.font.family.title
-                                                            font.pixelSize: Design.Tokens.font.size.body
-                                                            font.weight: Design.Tokens.font.weight.semibold
-                                                        }
-
-                                                        DS.Slider {
-                                                            Layout.fillWidth: true
-                                                            value: 0.62
-                                                        }
-
-                                                        RowLayout {
-                                                            Layout.fillWidth: true
-                                                            spacing: Design.Tokens.space.s12
-
-                                                            DS.Button {
-                                                                text: "Primary"
-                                                                variant: "primary"
-                                                            }
-
-                                                            DS.Button {
-                                                                text: "Secondary"
-                                                                variant: "secondary"
-                                                            }
-
-                                                            DS.Button {
-                                                                text: "Ghost"
-                                                                variant: "ghost"
-                                                            }
-                                                        }
-                                                    }
-                                                }
-
-                                                DS.FeedbackBlock {
-                                                    Layout.fillWidth: true
-                                                    kind: "info"
-                                                    title: "Feedback surface"
-                                                    message: "Accent color is reserved for focus, selection and key actions."
-                                                }
-
-                                                DS.ListItem {
-                                                    Layout.fillWidth: true
-                                                    title: "Notification item"
-                                                    subtitle: "Item / list / metadata alignment"
-                                                    valueText: "2m ago"
-                                                    selected: true
-                                                }
-
-                                                DS.ListItem {
-                                                    Layout.fillWidth: true
-                                                    title: "Calendar event"
-                                                    subtitle: "Preview of secondary text, spacing and hover"
-                                                    valueText: "14:30"
-                                                }
-                                            }
+                                onLoaded: {
+                                    if (item) {
+                                        item.context = shellRoot.pageContext;
+                                        if (shellRoot.pendingEntryId !== "" && item.focusEntry) {
+                                            item.focusEntry(shellRoot.pendingEntryId);
+                                            shellRoot.pendingEntryId = "";
                                         }
                                     }
                                 }

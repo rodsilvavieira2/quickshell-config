@@ -2,8 +2,9 @@ import QtQuick
 import "../designsystem"
 
 Surface {
-    backgroundColor: Tokens.color.bg.elevated
-    borderColor: Tokens.color.border.subtle
+    variant: "surfaceContainer"
+    backgroundColor: Tokens.color.surfaceContainer
+    borderColor: Tokens.color.outlineVariant
     borderWidth: Tokens.border.width.thin
     radius: Tokens.component.card.radius
     padding: Tokens.component.card.padding

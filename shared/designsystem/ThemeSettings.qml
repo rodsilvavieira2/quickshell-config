@@ -26,6 +26,7 @@ Singleton {
 
     readonly property bool isDark: mode !== "light"
     readonly property color accent: accentColor
+    readonly property color seedColor: accentColor
     readonly property string resolvedFontFamily: FontCatalog.resolveTextFamily(fontFamily)
     readonly property string iconFontFamily: FontCatalog.defaultIconFamily
 

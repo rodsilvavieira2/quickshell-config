@@ -7,18 +7,25 @@ Rectangle {
 
     signal clicked()
 
+    property string icon: ""
     property string title: ""
     property string subtitle: ""
     property string valueText: ""
+    property string trailingIcon: ""
     property bool selected: false
+    property bool disabled: false
 
     implicitHeight: Math.max(Tokens.component.listItem.minHeight, contentLayout.implicitHeight + Tokens.component.listItem.paddingY * 2)
-    radius: Tokens.radius.lg
-    color: selected ? ThemePalette.withAlpha(Tokens.color.accent.primary, ThemeSettings.isDark ? 0.14 : 0.12) : "transparent"
+    radius: Tokens.shape.large
+    color: selected ? ThemePalette.withAlpha(Tokens.color.primary, Tokens.stateLayer.selected) : "transparent"
+    border.width: selected ? Tokens.border.width.thin : 0
+    border.color: selected ? ThemePalette.withAlpha(Tokens.color.primary, 0.28) : "transparent"
+    opacity: disabled ? Tokens.opacities.disabled : 1
 
     MouseArea {
         id: mouseArea
         anchors.fill: parent
+        enabled: !root.disabled
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: root.clicked()
@@ -27,7 +34,7 @@ Rectangle {
     Rectangle {
         anchors.fill: parent
         radius: parent.radius
-        color: mouseArea.containsMouse ? ThemePalette.withAlpha(Tokens.color.text.primary, ThemeSettings.isDark ? 0.05 : 0.04) : "transparent"
+        color: mouseArea.containsMouse ? ThemePalette.withAlpha(Tokens.color.text.primary, Tokens.stateLayer.hover) : "transparent"
     }
 
     RowLayout {
@@ -38,6 +45,15 @@ Rectangle {
         anchors.topMargin: Tokens.component.listItem.paddingY
         anchors.bottomMargin: Tokens.component.listItem.paddingY
         spacing: Tokens.space.s12
+
+        Text {
+            visible: root.icon !== ""
+            text: root.icon
+            color: selected ? Tokens.color.primary : Tokens.color.icon.secondary
+            font.family: Tokens.font.family.icon
+            font.pixelSize: Tokens.font.size.title
+            Layout.alignment: Qt.AlignTop
+        }
 
         ColumnLayout {
             Layout.fillWidth: true
@@ -57,15 +73,24 @@ Rectangle {
                 color: Tokens.color.text.secondary
                 font.family: Tokens.font.family.caption
                 font.pixelSize: Tokens.font.size.caption
+                wrapMode: Text.Wrap
             }
         }
 
         Text {
             visible: root.valueText !== ""
             text: root.valueText
-            color: Tokens.color.text.secondary
+            color: selected ? Tokens.color.primary : Tokens.color.text.secondary
             font.family: Tokens.font.family.label
             font.pixelSize: Tokens.font.size.label
+        }
+
+        Text {
+            visible: root.trailingIcon !== ""
+            text: root.trailingIcon
+            color: Tokens.color.icon.secondary
+            font.family: Tokens.font.family.icon
+            font.pixelSize: Tokens.font.size.body
         }
     }
 }

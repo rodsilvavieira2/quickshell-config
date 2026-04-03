@@ -8,32 +8,32 @@ import "../shared/designsystem"
 Singleton {
     id: root
 
-    readonly property color base: Tokens.color.bg.surface
-    readonly property color mantle: Tokens.color.bg.elevated
-    readonly property color crust: Tokens.color.bg.canvas
+    readonly property color base: Tokens.color.surface
+    readonly property color mantle: Tokens.color.surfaceContainer
+    readonly property color crust: Tokens.color.surfaceDim
     readonly property color text: Tokens.color.text.primary
     readonly property color subtext0: Tokens.color.text.secondary
     readonly property color subtext1: Tokens.color.text.secondary
-    readonly property color surface0: Tokens.color.bg.interactive
+    readonly property color surface0: Tokens.color.surfaceContainerHigh
     readonly property color surface1: Tokens.color.bg.hover
     readonly property color surface2: Tokens.color.bg.active
     readonly property color overlay0: Tokens.color.text.muted
     readonly property color overlay1: Tokens.color.text.secondary
-    readonly property color blue: Tokens.color.accent.primary
-    readonly property color mauve: Tokens.color.accent.hover
-    readonly property color lavender: ThemePalette.mix(Tokens.color.accent.primary, ThemePalette.white, ThemeSettings.isDark ? 0.18 : 0.02)
+    readonly property color blue: Tokens.color.primary
+    readonly property color mauve: Tokens.color.secondary
+    readonly property color lavender: ThemePalette.mix(Tokens.color.primary, ThemePalette.white, ThemeSettings.isDark ? 0.18 : 0.02)
     readonly property color peach: Tokens.color.warning
     readonly property color green: Tokens.color.success
     readonly property color red: Tokens.color.error
-    readonly property color flamingo: ThemePalette.mix(Tokens.color.error, Tokens.color.accent.primary, 0.35)
+    readonly property color flamingo: ThemePalette.mix(Tokens.color.error, Tokens.color.primary, 0.35)
 
     property QtObject colors: QtObject {
         property color cSurface: root.base
         property color cSurfaceContainer: root.mantle
         property color cSurfaceContainerHigh: root.surface0
-        property color cBorder: Tokens.color.border.strong
-        property color cPrimary: Tokens.color.accent.primary
-        property color cSecondary: Tokens.color.accent.hover
+        property color cBorder: Tokens.color.outline
+        property color cPrimary: Tokens.color.primary
+        property color cSecondary: Tokens.color.secondary
         property color cOnSurface: Tokens.color.text.primary
         property color cOnSurfaceVariant: Tokens.color.text.secondary
         property color cOnSurfaceDim: Tokens.color.text.muted

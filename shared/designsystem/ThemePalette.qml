@@ -11,17 +11,23 @@ Singleton {
     readonly property color black: "#000000"
 
     readonly property QtObject dark: QtObject {
-        readonly property color bgCanvas: "#09090b"
-        readonly property color bgSurface: "#111214"
-        readonly property color bgElevated: "#17191c"
-        readonly property color bgInteractive: "#1f2227"
-        readonly property color bgHover: "#262a30"
-        readonly property color bgActive: "#30353d"
-        readonly property color borderSubtle: "#262a30"
-        readonly property color borderStrong: "#393f48"
+        readonly property color surfaceDim: "#09090b"
+        readonly property color surface: "#111214"
+        readonly property color surfaceBright: "#1b1d21"
+        readonly property color surfaceContainerLowest: "#0d0f12"
+        readonly property color surfaceContainerLow: "#13161a"
+        readonly property color surfaceContainer: "#17191c"
+        readonly property color surfaceContainerHigh: "#1f2227"
+        readonly property color surfaceContainerHighest: "#262a30"
+        readonly property color surfaceVariant: "#30353d"
+        readonly property color outline: "#6d7581"
+        readonly property color outlineVariant: "#393f48"
+        readonly property color inverseSurface: "#edf1f6"
+        readonly property color inverseOnSurface: "#17191c"
+        readonly property color inversePrimary: "#205fa9"
         readonly property color textPrimary: "#f5f7fa"
-        readonly property color textSecondary: "#c2c9d3"
-        readonly property color textMuted: "#9098a4"
+        readonly property color textSecondary: "#d6dde8"
+        readonly property color textMuted: "#9ba4b0"
         readonly property color textInverse: "#09090b"
         readonly property color iconPrimary: "#f5f7fa"
         readonly property color iconSecondary: "#aab2be"
@@ -34,17 +40,23 @@ Singleton {
     }
 
     readonly property QtObject light: QtObject {
-        readonly property color bgCanvas: "#eff1f5"
-        readonly property color bgSurface: "#ffffff"
-        readonly property color bgElevated: "#f7f8fa"
-        readonly property color bgInteractive: "#eef1f5"
-        readonly property color bgHover: "#e5e9f0"
-        readonly property color bgActive: "#dce1ea"
-        readonly property color borderSubtle: "#d8dde6"
-        readonly property color borderStrong: "#bcc4d0"
+        readonly property color surfaceDim: "#dde2e8"
+        readonly property color surface: "#f8f9fc"
+        readonly property color surfaceBright: "#ffffff"
+        readonly property color surfaceContainerLowest: "#ffffff"
+        readonly property color surfaceContainerLow: "#f3f5f8"
+        readonly property color surfaceContainer: "#edf1f5"
+        readonly property color surfaceContainerHigh: "#e7ebf0"
+        readonly property color surfaceContainerHighest: "#dce1ea"
+        readonly property color surfaceVariant: "#d5dce6"
+        readonly property color outline: "#66707d"
+        readonly property color outlineVariant: "#bcc4d0"
+        readonly property color inverseSurface: "#1f2329"
+        readonly property color inverseOnSurface: "#f5f7fa"
+        readonly property color inversePrimary: "#a9cbff"
         readonly property color textPrimary: "#111827"
-        readonly property color textSecondary: "#4b5563"
-        readonly property color textMuted: "#6b7280"
+        readonly property color textSecondary: "#334155"
+        readonly property color textMuted: "#64748b"
         readonly property color textInverse: "#ffffff"
         readonly property color iconPrimary: "#111827"
         readonly property color iconSecondary: "#6b7280"
@@ -68,5 +80,11 @@ Singleton {
             firstColor.b * inverse + secondColor.b * amount,
             firstColor.a * inverse + secondColor.a * amount
         );
+    }
+
+    function tone(colorValue, towardLight, amount) {
+        return towardLight
+            ? root.mix(colorValue, root.white, amount)
+            : root.mix(colorValue, root.black, amount);
     }
 }

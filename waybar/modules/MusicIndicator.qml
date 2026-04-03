@@ -27,7 +27,7 @@ Item {
             Layout.preferredHeight: infoRow.implicitHeight
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "music", "call", "music", "toggle"])
+            onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "toggle"])
 
             RowLayout {
                 id: infoRow

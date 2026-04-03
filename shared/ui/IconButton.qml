@@ -5,7 +5,7 @@ Button {
     id: root
 
     property string icon: ""
-    property int iconPixelSize: 16
+    property int iconPixelSize: Tokens.component.button.iconSize
 
     implicitWidth: preferredHeight
     text: ""
@@ -14,7 +14,7 @@ Button {
     Text {
         anchors.centerIn: parent
         text: root.icon
-        color: Tokens.color.icon.primary
+        color: root.contentColor
         font.family: Tokens.font.family.icon
         font.pixelSize: root.iconPixelSize
         font.weight: Tokens.font.weight.medium

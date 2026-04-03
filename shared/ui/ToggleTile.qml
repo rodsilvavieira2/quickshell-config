@@ -11,25 +11,21 @@ Rectangle {
     property string title: ""
     property string subtitle: ""
     property bool checked: false
+    property bool disabled: false
 
     implicitHeight: 86
-    radius: Tokens.radius.xl
+    radius: Tokens.shape.extraLarge
     color: checked
-        ? ThemePalette.withAlpha(Tokens.color.accent.primary, ThemeSettings.isDark ? 0.18 : 0.16)
-        : Tokens.color.bg.elevated
+        ? Tokens.color.primaryContainer
+        : Tokens.color.surfaceContainer
     border.width: Tokens.border.width.thin
-    border.color: checked ? ThemePalette.withAlpha(Tokens.color.accent.primary, 0.34) : Tokens.color.border.subtle
-
-    Behavior on color {
-        ColorAnimation {
-            duration: Tokens.motion.duration.fast
-            easing.type: Tokens.motion.easing.standard
-        }
-    }
+    border.color: checked ? Tokens.color.primary : Tokens.color.outlineVariant
+    opacity: disabled ? Tokens.opacities.disabled : 1
 
     MouseArea {
         id: mouseArea
         anchors.fill: parent
+        enabled: !root.disabled
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: root.clicked()
@@ -38,15 +34,8 @@ Rectangle {
     Rectangle {
         anchors.fill: parent
         radius: parent.radius
-        color: ThemePalette.withAlpha(Tokens.color.text.primary, ThemeSettings.isDark ? 0.04 : 0.03)
+        color: ThemePalette.withAlpha(checked ? Tokens.color.primary : Tokens.color.text.primary, Tokens.stateLayer.hover)
         opacity: mouseArea.containsMouse ? 1 : 0
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: Tokens.motion.duration.fast
-                easing.type: Tokens.motion.easing.standard
-            }
-        }
     }
 
     RowLayout {
@@ -57,15 +46,15 @@ Rectangle {
         Rectangle {
             Layout.preferredWidth: 40
             Layout.preferredHeight: 40
-            radius: Tokens.radius.lg
+            radius: Tokens.shape.large
             color: checked
-                ? ThemePalette.withAlpha(Tokens.color.accent.primary, ThemeSettings.isDark ? 0.2 : 0.12)
-                : Tokens.color.bg.interactive
+                ? ThemePalette.withAlpha(Tokens.color.primary, 0.14)
+                : Tokens.color.surfaceContainerHighest
 
             Text {
                 anchors.centerIn: parent
                 text: root.icon
-                color: checked ? Tokens.color.accent.primary : Tokens.color.icon.primary
+                color: checked ? Tokens.color.primary : Tokens.color.icon.primary
                 font.family: Tokens.font.family.icon
                 font.pixelSize: 18
             }
@@ -77,7 +66,7 @@ Rectangle {
 
             Text {
                 text: root.title
-                color: Tokens.color.text.primary
+                color: checked ? Tokens.color.text.primary : Tokens.color.text.primary
                 font.family: Tokens.font.family.label
                 font.pixelSize: Tokens.font.size.body
                 font.weight: Tokens.font.weight.semibold
@@ -86,7 +75,7 @@ Rectangle {
             Text {
                 visible: root.subtitle !== ""
                 text: root.subtitle
-                color: Tokens.color.text.secondary
+                color: checked ? Tokens.color.text.secondary : Tokens.color.text.secondary
                 font.family: Tokens.font.family.caption
                 font.pixelSize: Tokens.font.size.caption
             }
