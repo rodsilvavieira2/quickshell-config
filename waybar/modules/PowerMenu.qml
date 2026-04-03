@@ -14,7 +14,7 @@ Item {
         anchors.centerIn: parent
         text: ""
         color: mouseArea.containsMouse ? Root.Config.red : Root.Config.subtext0
-        font.family: "JetBrainsMono Nerd Font"
+        font.family: Root.Config.iconFontFamily
         font.pixelSize: Root.Config.iconSize
 
         Behavior on color {

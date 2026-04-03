@@ -28,6 +28,7 @@ Singleton {
             property string main: Tokens.font.family.body
             property string title: Tokens.font.family.title
             property string expressive: Tokens.font.family.display
+            property string icon: Tokens.font.family.icon
         }
         property QtObject pixelSize: QtObject {
             property int smaller: Tokens.font.size.caption

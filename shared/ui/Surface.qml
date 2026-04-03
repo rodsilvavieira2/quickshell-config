@@ -5,6 +5,7 @@ Item {
     id: root
 
     default property alias contentData: content.data
+    readonly property Item contentItem: content
 
     property color backgroundColor: Tokens.color.bg.surface
     property color borderColor: Tokens.color.border.subtle
@@ -13,8 +14,8 @@ Item {
     property int padding: Tokens.component.card.padding
     property int shadowLevel: Tokens.shadow.none
 
-    implicitWidth: content.implicitWidth + padding * 2
-    implicitHeight: content.implicitHeight + padding * 2
+    implicitWidth: Math.max(content.childrenRect.width, content.implicitWidth) + padding * 2
+    implicitHeight: Math.max(content.childrenRect.height, content.implicitHeight) + padding * 2
 
     DesignShadow {
         visible: root.shadowLevel > 0

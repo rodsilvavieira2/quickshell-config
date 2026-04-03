@@ -15,6 +15,15 @@ ShellRoot {
     id: shellRoot
 
     property bool panelOpen: false
+    property string draftMode: Design.ThemeSettings.mode
+    property string draftAccentColor: Design.ThemeSettings.accentColor
+    property string draftFontFamily: Design.ThemeSettings.fontFamily
+    property real draftUiScale: Design.ThemeSettings.uiScale
+    readonly property bool hasPendingChanges:
+        draftMode !== Design.ThemeSettings.mode
+        || draftAccentColor !== Design.ThemeSettings.accentColor
+        || draftFontFamily !== Design.ThemeSettings.fontFamily
+        || Math.abs(draftUiScale - Design.ThemeSettings.uiScale) > 0.001
 
     readonly property var accentOptions: [
         { name: "Blue", value: "#4f8cff" },
@@ -30,6 +39,24 @@ ShellRoot {
         { label: "100%", value: 1.0 },
         { label: "110%", value: 1.1 }
     ]
+
+    function resetDrafts() {
+        draftMode = Design.ThemeSettings.mode;
+        draftAccentColor = Design.ThemeSettings.accentColor;
+        draftFontFamily = Design.ThemeSettings.fontFamily;
+        draftUiScale = Design.ThemeSettings.uiScale;
+    }
+
+    function applyDrafts() {
+        Design.ThemeSettings.apply(draftMode, draftAccentColor, draftFontFamily, draftUiScale);
+        resetDrafts();
+    }
+
+    onPanelOpenChanged: {
+        if (panelOpen) {
+            resetDrafts();
+        }
+    }
 
     IpcHandler {
         target: "settings"
@@ -141,6 +168,14 @@ ShellRoot {
                             title: "Desktop UI"
                             subtitle: "Global design system settings for your Quickshell modules"
 
+                            DS.Button {
+                                text: "Apply"
+                                variant: "primary"
+                                preferredHeight: 36
+                                disabled: !shellRoot.hasPendingChanges
+                                onClicked: shellRoot.applyDrafts()
+                            }
+
                             DS.IconButton {
                                 icon: "󰅖"
                                 preferredHeight: 36
@@ -166,7 +201,7 @@ ShellRoot {
                                     Layout.fillWidth: true
 
                                     ColumnLayout {
-                                        anchors.fill: parent
+                                        width: parent.width
                                         spacing: Design.Tokens.space.s16
 
                                         DS.HeaderBlock {
@@ -182,19 +217,20 @@ ShellRoot {
                                             DS.Button {
                                                 Layout.fillWidth: true
                                                 text: "Dark"
-                                                variant: Design.ThemeSettings.mode === "dark" ? "primary" : "secondary"
-                                                onClicked: Design.ThemeSettings.mode = "dark"
+                                                variant: shellRoot.draftMode === "dark" ? "primary" : "secondary"
+                                                onClicked: shellRoot.draftMode = "dark"
                                             }
 
                                             DS.Button {
                                                 Layout.fillWidth: true
                                                 text: "Light"
-                                                variant: Design.ThemeSettings.mode === "light" ? "primary" : "secondary"
-                                                onClicked: Design.ThemeSettings.mode = "light"
+                                                variant: shellRoot.draftMode === "light" ? "primary" : "secondary"
+                                                onClicked: shellRoot.draftMode = "light"
                                             }
                                         }
 
                                         Flow {
+                                            Layout.fillWidth: true
                                             width: parent.width
                                             spacing: Design.Tokens.space.s12
 
@@ -208,10 +244,10 @@ ShellRoot {
                                                     height: 68
                                                     radius: Design.Tokens.radius.lg
                                                     color: modelData.value
-                                                    border.width: Design.ThemeSettings.accentColor === modelData.value
+                                                    border.width: shellRoot.draftAccentColor === modelData.value
                                                         ? Design.Tokens.border.width.strong
                                                         : Design.Tokens.border.width.thin
-                                                    border.color: Design.ThemeSettings.accentColor === modelData.value
+                                                    border.color: shellRoot.draftAccentColor === modelData.value
                                                         ? Design.Tokens.color.text.primary
                                                         : Design.ThemePalette.withAlpha(Design.Tokens.color.text.primary, 0.15)
 
@@ -229,7 +265,7 @@ ShellRoot {
                                                     MouseArea {
                                                         anchors.fill: parent
                                                         cursorShape: Qt.PointingHandCursor
-                                                        onClicked: Design.ThemeSettings.accentColor = parent.modelData.value
+                                                        onClicked: shellRoot.draftAccentColor = parent.modelData.value
                                                     }
                                                 }
                                             }
@@ -241,7 +277,7 @@ ShellRoot {
                                     Layout.fillWidth: true
 
                                     ColumnLayout {
-                                        anchors.fill: parent
+                                        width: parent.width
                                         spacing: Design.Tokens.space.s16
 
                                         DS.HeaderBlock {
@@ -259,9 +295,9 @@ ShellRoot {
                                                 Layout.fillWidth: true
                                                 title: modelData.label
                                                 subtitle: modelData.category
-                                                valueText: Design.ThemeSettings.resolvedFontFamily === modelData.family ? "Active" : ""
-                                                selected: Design.ThemeSettings.resolvedFontFamily === modelData.family
-                                                onClicked: Design.ThemeSettings.fontFamily = modelData.family
+                                                valueText: shellRoot.draftFontFamily === modelData.family ? "Selected" : ""
+                                                selected: shellRoot.draftFontFamily === modelData.family
+                                                onClicked: shellRoot.draftFontFamily = modelData.family
                                             }
                                         }
 
@@ -283,10 +319,19 @@ ShellRoot {
 
                                                     Layout.fillWidth: true
                                                     text: modelData.label
-                                                    variant: Math.abs(Design.ThemeSettings.uiScale - modelData.value) < 0.001 ? "primary" : "secondary"
-                                                    onClicked: Design.ThemeSettings.setUiScale(modelData.value)
+                                                    variant: Math.abs(shellRoot.draftUiScale - modelData.value) < 0.001 ? "primary" : "secondary"
+                                                    onClicked: shellRoot.draftUiScale = modelData.value
                                                 }
                                             }
+                                        }
+
+                                        DS.FeedbackBlock {
+                                            Layout.fillWidth: true
+                                            kind: shellRoot.hasPendingChanges ? "warning" : "info"
+                                            title: shellRoot.hasPendingChanges ? "Pending changes" : "Applied style"
+                                            message: shellRoot.hasPendingChanges
+                                                ? "Your changes are staged. Click Apply to propagate them to running modules."
+                                                : "This panel is showing the currently applied theme values."
                                         }
                                     }
                                 }
@@ -295,7 +340,7 @@ ShellRoot {
                                     Layout.fillWidth: true
 
                                     ColumnLayout {
-                                        anchors.fill: parent
+                                        width: parent.width
                                         spacing: Design.Tokens.space.s16
 
                                         DS.HeaderBlock {
@@ -309,7 +354,7 @@ ShellRoot {
                                             padding: Design.Tokens.space.s20
 
                                             ColumnLayout {
-                                                anchors.fill: parent
+                                                width: parent.width
                                                 spacing: Design.Tokens.space.s16
 
                                                 DS.HeaderBlock {
@@ -349,7 +394,7 @@ ShellRoot {
                                                     Layout.fillWidth: true
 
                                                     ColumnLayout {
-                                                        anchors.fill: parent
+                                                        width: parent.width
                                                         spacing: Design.Tokens.space.s12
 
                                                         Text {

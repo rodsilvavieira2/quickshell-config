@@ -18,7 +18,7 @@ Item {
         Text {
             text: ""
             color: Root.Config.text
-            font.family: "JetBrainsMono Nerd Font"
+            font.family: Root.Config.iconFontFamily
             font.pixelSize: Root.Config.iconSize
             anchors.verticalCenter: parent.verticalCenter
         }

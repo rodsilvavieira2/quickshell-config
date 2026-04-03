@@ -91,7 +91,7 @@ Rectangle {
                 text: root.icon
                 font.family: Appearance.font.family
                 font.pixelSize: 19
-                color: active ? "#f7f9fc" : root.textColor
+                color: active ? Appearance.colors.cOnSurface : root.textColor
                 
                 Behavior on color {
                     ColorAnimation {
@@ -114,7 +114,7 @@ Rectangle {
                     font.family: Appearance.font.family
                     font.pixelSize: 13
                     font.bold: true
-                    color: active ? "#f7f9fc" : root.textColor
+                    color: active ? Appearance.colors.cOnSurface : root.textColor
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
@@ -131,7 +131,7 @@ Rectangle {
                 text: root.subLabel
                 font.family: Appearance.font.family
                 font.pixelSize: 11
-                color: active ? "#dce6f5" : Appearance.colors.cOnSurfaceVariant
+                color: Appearance.colors.cOnSurfaceVariant
                 opacity: 1
                 elide: Text.ElideRight
                 Layout.fillWidth: true

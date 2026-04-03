@@ -22,7 +22,7 @@ Item {
 
         text: root.titleText
         color: Root.Config.subtext1
-        font.family: "JetBrainsMono Nerd Font"
+        font.family: Root.Config.textFontFamily
         font.pixelSize: 11
         elide: Text.ElideRight
     }

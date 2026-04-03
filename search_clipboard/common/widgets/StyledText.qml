@@ -10,5 +10,5 @@ Text {
         family: Appearance?.font.family.main ?? "sans-serif"
         pixelSize: Appearance?.font.pixelSize.small ?? 15
     }
-    color: Appearance?.colors.colOnLayer0 ?? "#cdd6f4"
+    color: Appearance.colors.colOnLayer0
 }

@@ -44,7 +44,7 @@ Item {
         Text {
             text: root.timeString
             color: Root.Config.text
-            font.family: "JetBrainsMono Nerd Font"
+            font.family: Root.Config.textFontFamily
             font.pixelSize: 13
             font.bold: true
         }
@@ -60,7 +60,7 @@ Item {
         Text {
             text: root.dateString
             color: Root.Config.subtext0
-            font.family: "JetBrainsMono Nerd Font"
+            font.family: Root.Config.textFontFamily
             font.pixelSize: 10
             font.bold: true
         }

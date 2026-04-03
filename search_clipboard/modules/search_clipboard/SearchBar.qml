@@ -30,7 +30,7 @@ Item {
 
         Text {
             text: ""
-            font.family: "JetBrainsMono Nerd Font"
+            font.family: Appearance.font.family.icon
             font.pixelSize: 20
             color: Appearance.colors.colAccent
             Layout.alignment: Qt.AlignVCenter

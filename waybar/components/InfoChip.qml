@@ -56,7 +56,7 @@ Rectangle {
             visible: !root.iconSource.toString().length && root.iconText.length > 0
             text: root.iconText
             color: root.hovered && root.clickable ? root.hoverIconColor : root.iconColor
-            font.family: "JetBrainsMono Nerd Font"
+            font.family: Root.Config.iconFontFamily
             font.pixelSize: Root.Config.iconSize
             font.bold: root.highlighted
 
@@ -70,7 +70,7 @@ Rectangle {
             Layout.preferredWidth: root.valueMaxWidth > 0 ? Math.min(implicitWidth, root.valueMaxWidth) : implicitWidth
             text: root.valueText
             color: root.hovered && root.clickable ? root.hoverLabelColor : root.labelColor
-            font.family: "JetBrainsMono Nerd Font"
+            font.family: Root.Config.textFontFamily
             font.pixelSize: Root.Config.iconSize - 3
             font.bold: root.highlighted
             elide: Text.ElideRight

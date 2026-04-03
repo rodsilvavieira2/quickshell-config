@@ -8,6 +8,7 @@ import QtCore
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import "./shared/designsystem" as Design
 
 ShellRoot {
     id: shellRoot
@@ -71,30 +72,32 @@ ShellRoot {
         }
 
         // -------------------------------------------------------------------------
-        // COLORS (Catppuccin Mocha Dark)
+        // COLORS
         // -------------------------------------------------------------------------
-        readonly property color base: "#1e1e2e"
-        readonly property color mantle: "#181825"
-        readonly property color crust: "#11111b"
-        readonly property color text: "#cdd6f4"
-        readonly property color subtext1: "#bac2de"
-        readonly property color subtext0: "#a6adc8"
-        readonly property color overlay2: "#9399b2"
-        readonly property color overlay1: "#7f849c"
-        readonly property color overlay0: "#6c7086"
-        readonly property color surface2: "#585b70"
-        readonly property color surface1: "#45475a"
-        readonly property color surface0: "#313244"
-        
-        readonly property color mauve: "#cba6f7"
-        readonly property color pink: "#f5c2e7"
-        readonly property color blue: "#89b4fa"
-        readonly property color sapphire: "#74c7ec"
-        readonly property color peach: "#fab387"
-        readonly property color yellow: "#f9e2af"
-        readonly property color teal: "#94e2d5"
-        readonly property color green: "#a6e3a1"
-        readonly property color red: "#f38ba8"
+        readonly property color base: Design.Tokens.color.bg.surface
+        readonly property color mantle: Design.Tokens.color.bg.elevated
+        readonly property color crust: Design.Tokens.color.bg.canvas
+        readonly property color text: Design.Tokens.color.text.primary
+        readonly property color subtext1: Design.Tokens.color.text.secondary
+        readonly property color subtext0: Design.Tokens.color.text.secondary
+        readonly property color overlay2: Design.ThemePalette.mix(Design.Tokens.color.text.secondary, Design.Tokens.color.text.muted, 0.25)
+        readonly property color overlay1: Design.Tokens.color.text.muted
+        readonly property color overlay0: Design.Tokens.color.text.muted
+        readonly property color surface2: Design.Tokens.color.bg.active
+        readonly property color surface1: Design.Tokens.color.bg.hover
+        readonly property color surface0: Design.Tokens.color.bg.interactive
+
+        readonly property color mauve: Design.Tokens.color.accent.hover
+        readonly property color pink: Design.ThemePalette.mix(Design.Tokens.color.error, Design.Tokens.color.accent.primary, 0.35)
+        readonly property color blue: Design.Tokens.color.accent.primary
+        readonly property color sapphire: Design.Tokens.color.info
+        readonly property color peach: Design.Tokens.color.warning
+        readonly property color yellow: Design.ThemePalette.mix(Design.Tokens.color.warning, Design.Tokens.color.text.primary, Design.ThemeSettings.isDark ? 0.18 : 0.08)
+        readonly property color teal: Design.ThemePalette.mix(Design.Tokens.color.info, Design.Tokens.color.success, 0.45)
+        readonly property color green: Design.Tokens.color.success
+        readonly property color red: Design.Tokens.color.error
+        readonly property string textFontFamily: Design.Tokens.font.family.body
+        readonly property string iconFontFamily: Design.Tokens.font.family.icon
 
         readonly property string scriptsDir: Quickshell.env("HOME") + "/.config/quickshell/calendar"
 
@@ -554,7 +557,7 @@ ShellRoot {
                     anchors.centerIn: parent
                     anchors.verticalCenterOffset: -100
                     text: window.weatherData && window.weatherData.forecast[window.weatherView] ? window.weatherData.forecast[window.weatherView].icon : ""
-                    font.family: "Iosevka Nerd Font"
+                    font.family: window.iconFontFamily
                     font.pixelSize: 800
                     color: window.activeWeatherHex
                     opacity: (0.03 + (0.01 * Math.sin(window.globalOrbitAngle * 4))) * window.introAmbient * window.weatherContentOpacity
@@ -674,7 +677,7 @@ ShellRoot {
                             spacing: 2
                             Text {
                                 text: Qt.formatTime(window.currentTime, "HH:mm")
-                                font.family: "JetBrains Mono"
+                                font.family: window.textFontFamily
                                 font.weight: Font.Black
                                 font.pixelSize: 84
                                 color: window.text
@@ -682,7 +685,7 @@ ShellRoot {
                             }
                             Text {
                                 text: Qt.formatTime(window.currentTime, ":ss")
-                                font.family: "JetBrains Mono"
+                                font.family: window.textFontFamily
                                 font.weight: Font.Bold
                                 font.pixelSize: 32
                                 color: window.textAccent
@@ -697,7 +700,7 @@ ShellRoot {
                         Text {
                             Layout.alignment: Qt.AlignHCenter
                             text: Qt.formatDateTime(window.currentTime, "dddd, MMMM dd")
-                            font.family: "JetBrains Mono"
+                            font.family: window.textFontFamily
                             font.weight: Font.Bold
                             font.pixelSize: 16
                             color: window.subtext0
@@ -761,14 +764,14 @@ ShellRoot {
                                         Text { 
                                             Layout.alignment: Qt.AlignHCenter
                                             text: modelData.time
-                                            font.family: "JetBrains Mono"; font.weight: Font.Bold; font.pixelSize: 12
+                                            font.family: window.textFontFamily; font.weight: Font.Bold; font.pixelSize: 12
                                             color: isHighlighted ? window.base : (hrMa.containsMouse ? window.text : window.overlay1)
                                         }
                                         
                                         Text { 
                                             Layout.alignment: Qt.AlignHCenter
                                             text: modelData.icon || (window.weatherData && window.weatherData.forecast[window.weatherView] ? window.weatherData.forecast[window.weatherView].icon : "")
-                                            font.family: "Iosevka Nerd Font"; font.pixelSize: 18
+                                            font.family: window.iconFontFamily; font.pixelSize: 18
                                             color: isHighlighted ? window.base : (modelData.hex || window.text)
                                             
                                             transform: Translate { y: hrMa.containsMouse ? -3 : 0 }
@@ -777,7 +780,7 @@ ShellRoot {
                                         
                                         Text { 
                                             Layout.alignment: Qt.AlignHCenter; text: modelData.temp + "°"
-                                            font.family: "JetBrains Mono"; font.weight: Font.Black; font.pixelSize: 14
+                                            font.family: window.textFontFamily; font.weight: Font.Black; font.pixelSize: 14
                                             color: isHighlighted ? window.base : window.text 
                                         }
                                     }
@@ -824,7 +827,7 @@ ShellRoot {
                                 opacity: window.targetMonthOffset !== 0 ? 1.0 : 0.0
                                 visible: opacity > 0
                                 Behavior on opacity { NumberAnimation { duration: 200 } }
-                                Text { anchors.centerIn: parent; text: "󰃭"; font.family: "Iosevka Nerd Font"; color: window.text; font.pixelSize: 16 }
+                                Text { anchors.centerIn: parent; text: "󰃭"; font.family: window.iconFontFamily; color: window.text; font.pixelSize: 16 }
                                 MouseArea { 
                                     id: homeMa; anchors.fill: parent; hoverEnabled: window.targetMonthOffset !== 0; 
                                     onClicked: if (window.targetMonthOffset !== 0) window.setMonthOffset(0) 
@@ -834,14 +837,14 @@ ShellRoot {
                             Rectangle {
                                 width: 32; height: 32; radius: 16
                                 color: prevMa.containsMouse ? window.surface1 : "transparent"
-                                Text { anchors.centerIn: parent; text: ""; font.family: "Iosevka Nerd Font"; color: window.text; font.pixelSize: 16 }
+                                Text { anchors.centerIn: parent; text: ""; font.family: window.iconFontFamily; color: window.text; font.pixelSize: 16 }
                                 MouseArea { id: prevMa; anchors.fill: parent; hoverEnabled: true; onClicked: window.setMonthOffset(window.targetMonthOffset - 1) }
                             }
                             
                             Text {
                                 Layout.fillWidth: true
                                 text: window.targetMonthName.toUpperCase()
-                                font.family: "JetBrains Mono"
+                                font.family: window.textFontFamily
                                 font.weight: Font.Black
                                 font.pixelSize: 16
                                 color: window.text
@@ -854,7 +857,7 @@ ShellRoot {
                             Rectangle {
                                 width: 32; height: 32; radius: 16
                                 color: nextMa.containsMouse ? window.surface1 : "transparent"
-                                Text { anchors.centerIn: parent; text: ""; font.family: "Iosevka Nerd Font"; color: window.text; font.pixelSize: 16 }
+                                Text { anchors.centerIn: parent; text: ""; font.family: window.iconFontFamily; color: window.text; font.pixelSize: 16 }
                                 MouseArea { id: nextMa; anchors.fill: parent; hoverEnabled: true; onClicked: window.setMonthOffset(window.targetMonthOffset + 1) }
                             }
                         }
@@ -866,7 +869,7 @@ ShellRoot {
                                 Text {
                                     Layout.fillWidth: true
                                     text: modelData
-                                    font.family: "JetBrains Mono"
+                                    font.family: window.textFontFamily
                                     font.weight: Font.Black
                                     font.pixelSize: 14
                                     color: window.overlay0
@@ -903,7 +906,7 @@ ShellRoot {
                                     Text {
                                         anchors.centerIn: parent
                                         text: dayNum
-                                        font.family: "JetBrains Mono"
+                                        font.family: window.textFontFamily
                                         font.weight: isToday ? Font.Black : Font.Bold
                                         font.pixelSize: 14
                                         color: isToday ? window.base : (isCurrentMonth ? window.text : window.surface0)
@@ -951,7 +954,7 @@ ShellRoot {
                                 }
                                 
                                 Text { 
-                                    anchors.centerIn: parent; text: ""; font.family: "Iosevka Nerd Font"; font.pixelSize: 18
+                                    anchors.centerIn: parent; text: ""; font.family: window.iconFontFamily; font.pixelSize: 18
                                     color: parent.containsMouse ? window.textAccent : window.overlay1
                                     transform: Translate { x: wPrevMa.containsMouse ? -5 : wPrevMa.pulseOffset }
                                     Behavior on transform { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
@@ -962,7 +965,7 @@ ShellRoot {
                                 Layout.preferredWidth: 110 // Fixed width so the buttons don't jump around
                                 horizontalAlignment: Text.AlignHCenter // Keeps the day name centered between the buttons
                                 text: window.weatherData && window.weatherData.forecast[window.weatherView] ? window.weatherData.forecast[window.weatherView].day_full.toUpperCase() : "LOADING..."
-                                font.family: "JetBrains Mono"
+                                font.family: window.textFontFamily
                                 font.weight: Font.Black
                                 font.pixelSize: 16
                                 color: window.text
@@ -980,7 +983,7 @@ ShellRoot {
                                 }
                                 
                                 Text { 
-                                    anchors.centerIn: parent; text: ""; font.family: "Iosevka Nerd Font"; font.pixelSize: 18
+                                    anchors.centerIn: parent; text: ""; font.family: window.iconFontFamily; font.pixelSize: 18
                                     color: parent.containsMouse ? window.textAccent : window.overlay1
                                     transform: Translate { x: wNextMa.containsMouse ? 5 : wNextMa.pulseOffset }
                                     Behavior on transform { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
@@ -996,7 +999,7 @@ ShellRoot {
                             Text {
                                 Layout.alignment: Qt.AlignHCenter 
                                 text: Math.round(window.displayedTemp) + "°"
-                                font.family: "JetBrains Mono"
+                                font.family: window.textFontFamily
                                 font.weight: Font.Black
                                 font.pixelSize: 84
                                 color: window.tempGlowColor
@@ -1010,7 +1013,7 @@ ShellRoot {
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
                                 text: window.weatherData && window.weatherData.forecast[window.weatherView] ? window.weatherData.forecast[window.weatherView].desc : ""
-                                font.family: "JetBrains Mono"
+                                font.family: window.textFontFamily
                                 font.weight: Font.Bold
                                 font.pixelSize: 16
                                 color: window.textAccent
@@ -1103,7 +1106,7 @@ ShellRoot {
                                         Text {
                                             anchors.centerIn: parent
                                             text: modelData.val
-                                            font.family: "JetBrains Mono"
+                                            font.family: window.textFontFamily
                                             font.weight: Font.Black
                                             font.pixelSize: 14
                                             color: window.text
@@ -1117,14 +1120,14 @@ ShellRoot {
                                         
                                         Text { 
                                             text: modelData.icon
-                                            font.family: "Iosevka Nerd Font"
+                                            font.family: window.iconFontFamily
                                             font.pixelSize: 14
                                             color: gaugeMa.containsMouse ? window.textAccent : window.overlay0
                                             Behavior on color { ColorAnimation { duration: 200 } }
                                         }
                                         Text { 
                                             text: modelData.lbl
-                                            font.family: "JetBrains Mono"
+                                            font.family: window.textFontFamily
                                             font.weight: Font.Bold
                                             font.pixelSize: 12
                                             color: window.overlay0 
@@ -1185,7 +1188,7 @@ ShellRoot {
                                 Text {
                                     anchors.centerIn: parent
                                     text: ""
-                                    font.family: "JetBrains Mono Nerd Font"
+                                    font.family: window.iconFontFamily
                                     font.pixelSize: 16
                                     color: window.mauve
                                 }
@@ -1193,7 +1196,7 @@ ShellRoot {
 
                             Text {
                                 text: "TECH NEWS"
-                                font.family: "JetBrains Mono"
+                                font.family: window.textFontFamily
                                 font.weight: Font.Bold
                                 font.pixelSize: 15
                                 font.letterSpacing: 1.5
@@ -1217,7 +1220,7 @@ ShellRoot {
 
                                     Text {
                                         text: "  HN"
-                                        font.family: "JetBrains Mono Nerd Font"
+                                        font.family: window.iconFontFamily
                                         font.weight: Font.Bold
                                         font.pixelSize: 13
                                         color: window.peach
@@ -1234,7 +1237,7 @@ ShellRoot {
                                             const mins = Math.floor(diff / 60);
                                             return mins + "m ago";
                                         }
-                                        font.family: "JetBrains Mono"
+                                        font.family: window.textFontFamily
                                         font.pixelSize: 12
                                         color: window.overlay0
                                     }
@@ -1251,7 +1254,7 @@ ShellRoot {
                             Text {
                                 anchors.centerIn: parent
                                 text: "Fetching latest stories…"
-                                font.family: "JetBrains Mono"
+                                font.family: window.textFontFamily
                                 font.italic: true
                                 font.pixelSize: 14
                                 color: window.overlay0
@@ -1346,7 +1349,7 @@ ShellRoot {
                                                             id: domainText
                                                             anchors.centerIn: parent
                                                             text: cardRoot.modelData.domain || ""
-                                                            font.family: "JetBrains Mono"
+                                                            font.family: window.textFontFamily
                                                             font.pixelSize: 10
                                                             color: window.mauve
                                                             elide: Text.ElideRight
@@ -1358,7 +1361,7 @@ ShellRoot {
                                                         Layout.fillWidth: true
                                                         Layout.fillHeight: true
                                                         text: cardRoot.modelData.title || ""
-                                                        font.family: "JetBrains Mono"
+                                                        font.family: window.textFontFamily
                                                         font.weight: Font.Bold
                                                         font.pixelSize: 13
                                                         color: cardRoot.hovered ? window.text : window.subtext1
@@ -1379,7 +1382,7 @@ ShellRoot {
                                                             Text { text: "▲"; font.pixelSize: 10; color: window.green }
                                                             Text {
                                                                 text: cardRoot.modelData.score || "0"
-                                                                font.family: "JetBrains Mono"
+                                                                font.family: window.textFontFamily
                                                                 font.weight: Font.Bold
                                                                 font.pixelSize: 12
                                                                 color: window.green
@@ -1389,10 +1392,10 @@ ShellRoot {
                                                         // Comments
                                                         RowLayout {
                                                             spacing: 4
-                                                            Text { text: ""; font.family: "JetBrains Mono Nerd Font"; font.pixelSize: 11; color: window.sapphire }
+                                                            Text { text: ""; font.family: window.iconFontFamily; font.pixelSize: 11; color: window.sapphire }
                                                             Text {
                                                                 text: cardRoot.modelData.comments || "0"
-                                                                font.family: "JetBrains Mono"
+                                                                font.family: window.textFontFamily
                                                                 font.weight: Font.Bold
                                                                 font.pixelSize: 12
                                                                 color: window.sapphire
@@ -1404,7 +1407,7 @@ ShellRoot {
                                                         // Author
                                                         Text {
                                                             text: cardRoot.modelData.by || ""
-                                                            font.family: "JetBrains Mono"
+                                                            font.family: window.textFontFamily
                                                             font.pixelSize: 11
                                                             color: window.subtext0
                                                             elide: Text.ElideRight

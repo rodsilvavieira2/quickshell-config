@@ -108,7 +108,7 @@ Item {
         Text {
             text: root.menuEntry.text
             color: Root.Config.text
-            font.family: "JetBrainsMono Nerd Font"
+            font.family: Root.Config.textFontFamily
             font.pixelSize: 12
             Layout.fillWidth: true
         }

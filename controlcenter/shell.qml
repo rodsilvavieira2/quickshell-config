@@ -12,6 +12,7 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 
 import "./components"
+import "./shared/designsystem" as Design
 
 ShellRoot {
     id: shellRoot
@@ -39,7 +40,18 @@ ShellRoot {
     ListModel { id: processModel }
     property string selectedPid: ""
     property int processMaxRows: 50
-    property string uiFontFamily: "JetBrainsMono Nerd Font Mono"
+    property string uiFontFamily: Design.Tokens.font.family.body
+    readonly property color panelBackground: Design.Tokens.color.bg.surface
+    readonly property color panelBorder: Design.ThemePalette.withAlpha(Design.Tokens.color.accent.primary, Design.ThemeSettings.isDark ? 0.55 : 0.35)
+    readonly property color cardBackground: Design.Tokens.color.bg.elevated
+    readonly property color cardBorder: Design.Tokens.color.border.subtle
+    readonly property color mutedText: Design.Tokens.color.text.secondary
+    readonly property color selectedText: Design.Tokens.color.text.inverse
+    readonly property color selectedRow: Design.Tokens.color.accent.hover
+    readonly property color processAccent: Design.ThemePalette.mix(Design.Tokens.color.error, Design.Tokens.color.accent.primary, 0.35)
+    readonly property color cpuAccent: Design.ThemePalette.mix(Design.Tokens.color.accent.primary, Design.ThemePalette.white, Design.ThemeSettings.isDark ? 0.22 : 0.08)
+    readonly property color warmColor: Design.Tokens.color.warning
+    readonly property color hotColor: Design.Tokens.color.error
 
     onPanelOpenChanged: {
         if (panelOpen) {
@@ -258,10 +270,10 @@ ShellRoot {
             width: window.width * 0.8
             height: window.height * 0.75
             anchors.centerIn: parent
-            color: "#1e1e2e" // App Background
-            radius: 8
-            border.color: "#89b4fa"
-            border.width: 2
+            color: shellRoot.panelBackground
+            radius: Design.Tokens.radius.xl
+            border.color: shellRoot.panelBorder
+            border.width: Design.Tokens.border.width.strong
 
             // Consume clicks inside the main panel
             MouseArea {
@@ -287,7 +299,7 @@ ShellRoot {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         title: "CPU CORE"
-                        titleColor: "#b4befe" // Lavender
+                        titleColor: shellRoot.cpuAccent
                         fontFamily: shellRoot.uiFontFamily
 
                         CircularProgress {
@@ -296,7 +308,7 @@ ShellRoot {
                             anchors.centerIn: parent
                             anchors.verticalCenterOffset: -22
                             value: shellRoot.cpuUsage
-                            progressColor: "#b4befe"
+                            progressColor: shellRoot.cpuAccent
                             title: Math.round(shellRoot.cpuUsage * 100) + "%"
                             subTitle: "Load"
                             fontFamily: shellRoot.uiFontFamily
@@ -306,8 +318,8 @@ ShellRoot {
                             anchors.horizontalCenter: parent.horizontalCenter
                             anchors.bottom: sparkline.top
                             anchors.bottomMargin: 12
-                            text: "Temp: <font color='#fab387'>" + shellRoot.cpuTemp + "</font>"
-                            color: "#a6adc8"
+                            text: "Temp: <font color='" + shellRoot.warmColor + "'>" + shellRoot.cpuTemp + "</font>"
+                            color: shellRoot.mutedText
                             font.family: shellRoot.uiFontFamily
                             font.pixelSize: 14
                             textFormat: Text.RichText
@@ -323,7 +335,7 @@ ShellRoot {
                             anchors.bottomMargin: 16
                             height: 40
                             history: shellRoot.cpuHistory
-                            lineColor: "#fab387" // Peach
+                            lineColor: shellRoot.warmColor
                         }
                     }
 
@@ -332,7 +344,7 @@ ShellRoot {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         title: "MEMORY (RAM)"
-                        titleColor: "#89b4fa" // Blue
+                        titleColor: Design.Tokens.color.accent.primary
                         fontFamily: shellRoot.uiFontFamily
 
                         Column {
@@ -347,7 +359,7 @@ ShellRoot {
                                 height: 32
                                 cornerRadius: 6
                                 value: shellRoot.memTotal > 0 ? (shellRoot.memUsed / shellRoot.memTotal) : 0
-                                progressColor: "#89b4fa" // Blue
+                                progressColor: Design.Tokens.color.accent.primary
                                 text: "used: " + shellRoot.memUsed.toFixed(1) + " GB / " + shellRoot.memTotal.toFixed(1) + " GB"
                                 fontFamily: shellRoot.uiFontFamily
                             }
@@ -359,7 +371,7 @@ ShellRoot {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         title: "GPU ENGINE"
-                        titleColor: "#a6e3a1" // Mint Green
+                        titleColor: Design.Tokens.color.success
                         fontFamily: shellRoot.uiFontFamily
 
                         CircularProgress {
@@ -368,7 +380,7 @@ ShellRoot {
                             anchors.centerIn: parent
                             anchors.verticalCenterOffset: -22
                             value: shellRoot.gpuUsage
-                            progressColor: "#a6e3a1"
+                            progressColor: Design.Tokens.color.success
                             title: Math.round(shellRoot.gpuUsage * 100) + "%"
                             subTitle: "Load"
                             fontFamily: shellRoot.uiFontFamily
@@ -379,8 +391,8 @@ ShellRoot {
                             anchors.bottom: gpuBar.top
                             anchors.bottomMargin: 10
                             property bool isHot: parseInt(shellRoot.gpuTemp) > 75
-                            text: "Temp: <font color='" + (isHot ? "#eba0ac" : "#fab387") + "'>" + shellRoot.gpuTemp + "</font>"
-                            color: "#a6adc8"
+                            text: "Temp: <font color='" + (isHot ? shellRoot.hotColor : shellRoot.warmColor) + "'>" + shellRoot.gpuTemp + "</font>"
+                            color: shellRoot.mutedText
                             font.family: shellRoot.uiFontFamily
                             font.pixelSize: 14
                             textFormat: Text.RichText
@@ -395,8 +407,8 @@ ShellRoot {
                             cornerRadius: 6
                             anchors.bottomMargin: 16
                             value: shellRoot.gpuMemTotal > 0 ? (shellRoot.gpuMemUsed / shellRoot.gpuMemTotal) : 0
-                            progressColor: "#a6e3a1" // Mint
-                            backgroundColor: "#313244"
+                            progressColor: Design.Tokens.color.success
+                            backgroundColor: Design.Tokens.color.bg.interactive
                             text: "VRAM: " + shellRoot.gpuMemUsed.toFixed(1) + " GB / " + shellRoot.gpuMemTotal.toFixed(1) + " GB"
                             fontFamily: shellRoot.uiFontFamily
                         }
@@ -420,10 +432,10 @@ ShellRoot {
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    color: "#181825"
-                    radius: 12
-                    border.color: "#313244"
-                    border.width: 1
+                    color: shellRoot.cardBackground
+                    radius: Design.Tokens.radius.lg
+                    border.color: shellRoot.cardBorder
+                    border.width: Design.Tokens.border.width.thin
 
                     ColumnLayout {
                         anchors.fill: parent
@@ -433,9 +445,9 @@ ShellRoot {
                         Text {
                             Layout.alignment: Qt.AlignHCenter
                             text: "RUNNING PROCESSES"
-                            color: "#f2cdcd" // Flamingo
+                            color: shellRoot.processAccent
                             font.family: shellRoot.uiFontFamily
-                            font.pixelSize: 16
+                            font.pixelSize: Design.Tokens.font.size.title
                             font.bold: true
                             font.letterSpacing: 1.1
                         }
@@ -452,17 +464,17 @@ ShellRoot {
                                 anchors.rightMargin: processCard.columnPadding + processCard.scrollBarWidth + 4
                                 spacing: processCard.columnSpacing
 
-                                Text { Layout.preferredWidth: processCard.pidWidth; text: "PID"; color: "#a6adc8"; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
-                                Text { Layout.preferredWidth: processCard.nameMinWidth; text: "Process Name"; color: "#a6adc8"; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
-                                Text { Layout.preferredWidth: processCard.cpuWidth; text: "CPU %"; color: "#a6adc8"; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
-                                Text { Layout.preferredWidth: processCard.ramWidth; text: "RAM (MB)"; color: "#a6adc8"; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
-                                Text { Layout.fillWidth: true; text: "User"; color: "#a6adc8"; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.preferredWidth: processCard.pidWidth; text: "PID"; color: shellRoot.mutedText; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.preferredWidth: processCard.nameMinWidth; text: "Process Name"; color: shellRoot.mutedText; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.preferredWidth: processCard.cpuWidth; text: "CPU %"; color: shellRoot.mutedText; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.preferredWidth: processCard.ramWidth; text: "RAM (MB)"; color: shellRoot.mutedText; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
+                                Text { Layout.fillWidth: true; text: "User"; color: shellRoot.mutedText; font.family: shellRoot.uiFontFamily; font.pixelSize: 13; font.bold: true }
                             }
 
                             Rectangle {
                                 width: parent.width
                                 height: 1
-                                color: "#313244"
+                                color: shellRoot.cardBorder
                                 anchors.bottom: parent.bottom
                             }
                         }
@@ -483,7 +495,7 @@ ShellRoot {
                                     implicitWidth: processCard.scrollBarWidth
                                     implicitHeight: 100
                                     radius: 6
-                                    color: "#313244"
+                                    color: Design.Tokens.color.bg.interactive
                                 }
                             }
 
@@ -491,8 +503,12 @@ ShellRoot {
                                 id: rowItem
                                 width: ListView.view.width
                                 height: processCard.rowHeight
-                                color: shellRoot.selectedPid === pid ? "#f2cdcd" : (index % 2 === 0 ? "#181825" : "#1e1e2e")
-                                property color textColor: shellRoot.selectedPid === pid ? "#11111b" : "#cdd6f4"
+                                color: shellRoot.selectedPid === pid
+                                    ? shellRoot.selectedRow
+                                    : (index % 2 === 0 ? shellRoot.cardBackground : shellRoot.panelBackground)
+                                property color textColor: shellRoot.selectedPid === pid
+                                    ? shellRoot.selectedText
+                                    : Design.Tokens.color.text.primary
 
                                 MouseArea {
                                     anchors.fill: parent

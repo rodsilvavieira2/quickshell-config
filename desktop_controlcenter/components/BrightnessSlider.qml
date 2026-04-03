@@ -95,7 +95,7 @@ Rectangle {
                 width: 18
                 height: 18
                 radius: 9
-                color: "#f8f8fa"
+                color: Appearance.colors.cOnSurface
                 border.color: Qt.rgba(0, 0, 0, 0.18)
                 border.width: 1
                 y: slider.topPadding + slider.availableHeight / 2 - height / 2

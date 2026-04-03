@@ -1,12 +1,13 @@
 import QtQuick
 import QtQuick.Shapes
+import "../shared/designsystem" as Design
 
 Item {
     id: root
     property real value: 0 // 0 to 1
     property real thickness: 14
-    property color progressColor: "#b4befe"
-    property color backgroundColor: "#313244"
+    property color progressColor: Design.Tokens.color.accent.primary
+    property color backgroundColor: Design.Tokens.color.bg.interactive
     property string title: ""
     property string subTitle: ""
     property string fontFamily: ""
@@ -53,17 +54,17 @@ Item {
         spacing: 2
         Text {
             text: root.title
-            color: "#ffffff"
-            font.family: root.fontFamily !== "" ? root.fontFamily : font.family
-            font.pixelSize: 32
+            color: Design.Tokens.color.text.primary
+            font.family: root.fontFamily !== "" ? root.fontFamily : Design.Tokens.font.family.display
+            font.pixelSize: Math.round(32 * Design.ThemeSettings.uiScale)
             font.bold: true
             anchors.horizontalCenter: parent.horizontalCenter
         }
         Text {
             text: root.subTitle
-            color: "#a6adc8"
-            font.family: root.fontFamily !== "" ? root.fontFamily : font.family
-            font.pixelSize: 14
+            color: Design.Tokens.color.text.secondary
+            font.family: root.fontFamily !== "" ? root.fontFamily : Design.Tokens.font.family.body
+            font.pixelSize: Design.Tokens.font.size.body
             anchors.horizontalCenter: parent.horizontalCenter
             visible: root.subTitle !== ""
         }

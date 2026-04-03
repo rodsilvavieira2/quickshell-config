@@ -1,11 +1,13 @@
 import QtQuick
 import QtQuick.Effects
 
+import ".." as Root
+
 Item {
     id: root
 
     property url source: ""
-    property color color: "#ffffff"
+    property color color: Root.Config.text
     property int iconSize: 16
 
     implicitWidth: iconSize

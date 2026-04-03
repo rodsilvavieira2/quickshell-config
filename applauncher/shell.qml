@@ -11,6 +11,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Widgets
+import "./shared/designsystem" as Design
 
 ShellRoot {
     id: shellRoot
@@ -110,10 +111,10 @@ ShellRoot {
             height: Math.min(600, layout.implicitHeight)
             anchors.centerIn: parent
             anchors.verticalCenterOffset: -100
-            color: "#1e1e2e"
-            radius: 12
-            border.color: "#89b4fa"
-            border.width: 2
+            color: Design.Tokens.color.bg.surface
+            radius: Design.Tokens.radius.xl
+            border.color: Design.ThemePalette.withAlpha(Design.Tokens.color.accent.primary, Design.ThemeSettings.isDark ? 0.55 : 0.4)
+            border.width: Design.Tokens.border.width.strong
             clip: true
 
             MouseArea {
@@ -142,10 +143,11 @@ ShellRoot {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             
-                            font.pixelSize: 22
-                            color: "#cdd6f4"
+                            font.family: Design.Tokens.font.family.body
+                            font.pixelSize: Math.round(22 * Design.ThemeSettings.uiScale)
+                            color: Design.Tokens.color.text.primary
                             placeholderText: "Search apps..."
-                            placeholderTextColor: "#a6adc8"
+                            placeholderTextColor: Design.Tokens.color.text.secondary
                             
                             background: Item {}
                             
@@ -177,7 +179,7 @@ ShellRoot {
                 Rectangle {
                     Layout.fillWidth: true
                     height: 1
-                    color: "#313244"
+                    color: Design.Tokens.color.border.subtle
                     visible: shellRoot.filteredApps.length > 0
                 }
 
@@ -200,8 +202,8 @@ ShellRoot {
                         width: appList.width - 16
                         anchors.horizontalCenter: parent.horizontalCenter
                         height: 56
-                        radius: 8
-                        color: index === appList.currentIndex ? "#313244" : "transparent"
+                        radius: Design.Tokens.radius.md
+                        color: index === appList.currentIndex ? Design.Tokens.color.bg.interactive : "transparent"
                         
                         MouseArea {
                             anchors.fill: parent
@@ -232,16 +234,18 @@ ShellRoot {
                                 Text {
                                     Layout.fillWidth: true
                                     text: modelData.name || ""
-                                    color: "#cdd6f4"
-                                    font.pixelSize: 16
+                                    color: Design.Tokens.color.text.primary
+                                    font.family: Design.Tokens.font.family.title
+                                    font.pixelSize: Design.Tokens.font.size.body
                                     font.bold: true
                                     elide: Text.ElideRight
                                 }
                                 Text {
                                     Layout.fillWidth: true
                                     text: modelData.genericName || modelData.comment || ""
-                                    color: "#a6adc8"
-                                    font.pixelSize: 13
+                                    color: Design.Tokens.color.text.secondary
+                                    font.family: Design.Tokens.font.family.body
+                                    font.pixelSize: Design.Tokens.font.size.label
                                     elide: Text.ElideRight
                                     visible: text !== ""
                                 }

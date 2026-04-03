@@ -80,7 +80,7 @@ Item {
                     anchors.centerIn: parent
                     text: wsIndicator.wsId
                     color: wsIndicator.isActive ? Root.Config.crust : Root.Config.subtext1
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: Root.Config.textFontFamily
                     font.pixelSize: 11
                     font.bold: wsIndicator.isActive
 

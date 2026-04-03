@@ -21,6 +21,8 @@ QtObject {
     readonly property color yellow: Tokens.color.warning
     readonly property color peach: Tokens.color.warning
     readonly property color teal: Tokens.color.info
+    readonly property string textFontFamily: Tokens.font.family.label
+    readonly property string iconFontFamily: Tokens.font.family.icon
 
     readonly property int radius: Tokens.radius.md
     readonly property int barRadius: 0

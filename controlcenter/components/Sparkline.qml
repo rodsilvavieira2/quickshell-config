@@ -1,10 +1,11 @@
 import QtQuick
+import "../shared/designsystem" as Design
 
 Canvas {
     id: root
     property var history: [] // Array of percentages [0, 100]
     property int maxPoints: 30
-    property color lineColor: "#fab387"
+    property color lineColor: Design.Tokens.color.warning
     property real lineWidth: 2
 
     onHistoryChanged: requestPaint()

@@ -57,7 +57,7 @@ Item {
                     Text {
                         text: root.musicData.title || ""
                         color: Root.Config.text
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Root.Config.textFontFamily
                         font.pixelSize: 11
                         font.bold: true
                         elide: Text.ElideRight
@@ -76,7 +76,7 @@ Item {
                     Text {
                         text: root.timeText
                         color: Root.Config.subtext0
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Root.Config.textFontFamily
                         font.pixelSize: 9
                         elide: Text.ElideRight
                         visible: text.length > 0
