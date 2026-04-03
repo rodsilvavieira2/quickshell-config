@@ -41,6 +41,12 @@ PanelWindow {
         onStarted: root.shouldShow = false
     }
 
+    Process {
+        id: logoffProcess
+        command: ["sh", "-c", "loginctl terminate-user \"$USER\""]
+        onStarted: root.shouldShow = false
+    }
+
     readonly property color cSurface: Appearance.colors.cSurface
     readonly property color cSurfaceContainer: Appearance.colors.cSurfaceContainer
     readonly property color cSurfaceContainerHigh: Appearance.colors.cSurfaceContainerHigh
@@ -214,27 +220,6 @@ PanelWindow {
             border.color: Qt.rgba(1, 1, 1, 0.10)
             border.width: 1
 
-            Rectangle {
-                anchors.fill: parent
-                radius: parent.radius
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: Qt.rgba(0.24, 0.21, 0.34, 0.34) }
-                    GradientStop { position: 1.0; color: Qt.rgba(0.10, 0.10, 0.15, 0.90) }
-                }
-            }
-
-            Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                height: 108
-                radius: parent.radius
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0.11) }
-                    GradientStop { position: 1.0; color: "transparent" }
-                }
-            }
-
             MouseArea {
                 anchors.fill: parent
                 onClicked: mouse => { mouse.accepted = true; }
@@ -255,11 +240,11 @@ PanelWindow {
                         spacing: 8
 
                         HeaderButton {
-                            icon: "󰒓"
-                            label: "Network"
-                            tooltip: "Network Settings"
+                            icon: "󰍃"
+                            label: "Logoff"
+                            tooltip: "Log Off"
                             tint: Appearance.colors.warning
-                            onClicked: settingsProcess.running = true
+                            onClicked: logoffProcess.running = true
                         }
 
                         HeaderButton {
