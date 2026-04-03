@@ -80,7 +80,7 @@ PanelWindow {
     }
 
     implicitWidth: 456
-    implicitHeight: Math.min((panelLayout.implicitHeight ?? 0) + 40, (screen?.height ?? 900) - 34)
+    implicitHeight: Math.max(320, Math.floor((screen?.height ?? 900) * 0.9))
     color: "transparent"
     visible: shouldShow || panelContent.opacity > 0
 
@@ -302,7 +302,7 @@ PanelWindow {
                 Flickable {
                     id: contentFlick
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Math.min(contentColumn.implicitHeight, (root.screen?.height ?? 860) - 170)
+                    Layout.fillHeight: true
                     contentHeight: contentColumn.height
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
@@ -322,6 +322,7 @@ PanelWindow {
                     ColumnLayout {
                         id: contentColumn
                         width: contentFlick.width
+                        height: Math.max(implicitHeight, contentFlick.height)
                         spacing: 14
 
                         SectionLabel {
@@ -400,7 +401,8 @@ PanelWindow {
                         }
 
                         NotificationList {
-                            Layout.preferredHeight: Math.min(420, Math.max(220, notifListContentHeight()))
+                            Layout.fillHeight: true
+                            Layout.minimumHeight: 280
                             notifs: notificationService
                         }
 
@@ -411,11 +413,6 @@ PanelWindow {
                 }
             }
         }
-    }
-
-    function notifListContentHeight() {
-        const available = (root.screen?.height ?? 860) - 250;
-        return Math.min(available, Math.max(220, (notificationService.recentNotifications?.length ?? 0) * 92 + 110));
     }
 
     component HeaderButton: Rectangle {
