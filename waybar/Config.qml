@@ -24,16 +24,16 @@ QtObject {
     // Geometry
     readonly property int radius: 10
     readonly property int barRadius: 0
-    readonly property int barHeight: 31
+    readonly property int barHeight: 34
     readonly property int barTopMargin: 0
     readonly property int barBottomGap: 0
     readonly property int barPaddingHorizontal: 12
     readonly property int barPaddingTop: 4
-    readonly property int barPaddingBottom: 5
+    readonly property int barPaddingBottom: 6
     readonly property int pillPadding: 6
     readonly property int pillSpacing: 6
     readonly property int sectionSpacing: 12
-    readonly property int iconSize: 15
+    readonly property int iconSize: 14
     readonly property int iconButtonSize: 22
 
     // InfoChip properties
