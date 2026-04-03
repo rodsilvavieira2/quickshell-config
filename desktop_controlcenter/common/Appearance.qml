@@ -3,73 +3,69 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import "../shared/designsystem"
 
 Singleton {
     id: root
 
-    readonly property color base: "#1e1e2e"
-    readonly property color mantle: "#181825"
-    readonly property color crust: "#11111b"
-    readonly property color text: "#cdd6f4"
-    readonly property color subtext0: "#a6adc8"
-    readonly property color subtext1: "#bac2de"
-    readonly property color surface0: "#313244"
-    readonly property color surface1: "#45475a"
-    readonly property color surface2: "#585b70"
-    readonly property color overlay0: "#6c7086"
-    readonly property color overlay1: "#7f849c"
-    readonly property color blue: "#89b4fa"
-    readonly property color mauve: "#cba6f7"
-    readonly property color lavender: "#b4befe"
-    readonly property color peach: "#fab387"
-    readonly property color green: "#a6e3a1"
-    readonly property color red: "#f38ba8"
-    readonly property color flamingo: "#f2cdcd"
+    readonly property color base: Tokens.color.bg.surface
+    readonly property color mantle: Tokens.color.bg.elevated
+    readonly property color crust: Tokens.color.bg.canvas
+    readonly property color text: Tokens.color.text.primary
+    readonly property color subtext0: Tokens.color.text.secondary
+    readonly property color subtext1: Tokens.color.text.secondary
+    readonly property color surface0: Tokens.color.bg.interactive
+    readonly property color surface1: Tokens.color.bg.hover
+    readonly property color surface2: Tokens.color.bg.active
+    readonly property color overlay0: Tokens.color.text.muted
+    readonly property color overlay1: Tokens.color.text.secondary
+    readonly property color blue: Tokens.color.accent.primary
+    readonly property color mauve: Tokens.color.accent.hover
+    readonly property color lavender: ThemePalette.mix(Tokens.color.accent.primary, ThemePalette.white, ThemeSettings.isDark ? 0.18 : 0.02)
+    readonly property color peach: Tokens.color.warning
+    readonly property color green: Tokens.color.success
+    readonly property color red: Tokens.color.error
+    readonly property color flamingo: ThemePalette.mix(Tokens.color.error, Tokens.color.accent.primary, 0.35)
 
     property QtObject colors: QtObject {
         property color cSurface: root.base
         property color cSurfaceContainer: root.mantle
         property color cSurfaceContainerHigh: root.surface0
-        property color cBorder: root.surface2
-        property color cPrimary: root.mauve
-        property color cSecondary: root.blue
-        property color cOnSurface: root.text
-        property color cOnSurfaceVariant: root.subtext0
-        property color cOnSurfaceDim: root.overlay0
-        
-        // Additional semantic colors
-        property color warning: root.peach
-        property color info: root.blue
-        property color error: root.red
-        property color success: root.green
+        property color cBorder: Tokens.color.border.strong
+        property color cPrimary: Tokens.color.accent.primary
+        property color cSecondary: Tokens.color.accent.hover
+        property color cOnSurface: Tokens.color.text.primary
+        property color cOnSurfaceVariant: Tokens.color.text.secondary
+        property color cOnSurfaceDim: Tokens.color.text.muted
+        property color warning: Tokens.color.warning
+        property color info: Tokens.color.info
+        property color error: Tokens.color.error
+        property color success: Tokens.color.success
     }
 
     property QtObject font: QtObject {
-        property string family: "JetBrainsMono Nerd Font"
-        property int sizeHeader: 34
-        property int sizeTitle: 16
-        property int sizeNormal: 14
-        property int sizeSmall: 13
-        property int sizeExtraSmall: 12
+        property string family: Tokens.font.family.body
+        property int sizeHeader: Tokens.font.size.display
+        property int sizeTitle: Tokens.font.size.title
+        property int sizeNormal: Tokens.font.size.body
+        property int sizeSmall: Tokens.font.size.label
+        property int sizeExtraSmall: Tokens.font.size.caption
     }
 
-    // Material 3 Style Animations
     property QtObject animation: QtObject {
         property int short1: 50
         property int short2: 100
-        property int short3: 150
-        property int short4: 200
-        property int medium1: 250
-        property int medium2: 300
-        property int medium3: 350
+        property int short3: Tokens.motion.duration.fast
+        property int short4: Tokens.motion.duration.normal
+        property int medium1: 220
+        property int medium2: 280
+        property int medium3: 340
         property int medium4: 400
         property int long1: 450
         property int long2: 500
-        
-        // Easing curves matching Material 3
-        property var standard: Easing.OutCubic
-        property var standardDecelerate: Easing.OutCubic
-        property var standardAccelerate: Easing.InCubic
+        property var standard: Tokens.motion.easing.standard
+        property var standardDecelerate: Tokens.motion.easing.decelerate
+        property var standardAccelerate: Tokens.motion.easing.accelerate
         property var emphasizedDecelerate: Easing.OutExpo
         property var emphasizedAccelerate: Easing.InExpo
     }

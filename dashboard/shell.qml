@@ -9,6 +9,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 
 import "./components"
+import "./shared/designsystem" as Design
 
 ShellRoot {
     id: shellRoot
@@ -115,10 +116,10 @@ ShellRoot {
             width: 900
             height: 600
             anchors.centerIn: parent
-            color: "#1e1e2e"
-            radius: 16
-            border.color: "#313244"
-            border.width: 2
+            color: Design.Tokens.color.bg.surface
+            radius: Design.Tokens.radius.lg
+            border.color: Design.Tokens.color.border.strong
+            border.width: Design.Tokens.border.width.strong
 
             MouseArea { anchors.fill: parent; preventStealing: true }
 
@@ -134,17 +135,17 @@ ShellRoot {
 
                     Text {
                         text: "󰕮" // Dashboard icon
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Design.Tokens.font.family.icon
                         font.pixelSize: 28
-                        color: "#cdd6f4"
+                        color: Design.Tokens.color.text.primary
                     }
 
                     Text {
                         text: "Performance Dashboard"
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: 24
-                        font.bold: true
-                        color: "#cdd6f4"
+                        font.family: Design.Tokens.font.family.title
+                        font.pixelSize: Design.Tokens.font.size.display
+                        font.weight: Design.Tokens.font.weight.semibold
+                        color: Design.Tokens.color.text.primary
                     }
                 }
 
@@ -169,7 +170,7 @@ ShellRoot {
                             secondaryLabel: "Temp"
                             usage: shellRoot.cpuUsage
                             tempProgress: Math.min(1, parseFloat(shellRoot.cpuTemp) / 100.0)
-                            accentColor: "#b4befe" // Lavender
+                            accentColor: Design.ThemePalette.mix(Design.Tokens.color.accent.primary, Design.ThemePalette.white, 0.18)
                         }
 
                         HeroCard {
@@ -183,7 +184,7 @@ ShellRoot {
                             secondaryLabel: "Temp"
                             usage: shellRoot.gpuUsage
                             tempProgress: Math.min(1, parseFloat(shellRoot.gpuTemp) / 100.0)
-                            accentColor: "#a6e3a1" // Green
+                            accentColor: Design.Tokens.color.success
                         }
                     }
 
@@ -198,7 +199,7 @@ ShellRoot {
                             title: "Memory"
                             percentage: shellRoot.memTotal > 0 ? (shellRoot.memUsed / shellRoot.memTotal) : 0
                             subtitle: shellRoot.memUsed.toFixed(1) + " GB / " + shellRoot.memTotal.toFixed(1) + " GB"
-                            accentColor: "#89b4fa" // Blue
+                            accentColor: Design.Tokens.color.accent.primary
                         }
 
                         // Placeholder for Storage / Network as seen in caelestia-dots
@@ -209,7 +210,7 @@ ShellRoot {
                             title: "Storage"
                             percentage: 0.45
                             subtitle: "Free: 55%"
-                            accentColor: "#f38ba8" // Red
+                            accentColor: Design.Tokens.color.error
                         }
                     }
                 }

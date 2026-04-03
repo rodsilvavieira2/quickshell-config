@@ -9,6 +9,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 
 import "./components"
+import "./shared/designsystem" as Design
 
 ShellRoot {
     id: shellRoot
@@ -61,10 +62,10 @@ ShellRoot {
             width: 450
             height: 350
             anchors.centerIn: parent
-            color: "#1e1e2e"
-            radius: 16
-            border.color: "#313244"
-            border.width: 2
+            color: Design.Tokens.color.bg.surface
+            radius: Design.Tokens.radius.lg
+            border.color: Design.Tokens.color.border.strong
+            border.width: Design.Tokens.border.width.strong
 
             MouseArea { anchors.fill: parent; preventStealing: true }
 
@@ -77,7 +78,7 @@ ShellRoot {
                 color: "transparent"
                 
                 audioService: globalAudioService
-                uiFontFamily: "JetBrainsMono Nerd Font"
+                uiFontFamily: Design.Tokens.font.family.body
             }
         }
     }

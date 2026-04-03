@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import "../shared/designsystem" as Design
 
 Rectangle {
     id: root
@@ -14,9 +15,11 @@ Rectangle {
     width: parent?.width ?? 380
     height: layout.implicitHeight + 24
 
-    color: notif.urgency === "critical" ? "#2d1b25" : (isPopup ? "#1e1e2e" : "#181825")
-    radius: 14
-    border.color: notif.urgency === "critical" ? "#f38ba8" : "#313244"
+    color: notif.urgency === "critical"
+        ? Design.ThemePalette.withAlpha(Design.Tokens.color.error, Design.ThemeSettings.isDark ? 0.18 : 0.12)
+        : (isPopup ? Design.Tokens.color.bg.surface : Design.Tokens.color.bg.elevated)
+    radius: Design.Tokens.radius.lg
+    border.color: notif.urgency === "critical" ? Design.Tokens.color.error : Design.Tokens.color.border.subtle
     border.width: 1
 
     ColumnLayout {
@@ -35,7 +38,7 @@ Rectangle {
                 width: 20
                 height: 20
                 radius: 5
-                color: "#313244"
+                color: Design.Tokens.color.bg.interactive
 
                 Image {
                     anchors.centerIn: parent
@@ -56,18 +59,18 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 text: notif.appName || "Notification"
-                color: "#6c7086"
-                font.pixelSize: 11
-                font.bold: true
-                font.family: "JetBrainsMono Nerd Font"
+                color: Design.Tokens.color.text.muted
+                font.pixelSize: Design.Tokens.font.size.small
+                font.weight: Design.Tokens.font.weight.semibold
+                font.family: Design.Tokens.font.family.label
                 elide: Text.ElideRight
             }
 
             Text {
                 text: notif.time || ""
-                color: "#6c7086"
-                font.pixelSize: 11
-                font.family: "JetBrainsMono Nerd Font"
+                color: Design.Tokens.color.text.muted
+                font.pixelSize: Design.Tokens.font.size.small
+                font.family: Design.Tokens.font.family.caption
             }
 
             // Close button — circle fills red on hover (macOS traffic-light feel)
@@ -84,17 +87,17 @@ Rectangle {
                     width: 14
                     height: 14
                     radius: 7
-                    color: closeArea.containsMouse ? "#f38ba8" : "transparent"
+                    color: closeArea.containsMouse ? Design.Tokens.color.error : "transparent"
 
                     Behavior on color { ColorAnimation { duration: 150 } }
 
                     Text {
                         anchors.centerIn: parent
                         text: "×"
-                        color: closeArea.containsMouse ? "#1e1e2e" : "#585b70"
+                        color: closeArea.containsMouse ? Design.Tokens.color.text.inverse : Design.Tokens.color.text.muted
                         font.pixelSize: 13
                         font.bold: true
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Design.Tokens.font.family.label
 
                         Behavior on color { ColorAnimation { duration: 150 } }
                     }
@@ -136,10 +139,10 @@ Rectangle {
                 Text {
                     Layout.fillWidth: true
                     text: notif.summary || ""
-                    color: "#cdd6f4"
-                    font.pixelSize: 13
-                    font.bold: true
-                    font.family: "JetBrainsMono Nerd Font"
+                    color: Design.Tokens.color.text.primary
+                    font.pixelSize: Design.Tokens.font.size.body
+                    font.weight: Design.Tokens.font.weight.semibold
+                    font.family: Design.Tokens.font.family.body
                     wrapMode: Text.Wrap
                     visible: text !== ""
                 }
@@ -147,9 +150,9 @@ Rectangle {
                 Text {
                     Layout.fillWidth: true
                     text: notif.body || ""
-                    color: "#a6adc8"
-                    font.pixelSize: 12
-                    font.family: "JetBrainsMono Nerd Font"
+                    color: Design.Tokens.color.text.secondary
+                    font.pixelSize: Design.Tokens.font.size.caption
+                    font.family: Design.Tokens.font.family.body
                     wrapMode: Text.Wrap
                     textFormat: Text.RichText
                     visible: text !== ""
@@ -171,7 +174,7 @@ Rectangle {
                     required property var modelData
                     Layout.fillWidth: true
                     height: 24
-                    color: actionArea.containsMouse ? "#45475a" : "#313244"
+                    color: actionArea.containsMouse ? Design.Tokens.color.bg.hover : Design.Tokens.color.bg.interactive
                     radius: 12
 
                     Behavior on color { ColorAnimation { duration: 120 } }
@@ -179,9 +182,9 @@ Rectangle {
                     Text {
                         anchors.centerIn: parent
                         text: modelData.text
-                        color: "#cdd6f4"
-                        font.pixelSize: 11
-                        font.family: "JetBrainsMono Nerd Font"
+                        color: Design.Tokens.color.text.primary
+                        font.pixelSize: Design.Tokens.font.size.small
+                        font.family: Design.Tokens.font.family.label
                     }
 
                     MouseArea {

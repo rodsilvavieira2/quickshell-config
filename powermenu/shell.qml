@@ -10,6 +10,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import "./shared/designsystem" as Design
 
 ShellRoot {
     id: shellRoot
@@ -73,7 +74,7 @@ ShellRoot {
         }
         
         visible: shellRoot.menuOpen
-        color: "#66000000"
+        color: Design.Tokens.color.scrim
         
         WlrLayershell.namespace: "quickshell:powermenu"
         WlrLayershell.layer: WlrLayer.Overlay
@@ -135,10 +136,10 @@ ShellRoot {
             width: layout.implicitWidth + 48
             height: layout.implicitHeight + 48
             anchors.centerIn: parent
-            color: "#1e1e2e"
-            radius: 12
-            border.color: "#89b4fa"
-            border.width: 2
+            color: Design.Tokens.color.bg.surface
+            radius: Design.Tokens.radius.lg
+            border.color: Design.Tokens.color.border.strong
+            border.width: Design.Tokens.border.width.strong
 
             // Consume clicks inside the menu box so it doesn't close when clicked
             MouseArea {
@@ -177,8 +178,8 @@ ShellRoot {
                         
                         width: 120
                         height: 120
-                        radius: 8
-                        color: index === shellRoot.currentIndex ? "#313244" : "transparent"
+                        radius: Design.Tokens.radius.md
+                        color: index === shellRoot.currentIndex ? Design.Tokens.color.bg.interactive : "transparent"
                         
                         MouseArea {
                             id: btnMouseArea
@@ -203,9 +204,10 @@ ShellRoot {
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
                                 text: modelData.name
-                                color: "#cdd6f4"
-                                font.pixelSize: 16
-                                font.bold: true
+                                color: Design.Tokens.color.text.primary
+                                font.family: Design.Tokens.font.family.body
+                                font.pixelSize: Design.Tokens.font.size.body
+                                font.weight: Design.Tokens.font.weight.semibold
                             }
                         }
                     }

@@ -11,6 +11,7 @@ import Quickshell.Hyprland
 
 import "./services"
 import "./components"
+import "./shared/designsystem" as Design
 
 ShellRoot {
     id: shellRoot
@@ -48,7 +49,7 @@ ShellRoot {
         }
         
         visible: shellRoot.panelOpen
-        color: "#66000000"
+        color: Design.Tokens.color.scrim
 
         WlrLayershell.namespace: "quickshell:network"
         WlrLayershell.layer: WlrLayer.Overlay
@@ -75,10 +76,10 @@ ShellRoot {
             width: parent.width * 0.70
             height: parent.height * 0.85
             anchors.centerIn: parent
-            color: "#1e1e2e"
-            radius: 16
-            border.color: "#313244"
-            border.width: 2
+            color: Design.Tokens.color.bg.surface
+            radius: Design.Tokens.radius.lg
+            border.color: Design.Tokens.color.border.strong
+            border.width: Design.Tokens.border.width.strong
             
             MouseArea { anchors.fill: parent; preventStealing: true }
             

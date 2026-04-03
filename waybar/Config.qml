@@ -1,28 +1,28 @@
 pragma Singleton
+
 import QtQuick
+import "./shared/designsystem"
 
 QtObject {
-    // Catppuccin Mocha Palette
-    readonly property color base: "#1e1e2e"
-    readonly property color mantle: "#181825"
-    readonly property color crust: "#11111b"
-    readonly property color surface0: "#313244"
-    readonly property color surface1: "#45475a"
-    readonly property color surface2: "#585b70"
-    readonly property color text: "#cdd6f4"
-    readonly property color subtext0: "#a6adc8"
-    readonly property color subtext1: "#bac2de"
-    readonly property color overlay0: "#6c7086"
-    readonly property color mauve: "#cba6f7"
-    readonly property color blue: "#89b4fa"
-    readonly property color green: "#a6e3a1"
-    readonly property color red: "#f38ba8"
-    readonly property color yellow: "#f9e2af"
-    readonly property color peach: "#fab387"
-    readonly property color teal: "#94e2d5"
+    readonly property color base: Tokens.color.bg.surface
+    readonly property color mantle: Tokens.color.bg.elevated
+    readonly property color crust: Tokens.color.bg.canvas
+    readonly property color surface0: Tokens.color.bg.interactive
+    readonly property color surface1: Tokens.color.bg.hover
+    readonly property color surface2: Tokens.color.bg.active
+    readonly property color text: Tokens.color.text.primary
+    readonly property color subtext0: Tokens.color.text.secondary
+    readonly property color subtext1: Tokens.color.text.secondary
+    readonly property color overlay0: Tokens.color.text.muted
+    readonly property color mauve: Tokens.color.accent.hover
+    readonly property color blue: Tokens.color.accent.primary
+    readonly property color green: Tokens.color.success
+    readonly property color red: Tokens.color.error
+    readonly property color yellow: Tokens.color.warning
+    readonly property color peach: Tokens.color.warning
+    readonly property color teal: Tokens.color.info
 
-    // Geometry
-    readonly property int radius: 10
+    readonly property int radius: Tokens.radius.md
     readonly property int barRadius: 0
     readonly property int barHeight: 34
     readonly property int barTopMargin: 0
@@ -36,22 +36,19 @@ QtObject {
     readonly property int iconSize: 14
     readonly property int iconButtonSize: 22
 
-    // InfoChip properties
-    readonly property int chipRadius: 7
+    readonly property int chipRadius: Tokens.radius.sm
     readonly property int chipPaddingHorizontal: 8
     readonly property int chipPaddingVertical: 4
     readonly property color chipColor: "transparent"
-    readonly property color chipHoverColor: surface0
-    readonly property color chipActiveColor: surface1
-    readonly property color activeAccent: blue
+    readonly property color chipHoverColor: Tokens.color.bg.hover
+    readonly property color chipActiveColor: Tokens.color.bg.active
+    readonly property color activeAccent: Tokens.color.accent.primary
 
-    // Configurable
     readonly property int workspaceCount: 10
 
-    // Bar styling
-    readonly property color barColor: mantle
-    readonly property color barBorderColor: surface0
-    readonly property color dividerColor: surface0
+    readonly property color barColor: Tokens.color.bg.elevated
+    readonly property color barBorderColor: Tokens.color.border.subtle
+    readonly property color dividerColor: Tokens.color.border.subtle
     readonly property color pillColor: barColor
-    readonly property color pillHoverColor: surface1
+    readonly property color pillHoverColor: Tokens.color.bg.hover
 }

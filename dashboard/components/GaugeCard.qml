@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import "../shared/designsystem" as Design
 
 Rectangle {
     id: gaugeCard
@@ -8,10 +9,10 @@ Rectangle {
     property string title: ""
     property real percentage: 0
     property string subtitle: ""
-    property color accentColor: "#89b4fa"
+    property color accentColor: Design.Tokens.color.accent.primary
 
-    color: "#313244"
-    radius: 16
+    color: Design.Tokens.color.bg.elevated
+    radius: Design.Tokens.radius.lg
     clip: true
 
     ColumnLayout {
@@ -26,7 +27,7 @@ Rectangle {
 
             Text {
                 text: gaugeCard.icon
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Design.Tokens.font.family.icon
                 color: gaugeCard.accentColor
                 font.pixelSize: 24
             }
@@ -34,9 +35,9 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 text: gaugeCard.title
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 18
-                color: "#cdd6f4"
+                font.family: Design.Tokens.font.family.title
+                font.pixelSize: Design.Tokens.font.size.title
+                color: Design.Tokens.color.text.primary
             }
         }
 
@@ -71,7 +72,7 @@ Rectangle {
                     ctx.arc(cx, cy, radius, startAngle, startAngle + sweepAngle);
                     ctx.lineWidth = 14;
                     ctx.lineCap = "round";
-                    ctx.strokeStyle = "#1e1e2e";
+                    ctx.strokeStyle = Design.Tokens.color.bg.surface;
                     ctx.stroke();
 
                     if (animPercentage > 0) {
@@ -88,7 +89,7 @@ Rectangle {
             Text {
                 anchors.centerIn: parent
                 text: Math.round(gaugeCard.percentage * 100) + "%"
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Design.Tokens.font.family.display
                 font.pixelSize: 32
                 font.bold: true
                 color: gaugeCard.accentColor
@@ -98,9 +99,9 @@ Rectangle {
         Text {
             Layout.alignment: Qt.AlignHCenter
             text: gaugeCard.subtitle
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: 14
-            color: "#a6adc8"
+            font.family: Design.Tokens.font.family.label
+            font.pixelSize: Design.Tokens.font.size.body
+            color: Design.Tokens.color.text.secondary
         }
     }
 }

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import "../shared/designsystem" as Design
 
 Rectangle {
     id: heroCard
@@ -12,10 +13,10 @@ Rectangle {
     property string secondaryLabel: ""
     property real usage: 0
     property real tempProgress: 0
-    property color accentColor: "#89b4fa"
+    property color accentColor: Design.Tokens.color.accent.primary
 
-    color: "#313244"
-    radius: 16
+    color: Design.Tokens.color.bg.elevated
+    radius: Design.Tokens.radius.lg
     clip: true
 
     // Background fill based on usage
@@ -44,7 +45,7 @@ Rectangle {
 
             Text {
                 text: heroCard.icon
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: Design.Tokens.font.family.icon
                 color: heroCard.accentColor
                 font.pixelSize: 24
             }
@@ -52,9 +53,9 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 text: heroCard.title
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 18
-                color: "#cdd6f4"
+                font.family: Design.Tokens.font.family.title
+                font.pixelSize: Design.Tokens.font.size.title
+                color: Design.Tokens.color.text.primary
             }
         }
 
@@ -72,16 +73,16 @@ Rectangle {
                     spacing: 8
                     Text {
                         text: heroCard.secondaryValue
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: Design.Tokens.font.family.body
                         font.pixelSize: 16
-                        color: "#cdd6f4"
+                        color: Design.Tokens.color.text.primary
                         font.bold: true
                     }
                     Text {
                         text: heroCard.secondaryLabel
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: 14
-                        color: "#a6adc8"
+                        font.family: Design.Tokens.font.family.label
+                        font.pixelSize: Design.Tokens.font.size.body
+                        color: Design.Tokens.color.text.secondary
                         anchors.baseline: parent.children[0].baseline
                     }
                 }
@@ -118,14 +119,14 @@ Rectangle {
         Text {
             anchors.right: parent.right
             text: heroCard.mainLabel
-            font.family: "JetBrainsMono Nerd Font"
+            font.family: Design.Tokens.font.family.label
             font.pixelSize: 16
-            color: "#a6adc8"
+            color: Design.Tokens.color.text.secondary
         }
         Text {
             anchors.right: parent.right
             text: heroCard.mainValue
-            font.family: "JetBrainsMono Nerd Font"
+            font.family: Design.Tokens.font.family.display
             font.pixelSize: 36
             font.bold: true
             color: heroCard.accentColor
