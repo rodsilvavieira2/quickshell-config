@@ -11,16 +11,13 @@ Item {
 
     property string timeString: ""
     property string dateString: ""
-    property string weatherIcon: ""
-    property string weatherTemp: "--°C"
-    readonly property string weatherScriptPath: Qt.resolvedUrl("../../calendar/weather.sh").toString().replace(/^file:\/\//, "")
 
     implicitWidth: contentRow.implicitWidth
     implicitHeight: contentRow.implicitHeight
 
     function updateDateTime() {
         const now = new Date();
-        root.timeString = Qt.formatDateTime(now, "hh:mm:ss AP");
+        root.timeString = Qt.formatDateTime(now, "hh:mm AP");
         root.dateString = Qt.formatDateTime(now, "dddd, MMMM dd");
     }
 
@@ -30,28 +27,6 @@ Item {
         repeat: true
         triggeredOnStart: true
         onTriggered: root.updateDateTime()
-    }
-
-    Process {
-        id: weatherPoller
-        command: ["bash", "-c", '"' + root.weatherScriptPath + '" --json >/dev/null 2>&1; "' + root.weatherScriptPath + '" --current-icon; "' + root.weatherScriptPath + '" --current-temp']
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const lines = text.trim().split("\n");
-                if (lines.length >= 2) {
-                    root.weatherIcon = lines[0] || "";
-                    root.weatherTemp = lines[1] || "--°C";
-                }
-            }
-        }
-    }
-
-    Timer {
-        interval: 900000
-        running: true
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: weatherPoller.running = true
     }
 
     MouseArea {
@@ -73,7 +48,7 @@ Item {
                 text: root.timeString
                 color: Root.Config.blue
                 font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 13
+                font.pixelSize: 14
                 font.bold: true
             }
 
@@ -82,25 +57,6 @@ Item {
                 color: Root.Config.subtext0
                 font.family: "JetBrainsMono Nerd Font"
                 font.pixelSize: 10
-                font.bold: true
-            }
-        }
-
-        RowLayout {
-            spacing: 6
-
-            Text {
-                text: root.weatherIcon
-                color: Root.Config.yellow
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 14
-            }
-
-            Text {
-                text: root.weatherTemp
-                color: Root.Config.peach
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 12
                 font.bold: true
             }
         }

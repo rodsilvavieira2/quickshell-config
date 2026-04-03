@@ -22,37 +22,34 @@ PanelWindow {
     implicitHeight: Root.Config.barHeight + Root.Config.barMargin * 2
     color: "transparent"
 
-    Item {
+    RowLayout {
         anchors.fill: parent
         anchors.topMargin: Root.Config.barMargin
         anchors.bottomMargin: Root.Config.barMargin
         anchors.leftMargin: Root.Config.barMargin + 2
         anchors.rightMargin: Root.Config.barMargin + 2
+        spacing: Root.Config.pillSpacing
 
+        // Group 1: Left
         Rectangle {
-            id: leftPill
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            height: parent.height
-            width: leftContent.implicitWidth + Root.Config.pillPadding * 2
+            Layout.preferredHeight: parent.height
+            Layout.preferredWidth: workspacesContent.implicitWidth + Root.Config.pillPadding * 2
             radius: Root.Config.radius
             color: Root.Config.pillColor
 
-            RowLayout {
-                id: leftContent
+            Modules.Workspaces {
+                id: workspacesContent
                 anchors.centerIn: parent
-                spacing: Root.Config.pillSpacing
-
-                Modules.Workspaces {}
             }
         }
 
+        // Spacer
+        Item { Layout.fillWidth: true }
+
+        // Group 2: Center
         Rectangle {
-            id: centerPill
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            height: parent.height
-            width: clockContent.implicitWidth + Root.Config.pillPadding * 2
+            Layout.preferredHeight: parent.height
+            Layout.preferredWidth: clockContent.implicitWidth + Root.Config.pillPadding * 2
             radius: Root.Config.radius
             color: Root.Config.pillColor
 
@@ -62,22 +59,19 @@ PanelWindow {
             }
         }
 
-        // ═══════════════════════════════════
-        //  MUSIC PILL (left of status icons)
-        // ═══════════════════════════════════
+        // Spacer
+        Item { Layout.fillWidth: true }
+
+        // Group 3: Right
         Rectangle {
-            id: musicPill
-            anchors.right: statusIconsPill.left
-            anchors.rightMargin: Root.Config.barMargin
-            anchors.verticalCenter: parent.verticalCenter
-            height: parent.height
-            width: MusicService.isActive ? musicContent.implicitWidth + Root.Config.pillPadding * 2 : 0
+            Layout.preferredHeight: parent.height
+            Layout.preferredWidth: MusicService.isActive ? musicContent.implicitWidth + Root.Config.pillPadding * 2 : 0
             radius: Root.Config.radius
             color: Root.Config.pillColor
             clip: true
             visible: width > 0
 
-            Behavior on width {
+            Behavior on Layout.preferredWidth {
                 NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
             }
 
@@ -87,16 +81,9 @@ PanelWindow {
             }
         }
 
-        // ═══════════════════════════════════
-        //  STATUS ICONS PILL (left of tray)
-        // ═══════════════════════════════════
         Rectangle {
-            id: statusIconsPill
-            anchors.right: rightPill.left
-            anchors.rightMargin: Root.Config.barMargin
-            anchors.verticalCenter: parent.verticalCenter
-            height: parent.height
-            width: statusIconsContent.implicitWidth + Root.Config.pillPadding * 2
+            Layout.preferredHeight: parent.height
+            Layout.preferredWidth: statusIconsContent.implicitWidth + Root.Config.pillPadding * 2
             radius: Root.Config.radius
             color: Root.Config.pillColor
 
@@ -106,22 +93,15 @@ PanelWindow {
             }
         }
 
-        // ═══════════════════════════
-        //  RIGHT PILL (tray group)
-        // ═══════════════════════════
         Rectangle {
-            id: rightPill
-            anchors.right: settingsPill.left
-            anchors.rightMargin: Root.Config.barMargin
-            anchors.verticalCenter: parent.verticalCenter
-            height: parent.height
-            width: visible ? rightContent.implicitWidth + Root.Config.pillPadding * 2 : 0
+            Layout.preferredHeight: parent.height
+            Layout.preferredWidth: visible ? trayContent.implicitWidth + Root.Config.pillPadding * 2 : 0
             radius: Root.Config.radius
             color: Root.Config.pillColor
             visible: TrayService.visibleItems.length > 0
 
             RowLayout {
-                id: rightContent
+                id: trayContent
                 anchors.centerIn: parent
                 spacing: Root.Config.pillSpacing
 
@@ -131,20 +111,14 @@ PanelWindow {
             }
         }
 
-        // ═════════════════════════════
-        //  SETTINGS PILL (standalone)
-        // ═════════════════════════════
         Rectangle {
-            id: settingsPill
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            height: parent.height
-            width: settingsContent.implicitWidth + Root.Config.pillPadding * 2
+            Layout.preferredHeight: parent.height
+            Layout.preferredWidth: launcherContent.implicitWidth + Root.Config.pillPadding * 2
             radius: Root.Config.radius
             color: Root.Config.pillColor
 
             Modules.ControlCenterLauncher {
-                id: settingsContent
+                id: launcherContent
                 anchors.centerIn: parent
             }
         }

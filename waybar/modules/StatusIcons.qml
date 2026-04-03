@@ -7,6 +7,7 @@ import Quickshell.Bluetooth
 import Quickshell.Services.Pipewire
 
 import ".." as Root
+import "../components"
 
 Item {
     id: root
@@ -22,16 +23,30 @@ Item {
     // Network state
     property bool networkConnected: false
     property bool networkIsWifi: false
+    property string activeSsid: ""
 
     Process {
         id: networkCheck
-        command: ["nmcli", "-t", "-f", "TYPE,STATE", "device", "status"]
+        command: ["nmcli", "-t", "-f", "TYPE,STATE,CONNECTION", "device", "status"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const lines = text.trim().split("\n").filter(l => l.length > 0)
-                root.networkIsWifi = lines.some(l => l.startsWith("wifi:connected"))
-                const hasEthernet = lines.some(l => l.startsWith("ethernet:connected"))
-                root.networkConnected = root.networkIsWifi || hasEthernet
+                let wifiLine = lines.find(l => l.startsWith("wifi:connected:"))
+                if (wifiLine) {
+                    root.networkIsWifi = true
+                    root.networkConnected = true
+                    root.activeSsid = wifiLine.split(":")[2] || "Wi-Fi"
+                } else {
+                    root.networkIsWifi = false
+                    const ethLine = lines.find(l => l.startsWith("ethernet:connected:"))
+                    if (ethLine) {
+                        root.networkConnected = true
+                        root.activeSsid = "Ethernet"
+                    } else {
+                        root.networkConnected = false
+                        root.activeSsid = ""
+                    }
+                }
             }
         }
     }
@@ -47,36 +62,30 @@ Item {
     Row {
         id: iconsRow
         anchors.centerIn: parent
-        spacing: 10
+        spacing: Root.Config.pillSpacing
 
         // Bluetooth icon
         Item {
-            width: btIcon.implicitWidth
-            height: btIcon.implicitHeight
+            id: btItem
+            width: btChip.width
+            height: btChip.height
             anchors.verticalCenter: parent.verticalCenter
 
             readonly property bool btEnabled: Bluetooth.defaultAdapter?.enabled ?? false
-            readonly property bool btConnected: {
+            readonly property var connectedDevice: {
                 const devices = Bluetooth.devices?.values ?? []
-                return devices.some(d => d.connected)
+                return devices.find(d => d.connected)
             }
+            readonly property bool btConnected: connectedDevice !== undefined
 
-            Text {
-                id: btIcon
-                text: parent.btConnected ? "󰂱" : (parent.btEnabled ? "󰂯" : "󰂲")
-                color: parent.btConnected ? Root.Config.blue : Root.Config.subtext0
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Root.Config.iconSize
-                anchors.centerIn: parent
-
-                Behavior on color {
-                    ColorAnimation { duration: 150 }
-                }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
+            InfoChip {
+                id: btChip
+                iconText: btItem.btConnected ? "󰂱" : (btItem.btEnabled ? "󰂯" : "󰂲")
+                valueText: btItem.btConnected ? (btItem.connectedDevice.name + " ✖") : ""
+                backgroundColor: btItem.btConnected ? Root.Config.mauve : Root.Config.chipColor
+                iconColor: btItem.btConnected ? Root.Config.crust : Root.Config.subtext0
+                labelColor: btItem.btConnected ? Root.Config.crust : Root.Config.subtext0
+                clickable: true
                 onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "network_desktop", "call", "networkdesktop", "toggle"])
             }
         }
@@ -90,69 +99,36 @@ Item {
                 return isNaN(v) ? 0 : v
             }
 
-            width: volRow.implicitWidth
-            height: volRow.implicitHeight
+            width: volChip.width
+            height: volChip.height
             anchors.verticalCenter: parent.verticalCenter
 
-            Row {
-                id: volRow
-                anchors.centerIn: parent
-                spacing: 4
-
-                Text {
-                    text: volItem.muted ? "󰖁" : (volItem.volume > 0.66 ? "󰕾" : (volItem.volume > 0.33 ? "󰖀" : "󰕿"))
-                    color: volItem.muted ? Root.Config.red : Root.Config.text
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: Root.Config.iconSize
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Behavior on color {
-                        ColorAnimation { duration: 150 }
-                    }
-                }
-
-                Text {
-                    text: Math.round(volItem.volume * 100) + "%"
-                    color: volItem.muted ? Root.Config.red : Root.Config.subtext0
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: Root.Config.iconSize - 2
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Behavior on color {
-                        ColorAnimation { duration: 150 }
-                    }
-                }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
+            InfoChip {
+                id: volChip
+                iconText: volItem.muted ? "󰖁" : (volItem.volume > 0.66 ? "󰕾" : (volItem.volume > 0.33 ? "󰖀" : "󰕿"))
+                valueText: Math.round(volItem.volume * 100) + "%"
+                iconColor: volItem.muted ? Root.Config.red : Root.Config.text
+                labelColor: volItem.muted ? Root.Config.red : Root.Config.subtext0
+                clickable: true
                 onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "music", "call", "music", "toggle"])
             }
         }
 
         // Network icon
         Item {
-            width: netIcon.implicitWidth
-            height: netIcon.implicitHeight
+            id: netItem
+            width: netChip.width
+            height: netChip.height
             anchors.verticalCenter: parent.verticalCenter
 
-            Text {
-                id: netIcon
-                text: root.networkConnected ? (root.networkIsWifi ? "󰤨" : "󰈀") : "󰤭"
-                color: root.networkConnected ? Root.Config.green : Root.Config.subtext0
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Root.Config.iconSize
-                anchors.centerIn: parent
-
-                Behavior on color {
-                    ColorAnimation { duration: 150 }
-                }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
+            InfoChip {
+                id: netChip
+                iconText: root.networkConnected ? (root.networkIsWifi ? "󰤨" : "󰈀") : "󰤭"
+                valueText: root.networkConnected ? root.activeSsid : ""
+                backgroundColor: root.networkConnected ? Root.Config.blue : Root.Config.chipColor
+                iconColor: root.networkConnected ? Root.Config.crust : Root.Config.subtext0
+                labelColor: root.networkConnected ? Root.Config.crust : Root.Config.subtext0
+                clickable: true
                 onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "network_desktop", "call", "networkdesktop", "toggle"])
             }
         }

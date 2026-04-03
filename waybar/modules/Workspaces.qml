@@ -52,7 +52,7 @@ Item {
     RowLayout {
         id: layout
         anchors.centerIn: parent
-        spacing: Root.Config.pillSpacing
+        spacing: 6
 
         Repeater {
             model: Root.Config.workspaceCount
@@ -63,61 +63,29 @@ Item {
                 property int wsId: index + 1
                 property bool isActive: Hyprland.focusedWorkspace != null && Hyprland.focusedWorkspace.id === wsId
                 
-                // Get up to 4 windows for this workspace
-                property var wsWindows: root.windowList.filter(w => w.workspace.id === wsId).slice(0, 4)
+                property var wsWindows: root.windowList.filter(w => w.workspace.id === wsId)
                 property bool hasWindows: wsWindows.length > 0
 
-                property int iconSpacing: 6
-                property int iconSize: 16
-                property int pillHorizontalPadding: 8
-
-                // Dynamic width: if it has windows, calculate width based on icons; if not, standard dot/pill
-                Layout.preferredWidth: hasWindows ? (wsWindows.length * iconSize + Math.max(0, wsWindows.length - 1) * iconSpacing + pillHorizontalPadding * 2) : (isActive ? 24 : 12)
-                Layout.preferredHeight: hasWindows ? 26 : 12
-                radius: hasWindows ? 13 : 6
+                Layout.preferredWidth: 26
+                Layout.preferredHeight: 26
+                radius: 6
                 
-                // Color logic: if active and has windows -> a slightly lighter surface or bordered
-                // If inactive and has windows -> standard surface
-                // If active and empty -> mauve pill
-                // If inactive and empty -> overlay0 dot
-                color: hasWindows ? (isActive ? Root.Config.surface2 : Root.Config.surface1) : (isActive ? Root.Config.mauve : Root.Config.overlay0)
+                color: isActive ? Root.Config.mauve : (hasWindows ? Root.Config.surface0 : "transparent")
 
-                border.color: isActive && hasWindows ? Root.Config.mauve : "transparent"
-                border.width: isActive && hasWindows ? 1 : 0
-
-                Behavior on Layout.preferredWidth {
-                    NumberAnimation { duration: 250; easing.type: Easing.OutQuint }
-                }
-                Behavior on Layout.preferredHeight {
-                    NumberAnimation { duration: 250; easing.type: Easing.OutQuint }
-                }
-                Behavior on radius {
-                    NumberAnimation { duration: 250; easing.type: Easing.OutQuint }
-                }
                 Behavior on color {
-                    ColorAnimation { duration: 200; easing.type: Easing.InOutQuad }
+                    ColorAnimation { duration: 150; easing.type: Easing.InOutQuad }
                 }
 
-                Row {
+                Text {
                     anchors.centerIn: parent
-                    spacing: wsIndicator.iconSpacing
-                    visible: parent.hasWindows
+                    text: wsIndicator.wsId
+                    color: wsIndicator.isActive ? Root.Config.crust : Root.Config.subtext1
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: 13
+                    font.bold: wsIndicator.isActive
 
-                    Repeater {
-                        model: wsIndicator.wsWindows
-
-                        Image {
-                            required property var modelData
-
-                            property var appEntry: DesktopEntries.heuristicLookup(modelData.class || modelData.initialClass)
-                            property string iconPath: Quickshell.iconPath(appEntry?.icon ?? modelData.class ?? modelData.initialClass ?? "application-x-executable", "image-missing")
-
-                            source: iconPath
-                            width: wsIndicator.iconSize
-                            height: wsIndicator.iconSize
-                            sourceSize: Qt.size(width, height)
-                            fillMode: Image.PreserveAspectFit
-                        }
+                    Behavior on color {
+                        ColorAnimation { duration: 150; easing.type: Easing.InOutQuad }
                     }
                 }
 

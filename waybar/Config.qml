@@ -22,12 +22,21 @@ QtObject {
     readonly property color teal: "#94e2d5"
 
     // Geometry
-    readonly property int radius: 14
-    readonly property int barHeight: 36
-    readonly property int barMargin: 6
-    readonly property int pillPadding: 8
-    readonly property int pillSpacing: 6
+    readonly property int radius: 10
+    readonly property int barHeight: 32
+    readonly property int barMargin: 4
+    readonly property int pillPadding: 6
+    readonly property int pillSpacing: 4
     readonly property int iconSize: 14
+
+    // InfoChip properties
+    readonly property int chipRadius: 6
+    readonly property int chipPaddingHorizontal: 8
+    readonly property int chipPaddingVertical: 4
+    readonly property color chipColor: "transparent"
+    readonly property color chipHoverColor: surface0
+    readonly property color chipActiveColor: surface1
+    readonly property color activeAccent: mauve
 
     // Configurable
     readonly property int workspaceCount: 10
