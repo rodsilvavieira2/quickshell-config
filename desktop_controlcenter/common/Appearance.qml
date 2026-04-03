@@ -7,7 +7,6 @@ import Quickshell
 Singleton {
     id: root
 
-    // Catppuccin Mocha Palette Mapping
     readonly property color base: "#1e1e2e"
     readonly property color mantle: "#181825"
     readonly property color crust: "#11111b"
@@ -47,7 +46,7 @@ Singleton {
 
     property QtObject font: QtObject {
         property string family: "JetBrainsMono Nerd Font"
-        property int sizeHeader: 32
+        property int sizeHeader: 34
         property int sizeTitle: 16
         property int sizeNormal: 14
         property int sizeSmall: 13
@@ -68,10 +67,10 @@ Singleton {
         property int long2: 500
         
         // Easing curves matching Material 3
-        property var standard: Easing.BezierSpline
-        property var standardDecelerate: [0, 0, 0, 1]
-        property var standardAccelerate: [0.3, 0, 1, 1]
-        property var emphasizedDecelerate: [0.05, 0.7, 0.1, 1]
-        property var emphasizedAccelerate: [0.3, 0, 0.8, 0.15]
+        property var standard: Easing.OutCubic
+        property var standardDecelerate: Easing.OutCubic
+        property var standardAccelerate: Easing.InCubic
+        property var emphasizedDecelerate: Easing.OutExpo
+        property var emphasizedAccelerate: Easing.InExpo
     }
 }

@@ -10,18 +10,21 @@ Rectangle {
     
     required property var audio
     
-    readonly property int currentVolume: Math.round((audio.volume ?? 0) * 100)
-    readonly property bool isMuted: audio.muted ?? false
+    readonly property real safeVolume: (audio?.volume !== undefined && !isNaN(audio.volume)) ? audio.volume : 0
+    readonly property int currentVolume: Math.round(safeVolume * 100)
+    readonly property bool isMuted: audio?.muted ?? false
     
     readonly property color surfaceColor: Appearance.colors.cSurfaceContainerHigh
     readonly property color textColor: Appearance.colors.cOnSurface
     readonly property color accentColor: Appearance.colors.success
     
     Layout.fillWidth: true
-    Layout.preferredHeight: 48
-    
+    Layout.preferredHeight: 60
+
     radius: 24
     color: surfaceColor
+    border.color: Qt.rgba(1, 1, 1, 0.08)
+    border.width: 1
     
     Behavior on color {
         ColorAnimation {
@@ -36,9 +39,9 @@ Rectangle {
         
         Rectangle {
             id: muteBtn
-            Layout.preferredWidth: 48
+            Layout.preferredWidth: 40
             Layout.fillHeight: true
-            radius: 24
+            radius: 16
             color: muteMouse.containsMouse 
                 ? Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.1) 
                 : "transparent"
@@ -54,7 +57,7 @@ Rectangle {
                 anchors.centerIn: parent
                 text: root.isMuted ? "󰝟" : (root.currentVolume > 66 ? "󰕾" : (root.currentVolume > 33 ? "󰖀" : "󰕿"))
                 font.family: Appearance.font.family
-                font.pixelSize: 20
+                font.pixelSize: 18
                 color: root.isMuted ? Appearance.colors.error : root.textColor
                 
                 Behavior on color {
@@ -78,6 +81,7 @@ Rectangle {
             id: slider
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.leftMargin: 10
             Layout.rightMargin: 12
             
             from: 0
@@ -91,18 +95,17 @@ Rectangle {
                 x: slider.leftPadding
                 y: slider.topPadding + slider.availableHeight / 2 - height / 2
                 implicitWidth: 200
-                implicitHeight: 48
+                implicitHeight: 10
                 width: slider.availableWidth
                 height: implicitHeight
-                radius: 24
-                color: "transparent"
+                radius: 5
+                color: Qt.rgba(1, 1, 1, 0.08)
                 
                 Rectangle {
                     width: slider.visualPosition * parent.width
                     height: parent.height
-                    radius: 24
+                    radius: 5
                     color: root.accentColor
-                    opacity: 0.2
                     
                     Behavior on width {
                         NumberAnimation {
@@ -114,7 +117,14 @@ Rectangle {
             }
             
             handle: Rectangle {
-                visible: false
+                width: 18
+                height: 18
+                radius: 9
+                color: "#f8f8fa"
+                border.color: Qt.rgba(0, 0, 0, 0.18)
+                border.width: 1
+                y: slider.topPadding + slider.availableHeight / 2 - height / 2
+                x: slider.leftPadding + slider.visualPosition * (slider.availableWidth - width)
             }
         }
         
@@ -123,7 +133,7 @@ Rectangle {
             Layout.preferredWidth: 40
             text: root.currentVolume + "%"
             font.family: Appearance.font.family
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.bold: true
             color: root.textColor
             horizontalAlignment: Text.AlignRight

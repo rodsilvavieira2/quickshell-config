@@ -9,6 +9,7 @@ import Quickshell.Wayland
 import Quickshell.Io
 import Quickshell.Hyprland
 import Quickshell.Bluetooth
+import Quickshell.Services.Notifications
 
 import "./common"
 import "./components"
@@ -16,33 +17,30 @@ import "./services"
 
 PanelWindow {
     id: root
-    
-    // Services
+
     AudioService { id: audioService }
     NetworkService { id: networkService }
-    SystemStatsService { id: systemUsageService }
-    MusicService { id: musicService }
-    
-    // Process launchers
+    BrightnessService { id: brightnessService }
+    NotificationService { id: notificationService }
+
     Process {
         id: settingsProcess
         command: ["nm-connection-editor"]
         onStarted: root.shouldShow = false
     }
-    
+
     Process {
         id: lockProcess
         command: ["loginctl", "lock-session"]
         onStarted: root.shouldShow = false
     }
-    
+
     Process {
         id: powerProcess
         command: ["wlogout"]
         onStarted: root.shouldShow = false
     }
-    
-    // Theme colors from Appearance singleton
+
     readonly property color cSurface: Appearance.colors.cSurface
     readonly property color cSurfaceContainer: Appearance.colors.cSurfaceContainer
     readonly property color cSurfaceContainerHigh: Appearance.colors.cSurfaceContainerHigh
@@ -52,9 +50,10 @@ PanelWindow {
     readonly property color cOnSurface: Appearance.colors.cOnSurface
     readonly property color cOnSurfaceVariant: Appearance.colors.cOnSurfaceVariant
     readonly property color cOnSurfaceDim: Appearance.colors.cOnSurfaceDim
-    
-    // Multi-screen support
+
+    property bool shouldShow: false
     property var focusedScreenName: Hyprland.focusedMonitor?.name ?? ""
+
     screen: {
         for (let i = 0; i < Quickshell.screens.values.length; i++) {
             if (Quickshell.screens.values[i].name === focusedScreenName) {
@@ -63,187 +62,249 @@ PanelWindow {
         }
         return Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null;
     }
-    
+
     anchors {
         top: true
         right: true
     }
-    
+
     margins {
-        right: 12
         top: 12
+        right: 12
     }
-    
-    implicitWidth: 420
-    implicitHeight: Math.min(860, screen?.height ?? 800 - 40)
+
+    implicitWidth: 456
+    implicitHeight: Math.min((panelLayout.implicitHeight ?? 0) + 40, (screen?.height ?? 900) - 34)
     color: "transparent"
     visible: shouldShow || panelContent.opacity > 0
-    
-    property bool shouldShow: false
-    
+
     WlrLayershell.namespace: "quickshell:desktop_controlcenter"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: shouldShow ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    
+
     IpcHandler {
         target: "desktop_controlcenter"
+
         function toggle() { root.shouldShow = !root.shouldShow; }
         function open() { root.shouldShow = true; }
         function close() { root.shouldShow = false; }
     }
 
+    NotificationServer {
+        id: notificationServer
+        actionsSupported: true
+        bodySupported: true
+        bodyMarkupSupported: true
+        bodyHyperlinksSupported: true
+        bodyImagesSupported: true
+        imageSupported: true
+
+        onNotification: notification => {
+            notificationService.addNotification(notification);
+        }
+    }
+
     FocusScope {
         id: panelContent
         anchors.fill: parent
-        
-        transformOrigin: Item.TopRight
-        scale: 0.94
-        opacity: 0
-        
+
         focus: true
-        
-        Keys.onEscapePressed: root.shouldShow = false
-        
-        // Tracking mouse for auto-close behavior (ported from remote)
+        transformOrigin: Item.TopRight
+        scale: 0.96
+        opacity: 0
+
         property bool mouseHasEntered: false
         property bool mouseInside: hoverHandler.hovered
-        
+
+        Keys.onEscapePressed: root.shouldShow = false
+
         Connections {
             target: root
+
             function onShouldShowChanged() {
                 if (root.shouldShow) {
-                    panelContent.mouseHasEntered = false
-                    closeTimer.stop()
+                    panelContent.mouseHasEntered = false;
+                    closeTimer.stop();
                 }
             }
         }
-        
+
         Timer {
             id: closeTimer
             interval: 400
             onTriggered: {
                 if (!panelContent.mouseInside && panelContent.mouseHasEntered && root.shouldShow) {
-                    root.shouldShow = false
+                    root.shouldShow = false;
                 }
             }
         }
-        
+
         HoverHandler {
             id: hoverHandler
             onHoveredChanged: {
                 if (hovered) {
-                    panelContent.mouseHasEntered = true
-                    closeTimer.stop()
+                    panelContent.mouseHasEntered = true;
+                    closeTimer.stop();
                 } else if (panelContent.mouseHasEntered && root.shouldShow) {
-                    closeTimer.restart()
+                    closeTimer.restart();
                 }
             }
         }
-        
+
         onVisibleChanged: {
-            if (visible) forceActiveFocus()
+            if (visible) {
+                forceActiveFocus();
+            }
         }
-        
+
         MouseArea {
             anchors.fill: parent
             z: -1
             onClicked: root.shouldShow = false
         }
-        
-        // Show Animation
-        SequentialAnimation {
-            running: root.shouldShow
-            ParallelAnimation {
-                NumberAnimation { 
-                    target: panelContent
-                    property: "scale"
-                    from: 0.94
-                    to: 1.0
-                    duration: Appearance.animation.medium2
-                    easing.type: Appearance.animation.standard
-                }
-                NumberAnimation { 
-                    target: panelContent
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                    duration: Appearance.animation.medium1
-                    easing.type: Appearance.animation.standard
-                }
-            }
-        }
-        
-        // Hide Animation
+
         ParallelAnimation {
-            running: !root.shouldShow && panelContent.opacity > 0
-            NumberAnimation { 
+            running: root.shouldShow
+
+            NumberAnimation {
                 target: panelContent
                 property: "scale"
-                to: 0.94
-                duration: Appearance.animation.short4
+                from: 0.96
+                to: 1
+                duration: Appearance.animation.medium2
+                easing.type: Appearance.animation.emphasizedDecelerate
+            }
+
+            NumberAnimation {
+                target: panelContent
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: Appearance.animation.medium1
                 easing.type: Appearance.animation.standard
             }
-            NumberAnimation { 
+        }
+
+        ParallelAnimation {
+            running: !root.shouldShow && panelContent.opacity > 0
+
+            NumberAnimation {
+                target: panelContent
+                property: "scale"
+                to: 0.96
+                duration: Appearance.animation.short4
+                easing.type: Appearance.animation.emphasizedAccelerate
+            }
+
+            NumberAnimation {
                 target: panelContent
                 property: "opacity"
                 to: 0
                 duration: Appearance.animation.short4
-                easing.type: Appearance.animation.standard
+                easing.type: Appearance.animation.standardAccelerate
             }
         }
-        
+
         Rectangle {
             id: panel
             anchors.fill: parent
-            color: root.cSurface
-            radius: 24
-            border.color: root.cBorder
-            border.width: 1
+            radius: 34
             clip: true
-            
-            Behavior on color {
-                ColorAnimation {
-                    duration: Appearance.animation.medium2
-                    easing.type: Appearance.animation.standard
+            color: Qt.rgba(root.cSurface.r, root.cSurface.g, root.cSurface.b, 0.96)
+            border.color: Qt.rgba(1, 1, 1, 0.10)
+            border.width: 1
+
+            Rectangle {
+                anchors.fill: parent
+                radius: parent.radius
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: Qt.rgba(0.24, 0.21, 0.34, 0.34) }
+                    GradientStop { position: 1.0; color: Qt.rgba(0.10, 0.10, 0.15, 0.90) }
                 }
             }
-            
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                height: 108
+                radius: parent.radius
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0.11) }
+                    GradientStop { position: 1.0; color: "transparent" }
+                }
+            }
+
             MouseArea {
                 anchors.fill: parent
-                onClicked: (mouse) => { mouse.accepted = true }
+                onClicked: mouse => { mouse.accepted = true; }
             }
-            
+
             ColumnLayout {
+                id: panelLayout
                 anchors.fill: parent
                 anchors.margins: 20
                 spacing: 16
-                
-                // Header Section
+
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 56
+                    Layout.preferredHeight: 66
                     spacing: 12
-                    
+
+                    RowLayout {
+                        spacing: 8
+
+                        HeaderButton {
+                            icon: "󰒓"
+                            label: "Network"
+                            tooltip: "Network Settings"
+                            tint: Appearance.colors.warning
+                            onClicked: settingsProcess.running = true
+                        }
+
+                        HeaderButton {
+                            icon: "󰍜"
+                            label: "Lock"
+                            tooltip: "Lock Session"
+                            tint: Appearance.colors.info
+                            onClicked: lockProcess.running = true
+                        }
+
+                        HeaderButton {
+                            icon: "󰐥"
+                            label: "Power"
+                            tooltip: "Power Menu"
+                            tint: Appearance.colors.error
+                            onClicked: powerProcess.running = true
+                        }
+                    }
+
+                    Item {
+                        Layout.fillWidth: true
+                    }
+
                     ColumnLayout {
                         spacing: 2
-                        
+
                         Text {
                             id: timeText
+                            Layout.alignment: Qt.AlignRight
                             text: Qt.formatTime(new Date(), "hh:mm")
                             font.family: Appearance.font.family
-                            font.pixelSize: 32
+                            font.pixelSize: Appearance.font.sizeHeader
                             font.bold: true
                             color: root.cOnSurface
                         }
-                        
+
                         Text {
+                            Layout.alignment: Qt.AlignRight
                             text: Qt.formatDate(new Date(), "dddd, MMMM d")
                             font.family: Appearance.font.family
-                            font.pixelSize: 13
+                            font.pixelSize: 11
                             font.bold: true
                             color: root.cOnSurfaceVariant
                         }
-                        
+
                         Timer {
                             interval: 1000
                             running: true
@@ -251,80 +312,57 @@ PanelWindow {
                             onTriggered: timeText.text = Qt.formatTime(new Date(), "hh:mm")
                         }
                     }
-                    
-                    Item { Layout.fillWidth: true }
-                    
-                    RowLayout {
-                        spacing: 6
-                        
-                        HeaderButton {
-                            icon: "󰒓"
-                            tooltip: "Network Settings"
-                            onClicked: settingsProcess.running = true
-                        }
-                        HeaderButton {
-                            icon: "󰍜"
-                            tooltip: "Lock Session"
-                            onClicked: lockProcess.running = true
-                        }
-                        HeaderButton {
-                            icon: "󰐥"
-                            tooltip: "Power Menu"
-                            onClicked: powerProcess.running = true
-                        }
-                    }
                 }
-                
-                // Scrollable Content
+
                 Flickable {
                     id: contentFlick
                     Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    
+                    Layout.preferredHeight: Math.min(contentColumn.implicitHeight, (root.screen?.height ?? 860) - 170)
                     contentHeight: contentColumn.height
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
-                    flickDeceleration: 3000
-                    maximumFlickVelocity: 2000
-                    
+                    flickDeceleration: 3200
+                    maximumFlickVelocity: 2200
+
                     ScrollBar.vertical: ScrollBar {
                         policy: ScrollBar.AsNeeded
                         width: 4
-                        
+
                         contentItem: Rectangle {
                             radius: 2
-                            color: Appearance.colors.cBorder
-                            opacity: 0.2
+                            color: Qt.rgba(1, 1, 1, 0.18)
                         }
                     }
-                    
+
                     ColumnLayout {
                         id: contentColumn
                         width: contentFlick.width
                         spacing: 14
-                        
-                        // Quick Toggles
+
+                        SectionLabel {
+                            label: "Controls"
+                            badge: notificationService.dnd ? "Focus On" : ""
+                        }
+
                         GridLayout {
                             Layout.fillWidth: true
                             columns: 2
                             columnSpacing: 10
                             rowSpacing: 10
-                            
+
                             QuickToggle {
-                                Layout.fillWidth: true
-                                icon: networkService.activeEthernet ? "󰈀" : "󰖩"
-                                label: networkService.activeEthernet ? "Ethernet" : "Wi-Fi"
-                                subLabel: networkService.activeEthernet ? "Connected" : (networkService.active?.ssid ?? "Disconnected")
-                                active: networkService.activeEthernet || networkService.wifiEnabled
-                                activeColor: networkService.activeEthernet ? Appearance.colors.info : Appearance.colors.success
-                                onClicked: networkService.toggleWifi()
+                                icon: "󰈀"
+                                label: "Ethernet"
+                                subLabel: networkService.activeEthernet ? "Connected" : "Disconnected"
+                                active: networkService.activeEthernet !== null
+                                activeColor: Appearance.colors.info
+                                onClicked: settingsProcess.running = true
                             }
-                            
+
                             QuickToggle {
-                                Layout.fillWidth: true
                                 icon: "󰂯"
                                 label: "Bluetooth"
-                                subLabel: Bluetooth.defaultAdapter?.enabled ? "On" : "Off"
+                                subLabel: Bluetooth.defaultAdapter?.enabled ? "Available" : "Disabled"
                                 active: Bluetooth.defaultAdapter?.enabled ?? false
                                 activeColor: Appearance.colors.info
                                 onClicked: {
@@ -333,86 +371,106 @@ PanelWindow {
                                     }
                                 }
                             }
+
+                            QuickToggle {
+                                icon: notificationService.dnd ? "󰂛" : "󰂚"
+                                label: "Notifications"
+                                subLabel: notificationService.dnd ? "Do Not Disturb" : "Alerts Enabled"
+                                active: notificationService.dnd
+                                activeColor: Appearance.colors.warning
+                                onClicked: notificationService.toggleDnd()
+                            }
+
+                            QuickToggle {
+                                icon: "󰒓"
+                                label: "System Settings"
+                                subLabel: "Connections and adapters"
+                                active: false
+                                activeColor: Appearance.colors.cSecondary
+                                onClicked: settingsProcess.running = true
+                            }
                         }
-                        
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 1
-                            color: root.cBorder
-                            opacity: 0.1
+
+                        SectionLabel {
+                            label: "Levels"
+                            badge: brightnessService.available ? "" : "Brightness unavailable"
                         }
-                        
+
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 10
-                            
+
                             VolumeSlider {
-                                Layout.fillWidth: true
                                 audio: audioService
                             }
+
+                            BrightnessSlider {
+                                visible: brightnessService.available
+                                brightness: brightnessService
+                            }
                         }
-                        
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 1
-                            color: root.cBorder
-                            opacity: 0.1
+
+                        SectionLabel {
+                            label: "Notifications"
                         }
-                        
-                        SystemStats {
-                            Layout.fillWidth: true
-                            systemUsage: systemUsageService
+
+                        NotificationList {
+                            Layout.preferredHeight: Math.min(420, Math.max(220, notifListContentHeight()))
+                            notifs: notificationService
                         }
-                        
-                        MediaCard {
-                            Layout.fillWidth: true
-                            mpris: musicService
-                            visible: musicService.isActive
+
+                        Item {
+                            Layout.preferredHeight: 6
                         }
-                        
-                        Item { Layout.preferredHeight: 4 }
                     }
                 }
             }
         }
     }
-    
+
+    function notifListContentHeight() {
+        const available = (root.screen?.height ?? 860) - 250;
+        return Math.min(available, Math.max(220, (notificationService.recentNotifications?.length ?? 0) * 92 + 110));
+    }
+
     component HeaderButton: Rectangle {
         id: headerBtn
-        property string icon
+
+        property string icon: ""
+        property string label: ""
         property string tooltip: ""
+        property color tint: Appearance.colors.info
         signal clicked()
-        
-        width: 40
-        height: 40
-        radius: 20
-        color: headerBtnMouse.containsMouse 
-            ? Appearance.colors.surface1
-            : root.cSurfaceContainer
-        
-        Behavior on color {
-            ColorAnimation {
-                duration: Appearance.animation.short3
-                easing.type: Appearance.animation.standard
-            }
-        }
-        
-        scale: headerBtnMouse.pressed ? 0.92 : 1.0
-        Behavior on scale {
-            NumberAnimation {
-                duration: Appearance.animation.short2
-                easing.type: Appearance.animation.standard
-            }
-        }
-        
-        Text {
+
+        width: 74
+        height: 34
+        radius: 17
+        color: headerBtnMouse.containsMouse
+            ? Qt.rgba(tint.r, tint.g, tint.b, 0.28)
+            : Qt.rgba(1, 1, 1, 0.06)
+        border.color: Qt.rgba(tint.r, tint.g, tint.b, 0.30)
+        border.width: 1
+
+        RowLayout {
             anchors.centerIn: parent
-            text: headerBtn.icon
-            font.family: Appearance.font.family
-            font.pixelSize: 18
-            color: root.cOnSurface
+            spacing: 6
+
+            Text {
+                text: headerBtn.icon
+                font.family: Appearance.font.family
+                font.pixelSize: 13
+                color: headerBtn.tint
+            }
+
+            Text {
+                text: headerBtn.label
+                font.family: Appearance.font.family
+                font.pixelSize: 10
+                font.bold: true
+                color: Appearance.colors.cOnSurface
+            }
         }
-        
+
         MouseArea {
             id: headerBtnMouse
             anchors.fill: parent
@@ -420,9 +478,53 @@ PanelWindow {
             hoverEnabled: true
             onClicked: headerBtn.clicked()
         }
-        
+
         ToolTip.visible: headerBtnMouse.containsMouse && headerBtn.tooltip !== ""
         ToolTip.text: headerBtn.tooltip
-        ToolTip.delay: 500
+        ToolTip.delay: 400
+    }
+
+    component SectionLabel: RowLayout {
+        property string label: ""
+        property string badge: ""
+
+        Layout.fillWidth: true
+        spacing: 8
+
+        Text {
+            text: label
+            font.family: Appearance.font.family
+            font.pixelSize: 10
+            font.bold: true
+            color: root.cOnSurfaceDim
+        }
+
+        Rectangle {
+            visible: badge !== ""
+            radius: 9
+            implicitWidth: badgeText.implicitWidth + 12
+            implicitHeight: 18
+            color: Qt.rgba(1, 1, 1, 0.06)
+
+            Text {
+                id: badgeText
+                anchors.centerIn: parent
+                text: badge
+                font.family: Appearance.font.family
+                font.pixelSize: 9
+                font.bold: true
+                color: root.cOnSurfaceVariant
+            }
+        }
+
+        Item {
+            Layout.fillWidth: true
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 1
+            color: Qt.rgba(1, 1, 1, 0.06)
+        }
     }
 }

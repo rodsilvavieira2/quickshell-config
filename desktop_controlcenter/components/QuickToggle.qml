@@ -18,11 +18,16 @@ Rectangle {
     signal clicked()
     
     Layout.fillWidth: true
-    Layout.preferredHeight: 64
-    
-    radius: 32
-    
-    color: active ? activeColor : surfaceColor
+    Layout.preferredHeight: 88
+
+    radius: 26
+    color: active
+        ? Qt.rgba(activeColor.r, activeColor.g, activeColor.b, 0.22)
+        : surfaceColor
+    border.color: active
+        ? Qt.rgba(activeColor.r, activeColor.g, activeColor.b, 0.34)
+        : Qt.rgba(1, 1, 1, 0.08)
+    border.width: 1
     
     Behavior on color {
         ColorAnimation { 
@@ -31,7 +36,7 @@ Rectangle {
         }
     }
     
-    scale: toggleMouse.pressed ? 0.96 : 1.0
+    scale: toggleMouse.pressed ? 0.985 : 1.0
     Behavior on scale {
         NumberAnimation {
             duration: Appearance.animation.short2
@@ -42,9 +47,7 @@ Rectangle {
     Rectangle {
         anchors.fill: parent
         radius: parent.radius
-        color: root.active 
-            ? Qt.rgba(0, 0, 0, 0.08)
-            : Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.08)
+        color: Qt.rgba(1, 1, 1, 0.06)
         opacity: toggleMouse.containsMouse && !toggleMouse.pressed ? 1 : 0
         
         Behavior on opacity {
@@ -65,17 +68,16 @@ Rectangle {
     
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 20
-        anchors.rightMargin: 20
-        spacing: 14
+        anchors.margins: 18
+        spacing: 12
         
         Rectangle {
-            Layout.preferredWidth: 40
-            Layout.preferredHeight: 40
-            radius: 20
-            color: active 
-                ? Qt.rgba(1, 1, 1, 0.25) 
-                : Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.1)
+            Layout.preferredWidth: 42
+            Layout.preferredHeight: 42
+            radius: 18
+            color: active
+                ? Qt.rgba(1, 1, 1, 0.14)
+                : Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.08)
             
             Behavior on color {
                 ColorAnimation {
@@ -88,10 +90,8 @@ Rectangle {
                 anchors.centerIn: parent
                 text: root.icon
                 font.family: Appearance.font.family
-                font.pixelSize: 22
-                color: active 
-                    ? Qt.rgba(0, 0, 0, 0.87)
-                    : root.textColor
+                font.pixelSize: 19
+                color: active ? "#f7f9fc" : root.textColor
                 
                 Behavior on color {
                     ColorAnimation {
@@ -104,35 +104,35 @@ Rectangle {
         
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: 2
-            
-            Text {
-                text: root.label
-                font.family: Appearance.font.family
-                font.pixelSize: 14
-                font.bold: true
-                color: active 
-                    ? Qt.rgba(0, 0, 0, 0.87)
-                    : root.textColor
-                elide: Text.ElideRight
-                Layout.fillWidth: true
-                
-                Behavior on color {
-                    ColorAnimation {
-                        duration: Appearance.animation.short4
-                        easing.type: Appearance.animation.standard
-                    }
+            spacing: 3
+
+            RowLayout {
+                spacing: 6
+
+                Text {
+                    text: root.label
+                    font.family: Appearance.font.family
+                    font.pixelSize: 13
+                    font.bold: true
+                    color: active ? "#f7f9fc" : root.textColor
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
+                }
+
+                Rectangle {
+                    Layout.preferredWidth: 7
+                    Layout.preferredHeight: 7
+                    radius: 3.5
+                    color: active ? activeColor : Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.28)
                 }
             }
-            
+
             Text {
                 text: root.subLabel
                 font.family: Appearance.font.family
-                font.pixelSize: 12
-                color: active 
-                    ? Qt.rgba(0, 0, 0, 0.6)
-                    : root.textColor
-                opacity: active ? 1 : 0.6
+                font.pixelSize: 11
+                color: active ? "#dce6f5" : Appearance.colors.cOnSurfaceVariant
+                opacity: 1
                 elide: Text.ElideRight
                 Layout.fillWidth: true
                 visible: text !== ""
