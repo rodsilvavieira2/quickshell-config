@@ -5,6 +5,7 @@ import Quickshell.Io
 import Quickshell.Hyprland
 
 import ".." as Root
+import "../shared/ui" as DS
 
 Item {
     id: root
@@ -57,7 +58,7 @@ Item {
         Repeater {
             model: Root.Config.workspaceCount
 
-            Rectangle {
+            DS.WorkspaceChip {
                 id: wsIndicator
 
                 property int wsId: index + 1
@@ -66,36 +67,13 @@ Item {
                 property var wsWindows: root.windowList.filter(w => w.workspace.id === wsId)
                 property bool hasWindows: wsWindows.length > 0
 
-                Layout.preferredWidth: 22
+                Layout.preferredWidth: implicitWidth
                 Layout.preferredHeight: 22
-                radius: 7
-                
-                color: isActive ? Root.Config.mauve : (hasWindows ? Root.Config.surface0 : "transparent")
-
-                Behavior on color {
-                    ColorAnimation { duration: 150; easing.type: Easing.InOutQuad }
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: wsIndicator.wsId
-                    color: wsIndicator.isActive ? Root.Config.crust : Root.Config.subtext1
-                    font.family: Root.Config.textFontFamily
-                    font.pixelSize: 11
-                    font.bold: wsIndicator.isActive
-
-                    Behavior on color {
-                        ColorAnimation { duration: 150; easing.type: Easing.InOutQuad }
-                    }
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        Hyprland.dispatch("workspace " + wsIndicator.wsId)
-                    }
-                }
+                text: String(wsIndicator.wsId)
+                selected: isActive
+                occupied: hasWindows
+                clickable: true
+                onClicked: Hyprland.dispatch("workspace " + wsIndicator.wsId)
             }
         }
     }

@@ -26,7 +26,7 @@ QtObject {
 
     readonly property int radius: Tokens.radius.md
     readonly property int barRadius: 0
-    readonly property int barHeight: 34
+    readonly property int barHeight: 42
     readonly property int barTopMargin: 0
     readonly property int barBottomGap: 0
     readonly property int barPaddingHorizontal: 12

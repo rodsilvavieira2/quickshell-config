@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 
 import ".." as Root
+import "../shared/ui" as DS
 
 Item {
     id: root
@@ -9,13 +10,12 @@ Item {
     implicitWidth: powerIcon.implicitWidth
     implicitHeight: powerIcon.implicitHeight
 
-    Text {
+    DS.LucideIcon {
         id: powerIcon
         anchors.centerIn: parent
-        text: ""
+        name: "power"
         color: mouseArea.containsMouse ? Root.Config.red : Root.Config.subtext0
-        font.family: Root.Config.iconFontFamily
-        font.pixelSize: Root.Config.iconSize
+        iconSize: Root.Config.iconSize
 
         Behavior on color {
             ColorAnimation { duration: 200; easing.type: Easing.InOutQuad }

@@ -9,6 +9,7 @@ Item {
     property alias to: control.to
     property alias value: control.value
     readonly property bool pressed: control.pressed
+    signal moved(real value)
 
     implicitWidth: 240
     implicitHeight: 30
@@ -16,6 +17,7 @@ Item {
     Slider {
         id: control
         anchors.fill: parent
+        onMoved: root.moved(value)
 
         background: Rectangle {
             x: control.leftPadding

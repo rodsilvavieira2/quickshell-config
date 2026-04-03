@@ -5,8 +5,10 @@ import Quickshell
 import Quickshell.Io
 
 import "../common"
+import "../shared/ui" as DS
+import "../shared/designsystem" as Design
 
-Rectangle {
+DS.Card {
     id: root
     
     required property var mpris
@@ -25,12 +27,14 @@ Rectangle {
     
     Layout.fillWidth: true
     Layout.preferredHeight: 120
-    
-    radius: 24
-    color: surfaceColor
+
+    radius: Design.Tokens.shape.extraLarge
+    backgroundColor: surfaceColor
+    borderColor: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.84)
+    borderWidth: Design.Tokens.border.width.thin
+    padding: 16
+    shadowLevel: Design.Tokens.shadow.none
     clip: true
-    border.color: Qt.rgba(1, 1, 1, 0.08)
-    border.width: 1
     
     Behavior on Layout.preferredHeight {
         NumberAnimation {
@@ -56,17 +60,19 @@ Rectangle {
             GradientStop { position: 1.0; color: Qt.rgba(0.06, 0.08, 0.11, 0.88) }
         }
     }
-    
+
     RowLayout {
         anchors.fill: parent
-        anchors.margins: 16
         spacing: 16
         
-        Rectangle {
+        DS.Surface {
             Layout.preferredWidth: 72
             Layout.preferredHeight: 72
-            radius: 18
-            color: Qt.rgba(1, 1, 1, 0.08)
+            padding: 0
+            radius: Design.Tokens.shape.large
+            backgroundColor: Design.ThemePalette.withAlpha(Design.Tokens.color.surfaceContainerHighest, 0.84)
+            borderColor: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.68)
+            borderWidth: Design.Tokens.border.width.thin
             clip: true
             
             Image {
@@ -79,13 +85,12 @@ Rectangle {
                 Behavior on opacity { NumberAnimation { duration: 200 } }
             }
             
-            Text {
+            DS.LucideIcon {
                 anchors.centerIn: parent
-                text: "󰝚"
-                font.family: Appearance.font.family
-                font.pixelSize: 32
-                color: root.textDim
                 visible: albumArt.status !== Image.Ready
+                name: "music-4"
+                iconSize: 32
+                color: root.textDim
             }
         }
         
@@ -105,23 +110,19 @@ Rectangle {
                     color: root.textDim
                 }
 
-                Rectangle {
-                    radius: 9
-                    implicitWidth: statusText.implicitWidth + 12
-                    implicitHeight: 18
-                    color: root.hasPlayer
-                        ? Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.16)
-                        : Qt.rgba(1, 1, 1, 0.06)
-
-                    Text {
-                        id: statusText
-                        anchors.centerIn: parent
-                        text: root.hasPlayer ? (root.isPlaying ? "Playing" : "Paused") : "Idle"
-                        font.family: Appearance.font.family
-                        font.pixelSize: 9
-                        font.bold: true
-                        color: root.hasPlayer ? root.accentColor : root.textDim
-                    }
+                DS.Chip {
+                    text: root.hasPlayer ? (root.isPlaying ? "Playing" : "Paused") : "Idle"
+                    clickable: false
+                    horizontalPadding: 10
+                    verticalPadding: 4
+                    contentFontSize: 9
+                    containerColor: root.hasPlayer
+                        ? Design.ThemePalette.withAlpha(root.accentColor, 0.16)
+                        : Design.ThemePalette.withAlpha(Design.Tokens.color.text.primary, 0.06)
+                    hoverContainerColor: containerColor
+                    pressedContainerColor: containerColor
+                    borderColor: "transparent"
+                    contentColor: root.hasPlayer ? root.accentColor : root.textDim
                 }
             }
             
@@ -160,42 +161,26 @@ Rectangle {
         RowLayout {
             spacing: 6
             
-            ControlButton {
-                icon: "󰒮"
-                buttonEnabled: root.hasPlayer
+            DS.IconButton {
+                iconName: "skip-back"
+                preferredHeight: 40
+                disabled: !root.hasPlayer
                 onClicked: playerctlProc.run("previous")
             }
             
-            Rectangle {
-                id: playBtn
-                width: 48
-                height: 48
-                radius: 24
-                color: root.hasPlayer ? root.accentColor : Qt.rgba(1, 1, 1, 0.08)
-                
-                scale: playMouse.pressed ? 0.92 : 1.0
-                Behavior on scale { NumberAnimation { duration: 100 } }
-                
-                Text {
-                    anchors.centerIn: parent
-                    text: root.isPlaying ? "󰏤" : "󰐊"
-                    font.family: Appearance.font.family
-                    font.pixelSize: 24
-                    color: root.hasPlayer ? Appearance.colors.cSurface : root.textDim
-                }
-                
-                MouseArea {
-                    id: playMouse
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    enabled: root.hasPlayer
-                    onClicked: playerctlProc.run("play-pause")
-                }
+            DS.IconButton {
+                preferredHeight: 48
+                iconName: root.isPlaying ? "pause" : "play"
+                iconPixelSize: 24
+                variant: root.hasPlayer ? "primary" : "secondary"
+                disabled: !root.hasPlayer
+                onClicked: playerctlProc.run("play-pause")
             }
             
-            ControlButton {
-                icon: "󰒭"
-                buttonEnabled: root.hasPlayer
+            DS.IconButton {
+                iconName: "skip-forward"
+                preferredHeight: 40
+                disabled: !root.hasPlayer
                 onClicked: playerctlProc.run("next")
             }
         }
@@ -206,40 +191,6 @@ Rectangle {
         function run(cmd) {
             command = ["playerctl", cmd];
             running = true;
-        }
-    }
-    
-    component ControlButton: Rectangle {
-        property string icon
-        property bool buttonEnabled: true
-        signal clicked()
-        
-        width: 40
-        height: 40
-        radius: 20
-        color: btnMouse.containsMouse && buttonEnabled
-            ? Qt.rgba(1, 1, 1, 0.1) 
-            : "transparent"
-        opacity: buttonEnabled ? 1 : 0.45
-        
-        scale: btnMouse.pressed ? 0.9 : 1.0
-        Behavior on scale { NumberAnimation { duration: 100 } }
-        
-        Text {
-            anchors.centerIn: parent
-            text: parent.icon
-            font.family: Appearance.font.family
-            font.pixelSize: 22
-            color: root.textColor
-        }
-        
-        MouseArea {
-            id: btnMouse
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            hoverEnabled: true
-            enabled: parent.buttonEnabled
-            onClicked: parent.clicked()
         }
     }
 }

@@ -1,142 +1,92 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 import Quickshell
 
 import "../common"
+import "../shared/ui" as DS
+import "../shared/designsystem" as Design
 
-Rectangle {
+Item {
     id: root
-    
+
     required property var audio
-    
-    readonly property real safeVolume: (audio?.volume !== undefined && !isNaN(audio.volume)) ? audio.volume : 0
+
+    readonly property real safeVolume: (audio && audio.volume !== undefined && !isNaN(audio.volume)) ? audio.volume : 0
     readonly property int currentVolume: Math.round(safeVolume * 100)
-    readonly property bool isMuted: audio?.muted ?? false
-    
+    readonly property bool isMuted: audio && audio.muted !== undefined ? audio.muted : false
+
     readonly property color surfaceColor: Appearance.colors.cSurfaceContainerHigh
     readonly property color textColor: Appearance.colors.cOnSurface
-    readonly property color accentColor: Appearance.colors.success
-    
+
     Layout.fillWidth: true
     Layout.preferredHeight: 60
+    implicitHeight: Layout.preferredHeight
 
-    radius: 24
-    color: surfaceColor
-    border.color: Qt.rgba(1, 1, 1, 0.08)
-    border.width: 1
-    
-    Behavior on color {
-        ColorAnimation {
-            duration: Appearance.animation.medium2
-            easing.type: Appearance.animation.standard
-        }
-    }
-    
-    RowLayout {
+    DS.Surface {
         anchors.fill: parent
-        spacing: 0
-        
-        Rectangle {
-            id: muteBtn
-            Layout.preferredWidth: 40
-            Layout.fillHeight: true
-            radius: 16
-            color: muteMouse.containsMouse 
-                ? Qt.rgba(root.textColor.r, root.textColor.g, root.textColor.b, 0.1) 
-                : "transparent"
-            
-            Behavior on color {
-                ColorAnimation {
-                    duration: Appearance.animation.short3
-                    easing.type: Appearance.animation.standard
+        variant: "surfaceContainerHigh"
+        radius: Design.Tokens.shape.extraLarge
+        backgroundColor: root.surfaceColor
+        borderColor: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.9)
+        borderWidth: Design.Tokens.border.width.thin
+        padding: 0
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: 12
+            anchors.rightMargin: 16
+            spacing: 0
+
+            DS.Chip {
+                Layout.preferredWidth: 40
+                Layout.preferredHeight: 40
+                Layout.alignment: Qt.AlignVCenter
+                clickable: true
+                containerColor: "transparent"
+                hoverContainerColor: Design.ThemePalette.withAlpha(root.textColor, 0.10)
+                pressedContainerColor: Design.ThemePalette.withAlpha(root.textColor, 0.14)
+                borderColor: "transparent"
+                horizontalPadding: 8
+                verticalPadding: 8
+                leading: Component {
+                    DS.LucideIcon {
+                        name: root.isMuted ? "volume-x" : (root.currentVolume > 33 ? "volume-2" : "volume-1")
+                        color: root.isMuted ? Appearance.colors.error : root.textColor
+                        iconSize: 18
+                    }
+                }
+                onClicked: {
+                    if (root.audio && root.audio.toggleMute) {
+                        root.audio.toggleMute()
+                    }
                 }
             }
-            
+
+            DS.Slider {
+                Layout.fillWidth: true
+                Layout.leftMargin: 10
+                Layout.rightMargin: 12
+                Layout.alignment: Qt.AlignVCenter
+                from: 0
+                to: 100
+                value: root.currentVolume
+                onMoved: {
+                    if (root.audio && root.audio.setVolume) {
+                        root.audio.setVolume(value / 100)
+                    }
+                }
+            }
+
             Text {
-                anchors.centerIn: parent
-                text: root.isMuted ? "󰝟" : (root.currentVolume > 66 ? "󰕾" : (root.currentVolume > 33 ? "󰖀" : "󰕿"))
+                Layout.rightMargin: 16
+                Layout.preferredWidth: 40
+                text: root.currentVolume + "%"
                 font.family: Appearance.font.family
-                font.pixelSize: 18
-                color: root.isMuted ? Appearance.colors.error : root.textColor
-                
-                Behavior on color {
-                    ColorAnimation {
-                        duration: Appearance.animation.short3
-                        easing.type: Appearance.animation.standard
-                    }
-                }
+                font.pixelSize: 12
+                font.bold: true
+                color: root.textColor
+                horizontalAlignment: Text.AlignRight
             }
-            
-            MouseArea {
-                id: muteMouse
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                hoverEnabled: true
-                onClicked: root.audio.toggleMute()
-            }
-        }
-        
-        Slider {
-            id: slider
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.leftMargin: 10
-            Layout.rightMargin: 12
-            
-            from: 0
-            to: 100
-            value: root.currentVolume
-            live: true
-            
-            onMoved: root.audio.setVolume(value / 100)
-            
-            background: Rectangle {
-                x: slider.leftPadding
-                y: slider.topPadding + slider.availableHeight / 2 - height / 2
-                implicitWidth: 200
-                implicitHeight: 10
-                width: slider.availableWidth
-                height: implicitHeight
-                radius: 5
-                color: Qt.rgba(1, 1, 1, 0.08)
-                
-                Rectangle {
-                    width: slider.visualPosition * parent.width
-                    height: parent.height
-                    radius: 5
-                    color: root.accentColor
-                    
-                    Behavior on width {
-                        NumberAnimation {
-                            duration: Appearance.animation.short2
-                            easing.type: Appearance.animation.standard
-                        }
-                    }
-                }
-            }
-            
-            handle: Rectangle {
-                width: 18
-                height: 18
-                radius: 9
-                color: Appearance.colors.cOnSurface
-                border.color: Qt.rgba(0, 0, 0, 0.18)
-                border.width: 1
-                y: slider.topPadding + slider.availableHeight / 2 - height / 2
-                x: slider.leftPadding + slider.visualPosition * (slider.availableWidth - width)
-            }
-        }
-        
-        Text {
-            Layout.rightMargin: 16
-            Layout.preferredWidth: 40
-            text: root.currentVolume + "%"
-            font.family: Appearance.font.family
-            font.pixelSize: 12
-            font.bold: true
-            color: root.textColor
-            horizontalAlignment: Text.AlignRight
         }
     }
 }

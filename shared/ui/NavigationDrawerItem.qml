@@ -8,6 +8,7 @@ Rectangle {
     signal clicked()
 
     property string icon: ""
+    property string iconName: ""
     property string text: ""
     property bool selected: false
 
@@ -37,7 +38,16 @@ Rectangle {
         anchors.rightMargin: Tokens.space.s16
         spacing: Tokens.space.s12
 
+        LucideIcon {
+            visible: root.iconName !== ""
+            name: root.iconName
+            color: selected ? Tokens.color.primary : Tokens.color.text.secondary
+            iconSize: Tokens.font.size.body + 2
+            Layout.alignment: Qt.AlignVCenter
+        }
+
         Text {
+            visible: root.iconName === "" && root.icon !== ""
             text: root.icon
             color: selected ? Tokens.color.primary : Tokens.color.text.secondary
             font.family: Tokens.font.family.icon

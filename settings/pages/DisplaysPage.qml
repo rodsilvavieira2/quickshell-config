@@ -31,7 +31,7 @@ PageScaffold {
 
             DS.ListItem {
                 Layout.fillWidth: true
-                icon: "󰍹"
+                iconName: "monitor"
                 title: "Current mode"
                 subtitle: `${monitorData.width}×${monitorData.height} @ ${Number(monitorData.refreshRate).toFixed(2)}Hz`
                 valueText: `${Number(monitorData.scale).toFixed(2)}x`

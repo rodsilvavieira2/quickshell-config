@@ -1,11 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
 import "../shared/designsystem" as Design
+import "../shared/ui" as DS
 
 Rectangle {
     id: gaugeCard
 
-    property string icon: ""
+    property string iconName: ""
     property string title: ""
     property real percentage: 0
     property string subtitle: ""
@@ -25,11 +26,10 @@ Rectangle {
             Layout.fillWidth: true
             spacing: 12
 
-            Text {
-                text: gaugeCard.icon
-                font.family: Design.Tokens.font.family.icon
+            DS.LucideIcon {
+                name: gaugeCard.iconName
                 color: gaugeCard.accentColor
-                font.pixelSize: 24
+                iconSize: 28
             }
 
             Text {

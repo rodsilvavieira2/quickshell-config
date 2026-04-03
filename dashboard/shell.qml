@@ -10,6 +10,7 @@ import Quickshell.Wayland
 
 import "./components"
 import "./shared/designsystem" as Design
+import "./shared/ui" as DS
 
 ShellRoot {
     id: shellRoot
@@ -133,10 +134,9 @@ ShellRoot {
                     Layout.fillWidth: true
                     spacing: 16
 
-                    Text {
-                        text: "󰕮" // Dashboard icon
-                        font.family: Design.Tokens.font.family.icon
-                        font.pixelSize: 28
+                    DS.LucideIcon {
+                        name: "monitor"
+                        iconSize: 32
                         color: Design.Tokens.color.text.primary
                     }
 
@@ -162,7 +162,7 @@ ShellRoot {
                         HeroCard {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 160
-                            icon: ""
+                            iconName: "cpu"
                             title: "CPU"
                             mainValue: Math.round(shellRoot.cpuUsage * 100) + "%"
                             mainLabel: "Usage"
@@ -176,7 +176,7 @@ ShellRoot {
                         HeroCard {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 160
-                            icon: "󰢮"
+                            iconName: "microchip"
                             title: "GPU"
                             mainValue: Math.round(shellRoot.gpuUsage * 100) + "%"
                             mainLabel: "Usage"
@@ -195,7 +195,7 @@ ShellRoot {
                         GaugeCard {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 240
-                            icon: ""
+                            iconName: "memory-stick"
                             title: "Memory"
                             percentage: shellRoot.memTotal > 0 ? (shellRoot.memUsed / shellRoot.memTotal) : 0
                             subtitle: shellRoot.memUsed.toFixed(1) + " GB / " + shellRoot.memTotal.toFixed(1) + " GB"
@@ -206,7 +206,7 @@ ShellRoot {
                         GaugeCard {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 240
-                            icon: "󰋊"
+                            iconName: "hard-drive"
                             title: "Storage"
                             percentage: 0.45
                             subtitle: "Free: 55%"

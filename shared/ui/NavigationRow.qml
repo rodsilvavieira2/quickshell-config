@@ -2,5 +2,5 @@ import QtQuick
 
 ListItem {
     id: root
-    trailingIcon: "󰅂"
+    trailingIconName: "chevron-right"
 }

@@ -8,6 +8,8 @@ import Quickshell.Hyprland
 import "../../common"
 import "../../common/widgets"
 import "../../services"
+import "../../shared/ui" as DS
+import "../../shared/designsystem" as Design
 
 Scope {
     id: root
@@ -28,9 +30,12 @@ Scope {
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
         anchors { top: true; bottom: true; left: true; right: true }
 
-        MouseArea {
+        DS.OverlayScrim {
             anchors.fill: parent
-            onClicked: GlobalStates.searchOpen = false
+            MouseArea {
+                anchors.fill: parent
+                onClicked: GlobalStates.searchOpen = false
+            }
         }
 
         Item {
@@ -43,19 +48,16 @@ Scope {
             }
         }
 
-        StyledRectangularShadow { target: panel }
-
-        Rectangle {
+        DS.Panel {
             id: panel
             width: 640
             height: LauncherSearch.results.length > 0 ? 460 : 76
             anchors.centerIn: parent
             anchors.verticalCenterOffset: -60
-            color: Appearance.colors.colLayer0
-            radius: 14
-            border.width: 1
-            border.color: Appearance.colors.colLayer0Border
-            clip: true
+            padding: 0
+            clipContent: true
+            backgroundColor: Design.Tokens.color.surfaceContainer
+            borderColor: Design.Tokens.color.outlineVariant
 
             Behavior on height {
                 NumberAnimation { duration: 200; easing.type: Easing.OutCubic }

@@ -8,10 +8,12 @@ Rectangle {
     signal clicked()
 
     property string icon: ""
+    property string iconName: ""
     property string title: ""
     property string subtitle: ""
     property string valueText: ""
     property string trailingIcon: ""
+    property string trailingIconName: ""
     property bool selected: false
     property bool disabled: false
 
@@ -46,8 +48,16 @@ Rectangle {
         anchors.bottomMargin: Tokens.component.listItem.paddingY
         spacing: Tokens.space.s12
 
+        LucideIcon {
+            visible: root.iconName !== ""
+            name: root.iconName
+            color: selected ? Tokens.color.primary : Tokens.color.icon.secondary
+            iconSize: Tokens.font.size.title + 2
+            Layout.alignment: Qt.AlignTop
+        }
+
         Text {
-            visible: root.icon !== ""
+            visible: root.iconName === "" && root.icon !== ""
             text: root.icon
             color: selected ? Tokens.color.primary : Tokens.color.icon.secondary
             font.family: Tokens.font.family.icon
@@ -85,8 +95,16 @@ Rectangle {
             font.pixelSize: Tokens.font.size.label
         }
 
+        LucideIcon {
+            visible: root.trailingIconName !== ""
+            name: root.trailingIconName
+            color: Tokens.color.icon.secondary
+            iconSize: Tokens.font.size.body + 1
+            Layout.alignment: Qt.AlignVCenter
+        }
+
         Text {
-            visible: root.trailingIcon !== ""
+            visible: root.trailingIconName === "" && root.trailingIcon !== ""
             text: root.trailingIcon
             color: Tokens.color.icon.secondary
             font.family: Tokens.font.family.icon

@@ -4,23 +4,27 @@ import QtQuick.Controls
 import Quickshell
 
 import "../common"
+import "../shared/ui" as DS
+import "../shared/designsystem" as Design
 
-Rectangle {
+DS.Card {
     id: root
 
     required property var notifs
+    readonly property var notificationItems: root.notifs && root.notifs.recentNotifications ? root.notifs.recentNotifications : []
 
     Layout.fillWidth: true
     Layout.fillHeight: true
-
-    radius: 28
-    color: Qt.darker(Appearance.colors.cSurfaceContainer, 1.08)
-    border.color: Qt.rgba(1, 1, 1, 0.10)
-    border.width: 1
+    radius: Design.Tokens.shape.extraLarge
+    padding: 18
+    clipContent: true
+    backgroundColor: Design.Tokens.color.surfaceContainerLow
+    borderColor: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.9)
+    borderWidth: Design.Tokens.border.width.thin
+    shadowLevel: Design.Tokens.shadow.none
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 18
         spacing: 14
 
         RowLayout {
@@ -31,61 +35,35 @@ Rectangle {
                 font.family: Appearance.font.family
                 font.pixelSize: 15
                 font.bold: true
-                color: Appearance.colors.cOnSurface
+                    color: Appearance.colors.cOnSurface
             }
 
             Item {
                 Layout.fillWidth: true
             }
 
-            Rectangle {
+            DS.Chip {
                 id: dndBadge
                 visible: root.notifs.dnd
-                radius: 12
-                color: Qt.rgba(Appearance.colors.warning.r, Appearance.colors.warning.g, Appearance.colors.warning.b, 0.18)
-                border.color: Qt.rgba(Appearance.colors.warning.r, Appearance.colors.warning.g, Appearance.colors.warning.b, 0.32)
-                border.width: 1
-                implicitWidth: dndText.implicitWidth + 14
-                implicitHeight: 22
-
-                Text {
-                    id: dndText
-                    anchors.centerIn: parent
-                    text: "Do Not Disturb"
-                    font.family: Appearance.font.family
-                    font.pixelSize: 10
-                    font.bold: true
-                    color: Appearance.colors.warning
-                }
+                text: "Do Not Disturb"
+                clickable: false
+                horizontalPadding: 10
+                verticalPadding: 4
+                containerColor: Design.ThemePalette.withAlpha(Appearance.colors.warning, 0.18)
+                hoverContainerColor: containerColor
+                pressedContainerColor: containerColor
+                borderColor: Design.ThemePalette.withAlpha(Appearance.colors.warning, 0.32)
+                contentColor: Appearance.colors.warning
+                contentFontSize: 10
             }
 
-            Rectangle {
+            DS.Button {
                 id: clearAllButton
-                visible: (root.notifs.recentNotifications?.length ?? 0) > 0
-                radius: 12
-                color: clearAllMouse.containsMouse
-                    ? Qt.rgba(1, 1, 1, 0.12)
-                    : Qt.rgba(1, 1, 1, 0.06)
-                implicitWidth: clearAllText.implicitWidth + 14
-                implicitHeight: 22
-
-                Text {
-                    id: clearAllText
-                    anchors.centerIn: parent
-                    text: "Clear"
-                    font.family: Appearance.font.family
-                    font.pixelSize: 10
-                    font.bold: true
-                    color: Appearance.colors.cOnSurfaceVariant
-                }
-
-                MouseArea {
-                    id: clearAllMouse
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    hoverEnabled: true
-                    onClicked: root.notifs.clearAll()
-                }
+                visible: root.notificationItems.length > 0
+                text: "Clear"
+                variant: "secondary"
+                preferredHeight: 28
+                onClicked: root.notifs.clearAll()
             }
         }
 
@@ -98,32 +76,26 @@ Rectangle {
                 anchors.fill: parent
                 clip: true
                 spacing: 10
-                model: root.notifs.recentNotifications ?? []
+                model: root.notificationItems
                 visible: count > 0
 
-                delegate: Rectangle {
+                delegate: DS.Surface {
                     id: notifCard
 
                     required property var modelData
                     required property int index
 
                     width: notifList.width
-                    height: notifContent.implicitHeight + 22
-                    radius: 18
-                    color: notifMouse.containsMouse
-                        ? Qt.rgba(Appearance.surface0.r, Appearance.surface0.g, Appearance.surface0.b, 0.92)
-                        : Qt.rgba(Appearance.surface0.r, Appearance.surface0.g, Appearance.surface0.b, 0.72)
-                    border.color: modelData.urgency >= 2
-                        ? Qt.rgba(Appearance.colors.error.r, Appearance.colors.error.g, Appearance.colors.error.b, 0.45)
-                        : Qt.rgba(1, 1, 1, 0.05)
-                    border.width: 1
-
-                    Behavior on color {
-                        ColorAnimation {
-                            duration: Appearance.animation.short3
-                            easing.type: Easing.OutCubic
-                        }
-                    }
+                    implicitHeight: notifContent.implicitHeight + 24
+                    padding: 12
+                    radius: Design.Tokens.shape.large
+                    backgroundColor: notifMouse.containsMouse
+                        ? Design.Tokens.color.surfaceContainerHigh
+                        : Design.ThemePalette.withAlpha(Design.Tokens.color.surfaceContainerHigh, 0.88)
+                    borderColor: modelData.urgency >= 2
+                        ? Design.ThemePalette.withAlpha(Design.Tokens.color.error, 0.42)
+                        : Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.72)
+                    borderWidth: Design.Tokens.border.width.thin
 
                     MouseArea {
                         id: notifMouse
@@ -131,28 +103,40 @@ Rectangle {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            if (modelData.actions?.length > 0) {
+                            if (modelData.actions && modelData.actions.length > 0) {
                                 modelData.invokeAction(modelData.actions[0].identifier);
                                 root.notifs.deleteNotification(modelData);
                             }
                         }
                     }
 
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: notifCard.radius
+                        color: Design.ThemePalette.withAlpha(modelData.urgency >= 2 ? Design.Tokens.color.error : Design.Tokens.color.text.primary,
+                            notifMouse.pressed
+                                ? Design.Tokens.stateLayer.pressed
+                                : notifMouse.containsMouse
+                                    ? Design.Tokens.stateLayer.hover
+                                    : 0)
+                    }
+
                     ColumnLayout {
                         id: notifContent
                         anchors.fill: parent
-                        anchors.margins: 11
                         spacing: 10
 
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 10
 
-                            Rectangle {
+                            DS.Surface {
                                 Layout.preferredWidth: 32
                                 Layout.preferredHeight: 32
-                                radius: 10
-                                color: Qt.rgba(Appearance.colors.cPrimary.r, Appearance.colors.cPrimary.g, Appearance.colors.cPrimary.b, 0.16)
+                                padding: 0
+                                radius: Design.Tokens.shape.medium
+                                backgroundColor: Design.ThemePalette.withAlpha(Appearance.colors.cPrimary, 0.16)
+                                borderWidth: 0
 
                                 Image {
                                     id: appIcon
@@ -170,13 +154,12 @@ Rectangle {
                                     visible: status === Image.Ready
                                 }
 
-                                Text {
+                                DS.LucideIcon {
                                     anchors.centerIn: parent
-                                    text: "󰂚"
-                                    font.family: Appearance.font.family
-                                    font.pixelSize: 16
-                                    color: Appearance.colors.cPrimary
                                     visible: !appIcon.visible
+                                    name: "bell"
+                                    iconSize: 16
+                                    color: Appearance.colors.cPrimary
                                 }
                             }
 
@@ -204,30 +187,13 @@ Rectangle {
                                 }
                             }
 
-                            Rectangle {
+                            DS.IconButton {
                                 id: closeButton
-                                Layout.preferredWidth: 24
-                                Layout.preferredHeight: 24
-                                radius: 12
-                                color: closeMouse.containsMouse
-                                    ? Qt.rgba(1, 1, 1, 0.12)
-                                    : "transparent"
-
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "󰅖"
-                                    font.family: Appearance.font.family
-                                    font.pixelSize: 14
-                                    color: Appearance.colors.cOnSurfaceVariant
-                                }
-
-                                MouseArea {
-                                    id: closeMouse
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    hoverEnabled: true
-                                    onClicked: root.notifs.deleteNotification(notifCard.modelData)
-                                }
+                                Layout.preferredWidth: 28
+                                Layout.preferredHeight: 28
+                                iconName: "x"
+                                iconPixelSize: 14
+                                onClicked: root.notifs.deleteNotification(notifCard.modelData)
                             }
                         }
 
@@ -255,40 +221,22 @@ Rectangle {
 
                         RowLayout {
                             Layout.fillWidth: true
-                            visible: notifCard.modelData.actions?.length > 0
+                            visible: notifCard.modelData.actions && notifCard.modelData.actions.length > 0
                             spacing: 8
 
                             Repeater {
-                                model: notifCard.modelData.actions ?? []
+                                model: notifCard.modelData.actions ? notifCard.modelData.actions : []
 
-                                delegate: Rectangle {
+                                delegate: DS.Button {
                                     required property var modelData
 
                                     Layout.fillWidth: true
-                                    implicitHeight: 28
-                                    radius: 14
-                                    color: actionMouse.containsMouse
-                                        ? Qt.rgba(Appearance.colors.cPrimary.r, Appearance.colors.cPrimary.g, Appearance.colors.cPrimary.b, 0.26)
-                                        : Qt.rgba(Appearance.colors.cPrimary.r, Appearance.colors.cPrimary.g, Appearance.colors.cPrimary.b, 0.16)
-
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: modelData.text
-                                        font.family: Appearance.font.family
-                                        font.pixelSize: 10
-                                        font.bold: true
-                                        color: Appearance.colors.cOnSurface
-                                    }
-
-                                    MouseArea {
-                                        id: actionMouse
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        hoverEnabled: true
-                                        onClicked: {
-                                            notifCard.modelData.invokeAction(modelData.identifier);
-                                            root.notifs.deleteNotification(notifCard.modelData);
-                                        }
+                                    text: modelData.text
+                                    variant: "tonal"
+                                    preferredHeight: 30
+                                    onClicked: {
+                                        notifCard.modelData.invokeAction(modelData.identifier);
+                                        root.notifs.deleteNotification(notifCard.modelData);
                                     }
                                 }
                             }
@@ -329,14 +277,13 @@ Rectangle {
                 spacing: 8
                 visible: notifList.count === 0
 
-                Text {
+                DS.LucideIcon {
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.fillWidth: true
-                    text: root.notifs.dnd ? "󰂛" : "󰂚"
-                    font.family: Appearance.font.family
-                    font.pixelSize: 34
+                    Layout.preferredWidth: 34
+                    Layout.preferredHeight: 34
+                    name: root.notifs.dnd ? "bell-off" : "bell"
                     color: Appearance.colors.cOnSurfaceDim
-                    horizontalAlignment: Text.AlignHCenter
+                    iconSize: 34
                 }
 
                 Text {

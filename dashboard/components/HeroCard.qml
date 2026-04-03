@@ -1,11 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
 import "../shared/designsystem" as Design
+import "../shared/ui" as DS
 
 Rectangle {
     id: heroCard
 
-    property string icon: ""
+    property string iconName: ""
     property string title: ""
     property string mainValue: ""
     property string mainLabel: ""
@@ -43,11 +44,10 @@ Rectangle {
             Layout.fillWidth: true
             spacing: 12
 
-            Text {
-                text: heroCard.icon
-                font.family: Design.Tokens.font.family.icon
+            DS.LucideIcon {
+                name: heroCard.iconName
                 color: heroCard.accentColor
-                font.pixelSize: 24
+                iconSize: 28
             }
 
             Text {

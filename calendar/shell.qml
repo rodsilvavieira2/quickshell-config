@@ -9,6 +9,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import "./shared/designsystem" as Design
+import "./shared/ui" as DS
 
 ShellRoot {
     id: shellRoot
@@ -827,7 +828,7 @@ ShellRoot {
                                 opacity: window.targetMonthOffset !== 0 ? 1.0 : 0.0
                                 visible: opacity > 0
                                 Behavior on opacity { NumberAnimation { duration: 200 } }
-                                Text { anchors.centerIn: parent; text: "󰃭"; font.family: window.iconFontFamily; color: window.text; font.pixelSize: 16 }
+                                DS.LucideIcon { anchors.centerIn: parent; name: "house"; color: window.text; iconSize: 16 }
                                 MouseArea { 
                                     id: homeMa; anchors.fill: parent; hoverEnabled: window.targetMonthOffset !== 0; 
                                     onClicked: if (window.targetMonthOffset !== 0) window.setMonthOffset(0) 
@@ -837,7 +838,7 @@ ShellRoot {
                             Rectangle {
                                 width: 32; height: 32; radius: 16
                                 color: prevMa.containsMouse ? window.surface1 : "transparent"
-                                Text { anchors.centerIn: parent; text: ""; font.family: window.iconFontFamily; color: window.text; font.pixelSize: 16 }
+                                DS.LucideIcon { anchors.centerIn: parent; name: "chevron-left"; color: window.text; iconSize: 16 }
                                 MouseArea { id: prevMa; anchors.fill: parent; hoverEnabled: true; onClicked: window.setMonthOffset(window.targetMonthOffset - 1) }
                             }
                             
@@ -857,7 +858,7 @@ ShellRoot {
                             Rectangle {
                                 width: 32; height: 32; radius: 16
                                 color: nextMa.containsMouse ? window.surface1 : "transparent"
-                                Text { anchors.centerIn: parent; text: ""; font.family: window.iconFontFamily; color: window.text; font.pixelSize: 16 }
+                                DS.LucideIcon { anchors.centerIn: parent; name: "chevron-right"; color: window.text; iconSize: 16 }
                                 MouseArea { id: nextMa; anchors.fill: parent; hoverEnabled: true; onClicked: window.setMonthOffset(window.targetMonthOffset + 1) }
                             }
                         }
@@ -953,8 +954,10 @@ ShellRoot {
                                     NumberAnimation { to: 0; duration: 1000; easing.type: Easing.InOutSine }
                                 }
                                 
-                                Text { 
-                                    anchors.centerIn: parent; text: ""; font.family: window.iconFontFamily; font.pixelSize: 18
+                                DS.LucideIcon { 
+                                    anchors.centerIn: parent
+                                    name: "chevron-left"
+                                    iconSize: 18
                                     color: parent.containsMouse ? window.textAccent : window.overlay1
                                     transform: Translate { x: wPrevMa.containsMouse ? -5 : wPrevMa.pulseOffset }
                                     Behavior on transform { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
@@ -982,8 +985,10 @@ ShellRoot {
                                     NumberAnimation { to: 0; duration: 1000; easing.type: Easing.InOutSine }
                                 }
                                 
-                                Text { 
-                                    anchors.centerIn: parent; text: ""; font.family: window.iconFontFamily; font.pixelSize: 18
+                                DS.LucideIcon { 
+                                    anchors.centerIn: parent
+                                    name: "chevron-right"
+                                    iconSize: 18
                                     color: parent.containsMouse ? window.textAccent : window.overlay1
                                     transform: Translate { x: wNextMa.containsMouse ? 5 : wNextMa.pulseOffset }
                                     Behavior on transform { NumberAnimation { duration: 250; easing.type: Easing.OutBack } }
@@ -1036,10 +1041,10 @@ ShellRoot {
 
                             Repeater {
                                 model: window.weatherData && window.weatherData.forecast[window.weatherView] ? [
-                                    { icon: "", val: window.weatherData.forecast[window.weatherView].wind + "m/s", lbl: "WIND", fill: Math.min(1.0, window.weatherData.forecast[window.weatherView].wind / 25.0) },
-                                    { icon: "", val: window.weatherData.forecast[window.weatherView].humidity + "%", lbl: "HUMID", fill: window.weatherData.forecast[window.weatherView].humidity / 100.0 },
-                                    { icon: "", val: window.weatherData.forecast[window.weatherView].pop + "%", lbl: "RAIN", fill: window.weatherData.forecast[window.weatherView].pop / 100.0 },
-                                    { icon: "", val: window.weatherData.forecast[window.weatherView].feels_like + "°", lbl: "FEELS", fill: Math.max(0.0, Math.min(1.0, (window.weatherData.forecast[window.weatherView].feels_like + 15) / 55.0)) }
+                                    { iconName: "wind", val: window.weatherData.forecast[window.weatherView].wind + "m/s", lbl: "WIND", fill: Math.min(1.0, window.weatherData.forecast[window.weatherView].wind / 25.0) },
+                                    { iconName: "droplets", val: window.weatherData.forecast[window.weatherView].humidity + "%", lbl: "HUMID", fill: window.weatherData.forecast[window.weatherView].humidity / 100.0 },
+                                    { iconName: "cloud-rain", val: window.weatherData.forecast[window.weatherView].pop + "%", lbl: "RAIN", fill: window.weatherData.forecast[window.weatherView].pop / 100.0 },
+                                    { iconName: "sun-medium", val: window.weatherData.forecast[window.weatherView].feels_like + "°", lbl: "FEELS", fill: Math.max(0.0, Math.min(1.0, (window.weatherData.forecast[window.weatherView].feels_like + 15) / 55.0)) }
                                 ] : []
 
                                 Item {
@@ -1118,12 +1123,10 @@ ShellRoot {
                                         anchors.horizontalCenter: parent.horizontalCenter
                                         spacing: 4
                                         
-                                        Text { 
-                                            text: modelData.icon
-                                            font.family: window.iconFontFamily
-                                            font.pixelSize: 14
+                                        DS.LucideIcon {
+                                            name: modelData.iconName
+                                            iconSize: 14
                                             color: gaugeMa.containsMouse ? window.textAccent : window.overlay0
-                                            Behavior on color { ColorAnimation { duration: 200 } }
                                         }
                                         Text { 
                                             text: modelData.lbl

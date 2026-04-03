@@ -14,6 +14,7 @@ Item {
     property int padding: Tokens.component.card.padding
     property int shadowLevel: Tokens.shadow.none
     property string variant: "surface"
+    property bool clipContent: false
 
     onVariantChanged: {
         if (variant === "surface") {
@@ -53,5 +54,6 @@ Item {
         id: content
         anchors.fill: parent
         anchors.margins: root.padding
+        clip: root.clipContent
     }
 }

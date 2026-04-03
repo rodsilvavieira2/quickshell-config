@@ -216,7 +216,7 @@ PageScaffold {
 
                     DS.ToggleTile {
                         Layout.fillWidth: true
-                        icon: "󰖩"
+                        iconName: "wifi"
                         title: "Wi-Fi"
                         subtitle: "Connected"
                         checked: true
@@ -224,7 +224,7 @@ PageScaffold {
 
                     DS.ToggleTile {
                         Layout.fillWidth: true
-                        icon: "󰂯"
+                        iconName: "bluetooth"
                         title: "Bluetooth"
                         subtitle: "Idle"
                     }
@@ -232,7 +232,7 @@ PageScaffold {
 
                 DS.ListItem {
                     Layout.fillWidth: true
-                    icon: "󰍹"
+                    iconName: "monitor"
                     title: "Display scale"
                     subtitle: "Lists and rows stay neutral until selected."
                     valueText: "100%"

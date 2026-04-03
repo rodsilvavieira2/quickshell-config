@@ -21,7 +21,7 @@ PageScaffold {
 
         DS.ListItem {
             Layout.fillWidth: true
-            icon: "󰸉"
+            iconName: "image"
             title: "Active image"
             subtitle: context?.wallpaperAdapter?.currentWallpaper ?? "No wallpaper cached yet."
             valueText: context?.wallpaperAdapter?.currentWallpaper ? "Cached" : ""

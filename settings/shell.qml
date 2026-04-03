@@ -172,7 +172,7 @@ ShellRoot {
                     }
 
                     DS.IconButton {
-                        icon: "󰅖"
+                        iconName: "x"
                         preferredHeight: 40
                         onClicked: shellRoot.closeApp()
                     }
@@ -199,7 +199,7 @@ ShellRoot {
                                 DS.NavigationDrawerItem {
                                     required property var modelData
                                     Layout.fillWidth: true
-                                    icon: modelData.icon
+                                    iconName: modelData.iconName
                                     text: modelData.label
                                     selected: shellRoot.selectedCategoryId === modelData.id
                                     onClicked: {
@@ -243,7 +243,7 @@ ShellRoot {
                                         DS.ListItem {
                                             required property var modelData
                                             Layout.fillWidth: true
-                                            icon: modelData.categoryIcon
+                                            iconName: modelData.categoryIconName
                                             title: modelData.title
                                             subtitle: modelData.description
                                             valueText: modelData.categoryLabel

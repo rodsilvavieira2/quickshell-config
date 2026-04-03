@@ -3,8 +3,10 @@ import QtQuick.Layouts
 import Quickshell
 
 import "../common"
+import "../shared/ui" as DS
+import "../shared/designsystem" as Design
 
-Rectangle {
+DS.Card {
     id: root
     
     required property var systemUsage
@@ -15,27 +17,20 @@ Rectangle {
     
     Layout.fillWidth: true
     Layout.preferredHeight: 104
-
-    radius: 22
-    color: surfaceColor
-    border.color: Qt.rgba(1, 1, 1, 0.08)
-    border.width: 1
-    
-    Behavior on color {
-        ColorAnimation {
-            duration: Appearance.animation.medium2
-            easing.type: Appearance.animation.standard
-        }
-    }
+    padding: 12
+    radius: Design.Tokens.shape.extraLarge
+    backgroundColor: root.surfaceColor
+    borderColor: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.82)
+    borderWidth: Design.Tokens.border.width.thin
+    shadowLevel: Design.Tokens.shadow.none
     
     RowLayout {
         anchors.fill: parent
-        anchors.margins: 12
         spacing: 10
 
         StatItem {
             Layout.fillWidth: true
-            icon: "󰘚"
+            iconName: "cpu"
             label: "CPU"
             value: root.systemUsage.cpuUsage * 100
             detail: root.systemUsage.cpuTemp
@@ -44,7 +39,7 @@ Rectangle {
 
         StatItem {
             Layout.fillWidth: true
-            icon: "󰍛"
+            iconName: "memory-stick"
             label: "RAM"
             value: (root.systemUsage.memUsed / root.systemUsage.memTotal) * 100
             detail: root.systemUsage.memUsed.toFixed(1) + " / " + root.systemUsage.memTotal.toFixed(1) + " GB"
@@ -54,7 +49,7 @@ Rectangle {
         StatItem {
             Layout.fillWidth: true
             visible: root.systemUsage.hasGpu
-            icon: "󰢮"
+            iconName: "microchip"
             label: "GPU"
             value: root.systemUsage.gpuUsage * 100
             detail: root.systemUsage.gpuTemp
@@ -62,38 +57,39 @@ Rectangle {
         }
     }
     
-    component StatItem: Rectangle {
-        property string icon
+    component StatItem: DS.Surface {
+        property string iconName
         property string label
         property real value
         property string detail: ""
         property color accentColor
 
-        radius: 18
-        color: Qt.rgba(1, 1, 1, 0.04)
-        border.color: Qt.rgba(1, 1, 1, 0.05)
-        border.width: 1
+        padding: 12
+        radius: Design.Tokens.shape.large
+        backgroundColor: Design.ThemePalette.withAlpha(Design.Tokens.color.surfaceContainerHighest, 0.9)
+        borderColor: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.72)
+        borderWidth: Design.Tokens.border.width.thin
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 12
             spacing: 8
 
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 8
 
-                Rectangle {
+                DS.Surface {
                     Layout.preferredWidth: 30
                     Layout.preferredHeight: 30
-                    radius: 10
-                    color: Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.16)
+                    padding: 0
+                    radius: Design.Tokens.shape.medium
+                    backgroundColor: Design.ThemePalette.withAlpha(accentColor, 0.16)
+                    borderWidth: 0
 
-                    Text {
+                    DS.LucideIcon {
                         anchors.centerIn: parent
-                        text: icon
-                        font.family: Appearance.font.family
-                        font.pixelSize: 15
+                        name: iconName
+                        iconSize: 15
                         color: accentColor
                     }
                 }
@@ -120,25 +116,12 @@ Rectangle {
                 }
             }
 
-            Rectangle {
+            DS.ProgressBar {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 5
-                radius: 2.5
-                color: Qt.rgba(1, 1, 1, 0.07)
-
-                Rectangle {
-                    width: parent.width * Math.min(value / 100, 1)
-                    height: parent.height
-                    radius: 2.5
-                    color: accentColor
-
-                    Behavior on width {
-                        NumberAnimation {
-                            duration: Appearance.animation.medium2
-                            easing.type: Appearance.animation.standard
-                        }
-                    }
-                }
+                thickness: 5
+                value: value / 100
+                indicatorColor: accentColor
+                trackColor: Design.ThemePalette.withAlpha(Design.Tokens.color.text.primary, 0.08)
             }
 
             Text {

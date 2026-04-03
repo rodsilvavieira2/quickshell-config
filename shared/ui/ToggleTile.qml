@@ -8,18 +8,20 @@ Rectangle {
     signal clicked()
 
     property string icon: ""
+    property string iconName: ""
     property string title: ""
     property string subtitle: ""
     property bool checked: false
     property bool disabled: false
+    property color accentColor: Tokens.color.primary
 
     implicitHeight: 86
     radius: Tokens.shape.extraLarge
     color: checked
-        ? Tokens.color.primaryContainer
+        ? ThemePalette.withAlpha(accentColor, ThemeSettings.isDark ? 0.22 : 0.18)
         : Tokens.color.surfaceContainer
     border.width: Tokens.border.width.thin
-    border.color: checked ? Tokens.color.primary : Tokens.color.outlineVariant
+    border.color: checked ? accentColor : Tokens.color.outlineVariant
     opacity: disabled ? Tokens.opacities.disabled : 1
 
     MouseArea {
@@ -34,7 +36,7 @@ Rectangle {
     Rectangle {
         anchors.fill: parent
         radius: parent.radius
-        color: ThemePalette.withAlpha(checked ? Tokens.color.primary : Tokens.color.text.primary, Tokens.stateLayer.hover)
+        color: ThemePalette.withAlpha(checked ? accentColor : Tokens.color.text.primary, Tokens.stateLayer.hover)
         opacity: mouseArea.containsMouse ? 1 : 0
     }
 
@@ -48,13 +50,22 @@ Rectangle {
             Layout.preferredHeight: 40
             radius: Tokens.shape.large
             color: checked
-                ? ThemePalette.withAlpha(Tokens.color.primary, 0.14)
+                ? ThemePalette.withAlpha(accentColor, 0.16)
                 : Tokens.color.surfaceContainerHighest
+
+            LucideIcon {
+                anchors.centerIn: parent
+                visible: root.iconName !== ""
+                name: root.iconName
+                color: checked ? accentColor : Tokens.color.icon.primary
+                iconSize: 18
+            }
 
             Text {
                 anchors.centerIn: parent
+                visible: root.iconName === "" && root.icon !== ""
                 text: root.icon
-                color: checked ? Tokens.color.primary : Tokens.color.icon.primary
+                color: checked ? accentColor : Tokens.color.icon.primary
                 font.family: Tokens.font.family.icon
                 font.pixelSize: 18
             }

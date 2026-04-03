@@ -40,7 +40,7 @@ PageScaffold {
 
         DS.ListItem {
             Layout.fillWidth: true
-            icon: "󰌌"
+            iconName: "keyboard"
             title: "Active keyboard layout"
             subtitle: context?.inputAdapter?.layoutSummary ?? "Unknown"
             valueText: `${context?.inputAdapter?.devices?.keyboards?.length ?? 0} keyboards`
@@ -48,7 +48,7 @@ PageScaffold {
 
         DS.ListItem {
             Layout.fillWidth: true
-            icon: "󰍽"
+            iconName: "mouse-pointer-2"
             title: "Pointing devices"
             subtitle: "Mice and touch devices reported by Hyprland"
             valueText: `${context?.inputAdapter?.devices?.mice?.length ?? 0} mice`
@@ -73,21 +73,21 @@ PageScaffold {
 
         DS.ListItem {
             Layout.fillWidth: true
-            icon: "󰒓"
+            iconName: "files"
             title: "Settings-managed Hypr includes"
             subtitle: "~/.config/hypr/generated/settings-monitors.conf and ~/.config/hypr/generated/settings-input.conf"
         }
 
         DS.ListItem {
             Layout.fillWidth: true
-            icon: "󰖟"
+            iconName: "file-text"
             title: "Theme source of truth"
             subtitle: "~/.config/quickshell/theme.ini"
         }
 
         DS.ListItem {
             Layout.fillWidth: true
-            icon: "󰸉"
+            iconName: "image"
             title: "Wallpaper cache"
             subtitle: context?.wallpaperAdapter?.currentWallpaper ?? "~/.cache/current_wallpaper"
         }

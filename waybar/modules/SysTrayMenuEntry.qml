@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Widgets
 
 import ".." as Root
+import "../shared/ui" as DS
 
 Item {
     id: root
@@ -18,30 +19,87 @@ Item {
     signal dismiss()
     signal openSubmenu(handle: var)
 
-    implicitWidth: contentRow.implicitWidth + 24
-    implicitHeight: menuEntry.isSeparator ? 1 : 36
+    implicitWidth: 220
+    implicitHeight: menuEntry.isSeparator ? 9 : 40
     Layout.topMargin: menuEntry.isSeparator ? 4 : 0
     Layout.bottomMargin: menuEntry.isSeparator ? 4 : 0
     Layout.fillWidth: true
 
-    MouseArea {
+    Rectangle {
         anchors.fill: parent
-        enabled: !root.menuEntry.isSeparator
-        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        hoverEnabled: true
+        visible: root.menuEntry.isSeparator
+        color: "transparent"
 
         Rectangle {
-            anchors.fill: parent
-            color: parent.containsMouse ? Root.Config.surface0 : "transparent"
-            visible: !root.menuEntry.isSeparator
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: 12
+            anchors.rightMargin: 12
+            height: 1
+            radius: 0.5
+            color: Root.Config.dividerColor
         }
+    }
 
-        Rectangle {
-            anchors.fill: parent
-            color: Root.Config.surface0
-            visible: root.menuEntry.isSeparator
+    DS.SearchResultItem {
+        anchors.fill: parent
+        visible: !root.menuEntry.isSeparator
+        clickable: true
+        title: root.menuEntry.text
+        selected: false
+        leading: Component {
+            RowLayout {
+                spacing: 8
+
+                Item {
+                    visible: root.hasSpecialInteraction || root.forceSpecialInteractionColumn
+                    implicitWidth: 20
+                    implicitHeight: 20
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 16
+                        height: 16
+                        radius: root.menuEntry.buttonType === QsMenuButtonType.CheckBox ? 3 : 8
+                        border.width: 2
+                        border.color: root.menuEntry.checkState !== Qt.Unchecked ? Root.Config.activeAccent : Root.Config.surface1
+                        color: root.menuEntry.checkState !== Qt.Unchecked ? Root.Config.activeAccent : "transparent"
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: root.menuEntry.checkState === Qt.PartiallyChecked ? "−" : "✓"
+                            color: Root.Config.base
+                            font.pixelSize: 12
+                            font.bold: true
+                            visible: root.menuEntry.checkState !== Qt.Unchecked && root.menuEntry.buttonType === QsMenuButtonType.CheckBox
+                        }
+                    }
+                }
+
+                Item {
+                    visible: root.hasIcon || root.forceIconColumn
+                    implicitWidth: 20
+                    implicitHeight: 20
+
+                    IconImage {
+                        anchors.centerIn: parent
+                        source: root.menuEntry.icon
+                        width: 18
+                        height: 18
+                        visible: root.menuEntry.icon.length > 0
+                    }
+                }
+            }
         }
-
+        trailing: Component {
+            Text {
+                visible: root.menuEntry.hasChildren
+                text: "›"
+                color: Root.Config.subtext0
+                font.pixelSize: 16
+            }
+        }
         onClicked: {
             if (root.menuEntry.hasChildren) {
                 root.openSubmenu(root.menuEntry);
@@ -49,75 +107,6 @@ Item {
             }
             root.menuEntry.triggered();
             root.dismiss();
-        }
-    }
-
-    RowLayout {
-        id: contentRow
-        anchors {
-            verticalCenter: parent.verticalCenter
-            left: parent.left
-            right: parent.right
-            leftMargin: 12
-            rightMargin: 12
-        }
-        spacing: 8
-        visible: !root.menuEntry.isSeparator
-
-        // Checkbox or radio button
-        Item {
-            visible: root.hasSpecialInteraction || root.forceSpecialInteractionColumn
-            implicitWidth: 20
-            implicitHeight: 20
-
-            Rectangle {
-                anchors.centerIn: parent
-                width: 16
-                height: 16
-                radius: root.menuEntry.buttonType === QsMenuButtonType.CheckBox ? 2 : 8
-                border.width: 2
-                border.color: root.menuEntry.checkState !== Qt.Unchecked ? Root.Config.mauve : Root.Config.surface1
-                color: root.menuEntry.checkState !== Qt.Unchecked ? Root.Config.mauve : "transparent"
-
-                Text {
-                    anchors.centerIn: parent
-                    text: root.menuEntry.checkState === Qt.PartiallyChecked ? "−" : "✓"
-                    color: Root.Config.mantle
-                    font.pixelSize: 12
-                    font.bold: true
-                    visible: root.menuEntry.checkState !== Qt.Unchecked && root.menuEntry.buttonType === QsMenuButtonType.CheckBox
-                }
-            }
-        }
-
-        // Icon
-        Item {
-            visible: root.hasIcon || root.forceIconColumn
-            implicitWidth: 20
-            implicitHeight: 20
-
-            IconImage {
-                anchors.centerIn: parent
-                source: root.menuEntry.icon
-                width: 20
-                height: 20
-                visible: root.menuEntry.icon.length > 0
-            }
-        }
-
-        Text {
-            text: root.menuEntry.text
-            color: Root.Config.text
-            font.family: Root.Config.textFontFamily
-            font.pixelSize: 12
-            Layout.fillWidth: true
-        }
-
-        Text {
-            text: "›"
-            color: Root.Config.subtext0
-            font.pixelSize: 16
-            visible: root.menuEntry.hasChildren
         }
     }
 }

@@ -5,6 +5,7 @@ import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 
 import ".." as Root
+import "../shared/ui" as DS
 import "../services"
 
 MouseArea {
@@ -16,8 +17,8 @@ MouseArea {
 
     hoverEnabled: true
     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-    implicitWidth: 20
-    implicitHeight: 20
+    implicitWidth: 24
+    implicitHeight: 24
     cursorShape: Qt.PointingHandCursor
 
     onPressed: event => {
@@ -65,11 +66,19 @@ MouseArea {
         }
     }
 
-    IconImage {
-        anchors.centerIn: parent
-        source: root.item ? root.item.icon : ""
-        width: parent.width
-        height: parent.height
+    DS.Surface {
+        anchors.fill: parent
+        padding: 0
+        radius: Root.Config.chipRadius + 2
+        borderWidth: 0
+        backgroundColor: root.containsMouse ? Root.Config.surface0 : "transparent"
+
+        IconImage {
+            anchors.centerIn: parent
+            source: root.item ? root.item.icon : ""
+            width: 18
+            height: 18
+        }
     }
 
     ToolTip {

@@ -100,11 +100,11 @@ Item {
                         required property var modelData
 
                         Layout.fillWidth: true
-                        icon: modelData.connected ? "󰂯" : "󰂲"
+                        iconName: modelData.connected ? "bluetooth-connected" : "bluetooth"
                         title: deviceLabel(modelData)
                         subtitle: modelData.connected ? "Connected" : (modelData.paired ? "Paired" : "Available")
                         valueText: modelData.address || ""
-                        trailingIcon: modelData.connected ? "󰄬" : ""
+                        trailingIconName: modelData.connected ? "check" : ""
 
                         onClicked: {
                             if (modelData.connected) {

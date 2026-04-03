@@ -7,7 +7,15 @@ Rectangle {
 
     property alias text: field.text
     property alias placeholderText: field.placeholderText
+    readonly property TextField inputField: field
     signal accepted()
+    signal escapePressed()
+    signal upPressed()
+    signal downPressed()
+
+    function forceFocus() {
+        field.forceActiveFocus();
+    }
 
     implicitWidth: 320
     implicitHeight: Tokens.component.searchBar.height
@@ -22,11 +30,10 @@ Rectangle {
         anchors.rightMargin: Tokens.space.s8
         spacing: Tokens.space.s12
 
-        Text {
-            text: "󰍉"
+        LucideIcon {
+            name: "search"
             color: Tokens.color.text.secondary
-            font.family: Tokens.font.family.icon
-            font.pixelSize: Tokens.font.size.body
+            iconSize: Tokens.font.size.body + 1
         }
 
         TextField {
@@ -42,11 +49,23 @@ Rectangle {
             leftPadding: 0
             rightPadding: 0
             onAccepted: root.accepted()
+            Keys.onEscapePressed: event => {
+                root.escapePressed()
+                event.accepted = true
+            }
+            Keys.onUpPressed: event => {
+                root.upPressed()
+                event.accepted = true
+            }
+            Keys.onDownPressed: event => {
+                root.downPressed()
+                event.accepted = true
+            }
         }
 
         IconButton {
             visible: field.text.length > 0
-            icon: "󰅖"
+            iconName: "x"
             preferredHeight: 36
             onClicked: field.clear()
         }

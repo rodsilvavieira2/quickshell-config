@@ -8,6 +8,7 @@ import Quickshell.Wayland
 
 import ".." as Root
 import "../components"
+import "../shared/ui" as DS
 import "../services"
 
 Item {
@@ -80,35 +81,19 @@ Item {
             width: visible ? overflowButton.width : 0
             height: Root.Config.iconSize + 2
 
-            Rectangle {
+            DS.Chip {
                 id: overflowButton
-                width: Root.Config.iconButtonSize + Root.Config.chipPaddingHorizontal
-                height: Root.Config.iconButtonSize + Root.Config.chipPaddingVertical
-                radius: Root.Config.chipRadius
-                color: root.overflowOpen ? Root.Config.surface0 : "transparent"
-                border.width: 0
-
-                Behavior on color {
-                    ColorAnimation { duration: 140 }
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    hoverEnabled: true
-
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: 4
-                        color: parent.containsMouse && !root.overflowOpen ? Root.Config.surface0 : "transparent"
-                    }
-
-                    onClicked: {
-                        root.overflowOpen = !root.overflowOpen;
-                    }
-
+                anchors.centerIn: parent
+                clickable: true
+                selected: root.overflowOpen
+                containerColor: "transparent"
+                hoverContainerColor: Root.Config.surface0
+                pressedContainerColor: Root.Config.surface0
+                borderColor: "transparent"
+                horizontalPadding: Math.max(6, Root.Config.chipPaddingHorizontal - 1)
+                verticalPadding: Root.Config.chipPaddingVertical
+                leading: Component {
                     LucideIcon {
-                        anchors.centerIn: parent
                         source: Qt.resolvedUrl("../assets/chevron-down.svg")
                         color: Root.Config.text
                         iconSize: Root.Config.iconSize
@@ -119,6 +104,7 @@ Item {
                         }
                     }
                 }
+                onClicked: root.overflowOpen = !root.overflowOpen
             }
         }
 
@@ -148,17 +134,18 @@ Item {
             visible: root.overflowOpen && root.unpinnedItems.length > 0
             color: "transparent"
 
-            Rectangle {
+            DS.Surface {
                 anchors.fill: parent
-                color: Root.Config.mantle
-                radius: 8
-                border.width: 1
-                border.color: Root.Config.surface0
+                padding: 6
+                backgroundColor: Root.Config.mantle
+                radius: 10
+                borderWidth: 1
+                borderColor: Root.Config.surface0
+                shadowLevel: 1
 
                 GridLayout {
                     anchors {
                         fill: parent
-                        margins: 6
                     }
                     columns: Math.max(1, Math.ceil(Math.sqrt(root.unpinnedItems.length)))
                     columnSpacing: 6

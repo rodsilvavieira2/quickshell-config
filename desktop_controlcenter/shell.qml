@@ -14,6 +14,8 @@ import Quickshell.Services.Notifications
 import "./common"
 import "./components"
 import "./services"
+import "./shared/ui" as DS
+import "./shared/designsystem" as Design
 
 PanelWindow {
     id: root
@@ -240,7 +242,7 @@ PanelWindow {
                         spacing: 8
 
                         HeaderButton {
-                            icon: "󰍃"
+                            iconName: "log-out"
                             label: "Logoff"
                             tooltip: "Log Off"
                             tint: Appearance.colors.warning
@@ -248,7 +250,7 @@ PanelWindow {
                         }
 
                         HeaderButton {
-                            icon: "󰍜"
+                            iconName: "lock"
                             label: "Lock"
                             tooltip: "Lock Session"
                             tint: Appearance.colors.info
@@ -256,7 +258,7 @@ PanelWindow {
                         }
 
                         HeaderButton {
-                            icon: "󰐥"
+                            iconName: "power"
                             label: "Power"
                             tooltip: "Power Menu"
                             tint: Appearance.colors.error
@@ -337,7 +339,7 @@ PanelWindow {
                             rowSpacing: 10
 
                             QuickToggle {
-                                icon: "󰈀"
+                                iconName: "ethernet"
                                 label: "Ethernet"
                                 subLabel: networkService.activeEthernet ? "Connected" : "Disconnected"
                                 active: networkService.activeEthernet !== null
@@ -346,7 +348,7 @@ PanelWindow {
                             }
 
                             QuickToggle {
-                                icon: "󰂯"
+                                iconName: "bluetooth"
                                 label: "Bluetooth"
                                 subLabel: Bluetooth.defaultAdapter?.enabled ? "Available" : "Disabled"
                                 active: Bluetooth.defaultAdapter?.enabled ?? false
@@ -359,7 +361,7 @@ PanelWindow {
                             }
 
                             QuickToggle {
-                                icon: notificationService.dnd ? "󰂛" : "󰂚"
+                                iconName: notificationService.dnd ? "bell-off" : "bell"
                                 label: "Notifications"
                                 subLabel: notificationService.dnd ? "Do Not Disturb" : "Alerts Enabled"
                                 active: notificationService.dnd
@@ -368,7 +370,7 @@ PanelWindow {
                             }
 
                             QuickToggle {
-                                icon: "󰒓"
+                                iconName: "settings-2"
                                 label: "System Settings"
                                 subLabel: "Connections and adapters"
                                 active: false
@@ -415,53 +417,31 @@ PanelWindow {
         }
     }
 
-    component HeaderButton: Rectangle {
+    component HeaderButton: DS.Chip {
         id: headerBtn
 
-        property string icon: ""
+        property string iconName: ""
         property string label: ""
         property string tooltip: ""
         property color tint: Appearance.colors.info
-        signal clicked()
 
-        width: 74
-        height: 34
-        radius: 17
-        color: headerBtnMouse.containsMouse
-            ? Qt.rgba(tint.r, tint.g, tint.b, 0.28)
-            : Qt.rgba(1, 1, 1, 0.06)
-        border.color: Qt.rgba(tint.r, tint.g, tint.b, 0.30)
-        border.width: 1
-
-        RowLayout {
-            anchors.centerIn: parent
-            spacing: 6
-
-            Text {
-                text: headerBtn.icon
-                font.family: Appearance.font.family
-                font.pixelSize: 13
+        clickable: true
+        horizontalPadding: 12
+        verticalPadding: 6
+        text: headerBtn.label
+        contentColor: Appearance.colors.cOnSurface
+        containerColor: Design.ThemePalette.withAlpha(Design.Tokens.color.surfaceContainerHigh, 0.96)
+        hoverContainerColor: Design.ThemePalette.withAlpha(tint, 0.18)
+        pressedContainerColor: Design.ThemePalette.withAlpha(tint, 0.24)
+        borderColor: Design.ThemePalette.withAlpha(tint, 0.30)
+        leading: Component {
+            DS.LucideIcon {
+                name: headerBtn.iconName
+                iconSize: 13
                 color: headerBtn.tint
             }
-
-            Text {
-                text: headerBtn.label
-                font.family: Appearance.font.family
-                font.pixelSize: 10
-                font.bold: true
-                color: Appearance.colors.cOnSurface
-            }
         }
-
-        MouseArea {
-            id: headerBtnMouse
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            hoverEnabled: true
-            onClicked: headerBtn.clicked()
-        }
-
-        ToolTip.visible: headerBtnMouse.containsMouse && headerBtn.tooltip !== ""
+        ToolTip.visible: hovered && headerBtn.tooltip !== ""
         ToolTip.text: headerBtn.tooltip
         ToolTip.delay: 400
     }
@@ -481,22 +461,18 @@ PanelWindow {
             color: root.cOnSurfaceDim
         }
 
-        Rectangle {
+        DS.Chip {
             visible: badge !== ""
-            radius: 9
-            implicitWidth: badgeText.implicitWidth + 12
-            implicitHeight: 18
-            color: Qt.rgba(1, 1, 1, 0.06)
-
-            Text {
-                id: badgeText
-                anchors.centerIn: parent
-                text: badge
-                font.family: Appearance.font.family
-                font.pixelSize: 9
-                font.bold: true
-                color: root.cOnSurfaceVariant
-            }
+            text: badge
+            clickable: false
+            horizontalPadding: 10
+            verticalPadding: 4
+            contentFontSize: 9
+            containerColor: Design.ThemePalette.withAlpha(Design.Tokens.color.surfaceContainerHigh, 0.88)
+            hoverContainerColor: containerColor
+            pressedContainerColor: containerColor
+            borderColor: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.72)
+            contentColor: root.cOnSurfaceVariant
         }
 
         Item {

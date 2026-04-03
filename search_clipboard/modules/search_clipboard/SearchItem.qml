@@ -4,44 +4,22 @@ import Quickshell
 import "../../common"
 import "../../common/widgets"
 import "../../services"
+import "../../shared/ui" as DS
 
-Rectangle {
+DS.SearchResultItem {
     id: root
     required property var entry
     required property bool active
 
-    height: 48
-    radius: 8
-    color: active ? Appearance.colors.colAccentSubtle : "transparent"
-
-    Behavior on color { ColorAnimation { duration: 120 } }
-
-    // 3-px left accent strip — only on the active item
-    Rectangle {
-        width: 3
-        height: 24
-        radius: 1.5
-        anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        color: Appearance.colors.colAccent
-        visible: root.active
-
-        Behavior on opacity { NumberAnimation { duration: 120 } }
-    }
-
-    RowLayout {
-        anchors.fill: parent
-        anchors.leftMargin: 14
-        anchors.rightMargin: 12
-        spacing: 12
-
-        // App icon box
+    title: root.entry.name ?? ""
+    subtitle: root.entry.comment ?? ""
+    selected: root.active
+    leading: Component {
         Rectangle {
-            width: 34
-            height: 34
-            radius: 8
+            width: 36
+            height: 36
+            radius: 10
             color: Appearance.colors.colLayer2
-            Layout.alignment: Qt.AlignVCenter
 
             StyledText {
                 anchors.centerIn: parent
@@ -67,60 +45,35 @@ Rectangle {
                 asynchronous: true
                 visible: root.entry.iconType === "image"
                 source: visible ? (root.entry.iconName ? (root.entry.iconName.startsWith("/") ? "file://" + root.entry.iconName : (root.entry.iconName.startsWith("file://") ? root.entry.iconName : Qt.resolvedUrl(root.entry.iconName))) : "") : ""
-                
+
                 onStatusChanged: {
-                    if (status === Image.Error && root.entry.isImage) {
+                    if (status === Image.Error && root.entry.isImage)
                         source = "../../assets/clipboard.svg"
-                    }
                 }
             }
         }
-
-        // Name + comment
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-            spacing: 1
-
-            StyledText {
-                text: root.entry.name ?? ""
-                font.pixelSize: Appearance.font.pixelSize.normal
-                elide: Text.ElideRight
-                horizontalAlignment: Text.AlignLeft
-                Layout.fillWidth: true
-            }
-
-            StyledText {
-                text: root.entry.comment ?? ""
-                font.pixelSize: Appearance.font.pixelSize.smaller
-                color: Appearance.colors.colSubtext
-                elide: Text.ElideRight
-                visible: text.length > 0
-                horizontalAlignment: Text.AlignLeft
-                Layout.fillWidth: true
-            }
-        }
-
-        // ↵ hint — only visible on active item
-        StyledText {
+    }
+    trailing: Component {
+        Text {
             text: "↵"
-            font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colAccent
             visible: root.active
             opacity: 0.75
-            Layout.alignment: Qt.AlignVCenter
+            color: Appearance.colors.colAccent
+            font.family: Appearance.font.family.main
+            font.pixelSize: Appearance.font.pixelSize.small
+            font.weight: Font.DemiBold
         }
     }
-
+    onClicked: {
+        if (root.entry && root.entry.execute) {
+            root.entry.execute()
+            GlobalStates.searchOpen = false
+        }
+    }
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
+        acceptedButtons: Qt.NoButton
         onEntered: root.ListView.view.currentIndex = index
-        onClicked: {
-            if (root.entry && root.entry.execute) {
-                root.entry.execute()
-                GlobalStates.searchOpen = false
-            }
-        }
     }
 }

@@ -18,7 +18,7 @@ Item {
         hoverIconColor: Root.Config.mauve
         hoverColor: Root.Config.surface0
         onClicked: {
-            Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "toggle"])
+            Quickshell.execDetached(["quickshell", "ipc", "-c", "desktop_controlcenter", "call", "desktop_controlcenter", "toggle"])
         }
     }
 }

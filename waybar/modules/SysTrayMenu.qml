@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 
 import ".." as Root
+import "../shared/ui" as DS
 import "../services"
 
 PopupWindow {
@@ -53,7 +54,7 @@ PopupWindow {
                 stackView.pop();
         }
 
-        Rectangle {
+        DS.Surface {
             id: menuPanel
             readonly property real padding: 4
             anchors {
@@ -63,10 +64,11 @@ PopupWindow {
                 margins: root.padding
             }
 
-            color: Root.Config.mantle
-            radius: 8
-            border.width: 1
-            border.color: Root.Config.surface0
+            backgroundColor: Root.Config.mantle
+            radius: 10
+            borderWidth: 1
+            borderColor: Root.Config.surface0
+            shadowLevel: 1
             clip: true
 
             implicitWidth: stackView.implicitWidth + menuPanel.padding * 2
@@ -110,46 +112,17 @@ PopupWindow {
             visible: submenu.isSubMenu
             active: visible
 
-            sourceComponent: Rectangle {
-                height: 36
+            sourceComponent: DS.SearchResultItem {
                 Layout.fillWidth: true
-                color: "transparent"
-
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    hoverEnabled: true
-
-                    Rectangle {
-                        anchors.fill: parent
-                        color: parent.containsMouse ? Root.Config.surface0 : "transparent"
-                    }
-
-                    onClicked: stackView.pop()
-
-                    RowLayout {
-                        anchors {
-                            fill: parent
-                            leftMargin: 12
-                            rightMargin: 12
-                        }
-                        spacing: 8
-
-                        Text {
-                            text: "‹"
-                            color: Root.Config.text
-                            font.pixelSize: 16
-                        }
-
-                        Text {
-                            text: "Back"
-                            color: Root.Config.text
-                            font.family: Root.Config.textFontFamily
-                            font.pixelSize: 12
-                            Layout.fillWidth: true
-                        }
+                title: "Back"
+                leading: Component {
+                    Text {
+                        text: "‹"
+                        color: Root.Config.text
+                        font.pixelSize: 16
                     }
                 }
+                onClicked: stackView.pop()
             }
         }
 

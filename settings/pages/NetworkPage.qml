@@ -107,11 +107,11 @@ Item {
                         required property var modelData
 
                         Layout.fillWidth: true
-                        icon: "󰤨"
+                        iconName: "wifi"
                         title: networkLabel(modelData)
                         subtitle: modelData.security && modelData.security.length > 0 ? modelData.security : "Open network"
                         valueText: (modelData.active ? "Active" : "") + (modelData.strength !== undefined ? (modelData.active ? " " : "") + modelData.strength + "%" : "")
-                        trailingIcon: modelData.active ? "󰄬" : ""
+                        trailingIconName: modelData.active ? "check" : ""
                         onClicked: {
                             if (modelData.active && networkService?.disconnectFromNetwork) {
                                 networkService.disconnectFromNetwork();
@@ -139,7 +139,7 @@ Item {
 
                 UI.ListItem {
                     Layout.fillWidth: true
-                    icon: "󰈀"
+                    iconName: "ethernet"
                     title: activeInterface !== "" ? activeInterface : "No active interface"
                     subtitle: activeStateText()
                     valueText: isConnected ? "Connected" : "Idle"
@@ -152,7 +152,7 @@ Item {
                         required property var modelData
 
                         Layout.fillWidth: true
-                        icon: "󰈀"
+                        iconName: "ethernet"
                         title: modelData.interface || modelData.device || "Ethernet"
                         subtitle: modelData.state || "Unknown state"
                         valueText: modelData.connection || ""

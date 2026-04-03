@@ -2,7 +2,7 @@ import QtQuick
 
 import ".." as Root
 
-Rectangle {
+Item {
     id: root
 
     property url iconSource: ""
@@ -11,29 +11,37 @@ Rectangle {
     property color backgroundColor: "transparent"
     property color hoverColor: Root.Config.surface0
     property bool clickable: true
+    property int buttonSize: Math.max(Root.Config.iconButtonSize + 8, Root.Config.barHeight - 10)
 
     signal clicked()
 
-    readonly property bool hovered: mouseArea.containsMouse
+    implicitWidth: buttonSize
+    implicitHeight: buttonSize
 
-    implicitWidth: Root.Config.iconButtonSize + Root.Config.chipPaddingHorizontal
-    implicitHeight: Root.Config.iconButtonSize + Root.Config.chipPaddingVertical
-    radius: Root.Config.chipRadius
-    color: hovered && clickable ? hoverColor : backgroundColor
+    Rectangle {
+        id: buttonBg
+        anchors.centerIn: parent
+        width: root.buttonSize
+        height: root.buttonSize
+        radius: width / 2
+        color: mouseArea.pressed
+            ? root.hoverColor
+            : mouseArea.containsMouse
+                ? root.hoverColor
+                : root.backgroundColor
 
-    Behavior on color {
-        ColorAnimation { duration: 140 }
+        Behavior on color {
+            ColorAnimation {
+                duration: 140
+            }
+        }
     }
 
     LucideIcon {
-        anchors.centerIn: parent
+        anchors.centerIn: buttonBg
         source: root.iconSource
-        color: root.hovered && root.clickable ? root.hoverIconColor : root.iconColor
+        color: mouseArea.containsMouse && root.clickable ? root.hoverIconColor : root.iconColor
         iconSize: Root.Config.iconSize
-
-        Behavior on color {
-            ColorAnimation { duration: 140 }
-        }
     }
 
     MouseArea {

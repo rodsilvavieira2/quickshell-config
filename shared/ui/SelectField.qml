@@ -37,13 +37,12 @@ ComboBox {
         }
     }
 
-    indicator: Text {
+    indicator: LucideIcon {
         x: root.width - width - Tokens.space.s16
         y: root.height / 2 - height / 2
-        text: "󰅀"
+        name: "chevron-down"
         color: Tokens.color.text.secondary
-        font.family: Tokens.font.family.icon
-        font.pixelSize: Tokens.font.size.label
+        iconSize: Tokens.font.size.label + 1
     }
 
     popup: Popup {

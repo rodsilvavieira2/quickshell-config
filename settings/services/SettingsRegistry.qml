@@ -7,7 +7,7 @@ QtObject {
         {
             id: "appearance",
             label: "Appearance",
-            icon: "󰔎",
+            iconName: "palette",
             keywords: ["theme", "accent", "font", "scale", "dark", "light", "gtk"],
             pageSource: Qt.resolvedUrl("../pages/AppearancePage.qml"),
             entries: [
@@ -19,7 +19,7 @@ QtObject {
         {
             id: "wallpaper",
             label: "Wallpaper",
-            icon: "󰸉",
+            iconName: "image",
             keywords: ["wallpaper", "background", "image"],
             pageSource: Qt.resolvedUrl("../pages/WallpaperPage.qml"),
             entries: [
@@ -30,7 +30,7 @@ QtObject {
         {
             id: "displays",
             label: "Displays",
-            icon: "󰍹",
+            iconName: "monitor",
             keywords: ["monitor", "display", "resolution", "scale", "refresh"],
             pageSource: Qt.resolvedUrl("../pages/DisplaysPage.qml"),
             entries: [
@@ -41,7 +41,7 @@ QtObject {
         {
             id: "audio",
             label: "Audio",
-            icon: "󰕾",
+            iconName: "volume-2",
             keywords: ["audio", "volume", "microphone", "speaker", "output", "input"],
             pageSource: Qt.resolvedUrl("../pages/AudioPage.qml"),
             entries: [
@@ -52,7 +52,7 @@ QtObject {
         {
             id: "network",
             label: "Network",
-            icon: "󰖩",
+            iconName: "wifi",
             keywords: ["network", "wifi", "ethernet", "internet", "connection"],
             pageSource: Qt.resolvedUrl("../pages/NetworkPage.qml"),
             entries: [
@@ -63,7 +63,7 @@ QtObject {
         {
             id: "bluetooth",
             label: "Bluetooth",
-            icon: "󰂯",
+            iconName: "bluetooth",
             keywords: ["bluetooth", "devices", "pair", "headphones"],
             pageSource: Qt.resolvedUrl("../pages/BluetoothPage.qml"),
             entries: [
@@ -74,7 +74,7 @@ QtObject {
         {
             id: "input-about",
             label: "Input & About",
-            icon: "󰌓",
+            iconName: "keyboard",
             keywords: ["keyboard", "mouse", "touchpad", "layout", "about", "system"],
             pageSource: Qt.resolvedUrl("../pages/InputAboutPage.qml"),
             entries: [
@@ -117,7 +117,7 @@ QtObject {
                     results.push({
                         categoryId: category.id,
                         categoryLabel: category.label,
-                        categoryIcon: category.icon,
+                        categoryIconName: category.iconName,
                         entryId: entry.id,
                         title: entry.label,
                         description: entry.description,
@@ -130,7 +130,7 @@ QtObject {
                 results.push({
                     categoryId: category.id,
                     categoryLabel: category.label,
-                    categoryIcon: category.icon,
+                    categoryIconName: category.iconName,
                     entryId: "",
                     title: category.label,
                     description: "Open category",
