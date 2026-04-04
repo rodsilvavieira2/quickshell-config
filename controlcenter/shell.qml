@@ -18,40 +18,13 @@ import "./services"
 import "./shared/ui" as DS
 import "./shared/designsystem" as Design
 
-PanelWindow {
-    id: root
+ShellRoot {
+    id: shellRoot
 
     AudioService { id: audioService }
     NetworkService { id: networkService }
     BrightnessService { id: brightnessService }
     NotificationService { id: notificationService }
-
-    function openSettings(categoryId) {
-        root.shouldShow = false;
-        if (categoryId && categoryId.length > 0) {
-            Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "openCategory", categoryId]);
-        } else {
-            Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "open"]);
-        }
-    }
-
-    Process {
-        id: lockProcess
-        command: ["loginctl", "lock-session"]
-        onStarted: root.shouldShow = false
-    }
-
-    Process {
-        id: powerProcess
-        command: ["wlogout"]
-        onStarted: root.shouldShow = false
-    }
-
-    Process {
-        id: logoffProcess
-        command: ["sh", "-c", "loginctl terminate-user \"$USER\""]
-        onStarted: root.shouldShow = false
-    }
 
     readonly property color cSurface: Appearance.colors.cSurface
     readonly property color cSurfaceContainer: Appearance.colors.cSurfaceContainer
@@ -68,40 +41,49 @@ PanelWindow {
         ? Hyprland.focusedMonitor.name
         : ""
 
-    screen: {
+    function resolveScreen() {
         for (let i = 0; i < Quickshell.screens.values.length; i++) {
             if (Quickshell.screens.values[i].name === focusedScreenName) {
                 return Quickshell.screens.values[i];
             }
         }
+
         return Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null;
     }
 
-    anchors {
-        top: true
-        right: true
+    function openSettings(categoryId) {
+        shellRoot.shouldShow = false;
+        if (categoryId && categoryId.length > 0) {
+            Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "openCategory", categoryId]);
+        } else {
+            Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "open"]);
+        }
     }
 
-    margins {
-        top: 18
-        right: 18
+    Process {
+        id: lockProcess
+        command: ["loginctl", "lock-session"]
+        onStarted: shellRoot.shouldShow = false
     }
 
-    implicitWidth: 404
-    implicitHeight: Math.max(420, Math.floor(((screen && screen.height) ? screen.height : 900) * 0.9))
-    color: "transparent"
-    visible: shouldShow || panelContent.opacity > 0
+    Process {
+        id: powerProcess
+        command: ["wlogout"]
+        onStarted: shellRoot.shouldShow = false
+    }
 
-    WlrLayershell.namespace: "quickshell:controlcenter"
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: shouldShow ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    Process {
+        id: logoffProcess
+        command: ["sh", "-c", "loginctl terminate-user \"$USER\""]
+        onStarted: shellRoot.shouldShow = false
+    }
 
     IpcHandler {
         target: "controlcenter"
 
-        function toggle() { root.shouldShow = !root.shouldShow; }
-        function open() { root.shouldShow = true; }
-        function close() { root.shouldShow = false; }
+        function toggle() { shellRoot.shouldShow = !shellRoot.shouldShow; }
+        function open() { shellRoot.shouldShow = true; }
+        function close() { shellRoot.shouldShow = false; }
     }
 
     NotificationServer {
@@ -117,6 +99,47 @@ PanelWindow {
             notificationService.addNotification(notification);
         }
     }
+
+    PanelWindow {
+        id: root
+
+        property alias shouldShow: shellRoot.shouldShow
+        property alias focusedScreenName: shellRoot.focusedScreenName
+
+        readonly property color cSurface: shellRoot.cSurface
+        readonly property color cSurfaceContainer: shellRoot.cSurfaceContainer
+        readonly property color cSurfaceContainerHigh: shellRoot.cSurfaceContainerHigh
+        readonly property color cBorder: shellRoot.cBorder
+        readonly property color cPrimary: shellRoot.cPrimary
+        readonly property color cSecondary: shellRoot.cSecondary
+        readonly property color cOnSurface: shellRoot.cOnSurface
+        readonly property color cOnSurfaceVariant: shellRoot.cOnSurfaceVariant
+        readonly property color cOnSurfaceDim: shellRoot.cOnSurfaceDim
+
+        function openSettings(categoryId) {
+            shellRoot.openSettings(categoryId);
+        }
+
+        screen: shellRoot.resolveScreen()
+
+        anchors {
+            top: true
+            right: true
+        }
+
+        margins {
+            top: 18
+            right: 18
+        }
+
+        implicitWidth: 404
+        implicitHeight: Math.max(420, Math.floor(((screen && screen.height) ? screen.height : 900) * 0.9))
+        color: "transparent"
+        visible: shouldShow || panelContent.opacity > 0
+
+        WlrLayershell.namespace: "quickshell:controlcenter"
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: shouldShow ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     FocusScope {
         id: panelContent
@@ -520,5 +543,38 @@ PanelWindow {
         padding: 12
         clipContent: true
         shadowLevel: Design.Tokens.shadow.none
+    }
+    }
+
+    PanelWindow {
+        id: floatingNotifications
+
+        screen: shellRoot.resolveScreen()
+
+        anchors {
+            top: true
+            right: true
+        }
+
+        margins {
+            top: 18
+            right: 18
+        }
+
+        implicitWidth: notificationStack.implicitWidth
+        implicitHeight: notificationStack.implicitHeight
+        color: "transparent"
+        visible: !shellRoot.shouldShow && notificationService.floatingNotifications.length > 0
+
+        WlrLayershell.namespace: "quickshell:controlcenter:notifications"
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+
+        FloatingNotificationStack {
+            id: notificationStack
+            anchors.top: parent.top
+            anchors.right: parent.right
+            notifs: notificationService
+        }
     }
 }
