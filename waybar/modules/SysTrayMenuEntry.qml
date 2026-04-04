@@ -1,5 +1,3 @@
-pragma ComponentBehavior: Bound
-
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -19,8 +17,8 @@ Item {
     signal dismiss()
     signal openSubmenu(handle: var)
 
-    implicitWidth: 220
-    implicitHeight: menuEntry.isSeparator ? 9 : 40
+    implicitWidth: 248
+    implicitHeight: menuEntry.isSeparator ? 8 : 38
     Layout.topMargin: menuEntry.isSeparator ? 4 : 0
     Layout.bottomMargin: menuEntry.isSeparator ? 4 : 0
     Layout.fillWidth: true
@@ -46,6 +44,10 @@ Item {
         anchors.fill: parent
         visible: !root.menuEntry.isSeparator
         clickable: true
+        minHeight: 38
+        horizontalPadding: 14
+        verticalPadding: 8
+        itemRadius: 12
         title: root.menuEntry.text
         selected: false
         leading: Component {
@@ -54,8 +56,8 @@ Item {
 
                 Item {
                     visible: root.hasSpecialInteraction || root.forceSpecialInteractionColumn
-                    implicitWidth: 20
-                    implicitHeight: 20
+                    implicitWidth: 22
+                    implicitHeight: 22
 
                     Rectangle {
                         anchors.centerIn: parent
@@ -63,13 +65,13 @@ Item {
                         height: 16
                         radius: root.menuEntry.buttonType === QsMenuButtonType.CheckBox ? 3 : 8
                         border.width: 2
-                        border.color: root.menuEntry.checkState !== Qt.Unchecked ? Root.Config.activeAccent : Root.Config.surface1
-                        color: root.menuEntry.checkState !== Qt.Unchecked ? Root.Config.activeAccent : "transparent"
+                        border.color: root.menuEntry.checkState !== Qt.Unchecked ? Root.Config.activeAccent : Root.Config.dividerColor
+                        color: root.menuEntry.checkState !== Qt.Unchecked ? Root.Config.chipActiveColor : "transparent"
 
                         Text {
                             anchors.centerIn: parent
                             text: root.menuEntry.checkState === Qt.PartiallyChecked ? "−" : "✓"
-                            color: Root.Config.base
+                            color: Root.Config.chipActiveForeground
                             font.pixelSize: 12
                             font.bold: true
                             visible: root.menuEntry.checkState !== Qt.Unchecked && root.menuEntry.buttonType === QsMenuButtonType.CheckBox
@@ -79,8 +81,8 @@ Item {
 
                 Item {
                     visible: root.hasIcon || root.forceIconColumn
-                    implicitWidth: 20
-                    implicitHeight: 20
+                    implicitWidth: 22
+                    implicitHeight: 22
 
                     IconImage {
                         anchors.centerIn: parent

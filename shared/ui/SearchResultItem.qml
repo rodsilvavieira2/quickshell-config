@@ -12,11 +12,15 @@ Rectangle {
     property bool selected: false
     property bool clickable: true
     property bool itemEnabled: true
+    property int minHeight: 56
+    property int horizontalPadding: 14
+    property int verticalPadding: Tokens.space.s12
+    property int itemRadius: Tokens.shape.medium
     property Component leading
     property Component trailing
 
-    implicitHeight: Math.max(56, contentLayout.implicitHeight + Tokens.space.s12 * 2)
-    radius: Tokens.shape.medium
+    implicitHeight: Math.max(root.minHeight, contentLayout.implicitHeight + root.verticalPadding * 2)
+    radius: root.itemRadius
     color: selected ? ThemePalette.withAlpha(Tokens.color.primary, 0.12) : "transparent"
     border.width: selected ? Tokens.border.width.thin : 0
     border.color: selected ? ThemePalette.withAlpha(Tokens.color.primary, 0.26) : "transparent"
@@ -56,10 +60,10 @@ Rectangle {
     RowLayout {
         id: contentLayout
         anchors.fill: parent
-        anchors.leftMargin: 14
-        anchors.rightMargin: Tokens.space.s12
-        anchors.topMargin: Tokens.space.s12
-        anchors.bottomMargin: Tokens.space.s12
+        anchors.leftMargin: root.horizontalPadding
+        anchors.rightMargin: root.horizontalPadding
+        anchors.topMargin: root.verticalPadding
+        anchors.bottomMargin: root.verticalPadding
         spacing: Tokens.space.s12
 
         Loader {

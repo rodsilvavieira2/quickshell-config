@@ -92,14 +92,15 @@ Item {
                 return;
             }
 
-            notifId = notification.id ?? -1;
-            summary = notification.summary ?? "";
-            body = notification.body ?? "";
-            appName = notification.appName ?? "";
-            appIcon = notification.appIcon ?? "";
-            image = notification.image ?? "";
-            urgency = notification.urgency ?? 1;
-            actions = (notification.actions ?? []).map(action => ({
+            notifId = notification.id !== undefined && notification.id !== null ? notification.id : -1;
+            summary = notification.summary !== undefined && notification.summary !== null ? notification.summary : "";
+            body = notification.body !== undefined && notification.body !== null ? notification.body : "";
+            appName = notification.appName !== undefined && notification.appName !== null ? notification.appName : "";
+            appIcon = notification.appIcon !== undefined && notification.appIcon !== null ? notification.appIcon : "";
+            image = notification.image !== undefined && notification.image !== null ? notification.image : "";
+            urgency = notification.urgency !== undefined && notification.urgency !== null ? notification.urgency : 1;
+            const notifActions = notification.actions !== undefined && notification.actions !== null ? notification.actions : [];
+            actions = notifActions.map(action => ({
                 identifier: action.identifier,
                 text: action.text,
                 invoke: () => action.invoke()
@@ -108,7 +109,7 @@ Item {
 
         function invokeAction(actionId) {
             const action = actions.find(item => item.identifier === actionId);
-            if (action?.invoke) {
+            if (action && action.invoke) {
                 action.invoke();
             }
         }

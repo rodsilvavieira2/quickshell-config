@@ -42,11 +42,11 @@ Item {
                 try {
                     const parsed = JSON.parse(out);
                     root.musicData = {
-                        "title": parsed.title ?? "",
-                        "artist": parsed.artist ?? "",
-                        "status": parsed.status ?? "Stopped",
-                        "timeStr": parsed.timeStr ?? "--:-- / --:--",
-                        "artUrl": parsed.artUrl ?? ""
+                        "title": parsed.title !== undefined && parsed.title !== null ? parsed.title : "",
+                        "artist": parsed.artist !== undefined && parsed.artist !== null ? parsed.artist : "",
+                        "status": parsed.status !== undefined && parsed.status !== null ? parsed.status : "Stopped",
+                        "timeStr": parsed.timeStr !== undefined && parsed.timeStr !== null ? parsed.timeStr : "--:-- / --:--",
+                        "artUrl": parsed.artUrl !== undefined && parsed.artUrl !== null ? parsed.artUrl : ""
                     };
                 } catch (e) {
                     root.musicData = root._fallbackData();

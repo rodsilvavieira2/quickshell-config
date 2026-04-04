@@ -37,16 +37,17 @@ Item {
 
         stdout: StdioCollector {
             onStreamFinished: {
-                const line = text.trim().split("\n")[0] ?? "";
+                const lines = text.trim().split("\n");
+                const line = lines.length > 0 ? lines[0] : "";
                 const parts = line.split(",");
                 if (parts.length < 4) {
                     root.available = false;
                     return;
                 }
 
-                const current = parseInt(parts[2] ?? "0", 10);
-                const max = parseInt(parts[3] ?? "0", 10);
-                const percentText = (parts[4] ?? "").replace("%", "");
+                const current = parseInt(parts.length > 2 ? parts[2] : "0", 10);
+                const max = parseInt(parts.length > 3 ? parts[3] : "0", 10);
+                const percentText = (parts.length > 4 ? parts[4] : "").replace("%", "");
                 const parsedPercent = parseInt(percentText, 10);
 
                 if (isNaN(current) || isNaN(max) || max <= 0) {

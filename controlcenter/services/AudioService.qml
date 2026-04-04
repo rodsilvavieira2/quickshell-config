@@ -74,7 +74,7 @@ Item {
     function setVolume(newVolume) {
         if (sink && sink.audio) {
             sink.audio.muted = false;
-            sink.audio.volume = Math.max(0, Math.min(1.0, newVolume));
+            sink.audio.volume = Math.max(0, Math.min(1.4, newVolume));
         }
     }
 

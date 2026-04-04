@@ -17,7 +17,10 @@ Item {
     property bool wifiEnabled: true
     readonly property bool scanning: rescanProc.running
     readonly property list<AccessPoint> networks: []
-    readonly property AccessPoint active: networks.find(n => n.active) ?? null
+    readonly property AccessPoint active: {
+        const activeNetwork = networks.find(function(n) { return n.active; });
+        return activeNetwork ? activeNetwork : null;
+    }
     property list<string> savedConnections: []
     property list<string> savedConnectionSsids: []
 
@@ -28,7 +31,10 @@ Item {
     property var wirelessDeviceDetails: null
     property var ethernetDeviceDetails: null
     property list<var> ethernetDevices: []
-    readonly property var activeEthernet: ethernetDevices.find(d => d.connected) ?? null
+    readonly property var activeEthernet: {
+        const activeDevice = ethernetDevices.find(function(d) { return d.connected; });
+        return activeDevice ? activeDevice : null;
+    }
 
     property list<var> activeProcesses: []
 
@@ -79,9 +85,9 @@ Item {
                 active: net[0] === "yes",
                 strength: parseInt(net[1] || "0", 10) || 0,
                 frequency: parseInt(net[2] || "0", 10) || 0,
-                ssid: (net[3]?.replace(rep2, ":") ?? "").trim(),
-                bssid: (net[4]?.replace(rep2, ":") ?? "").trim(),
-                security: (net[5] ?? "").trim()
+                ssid: ((net.length > 3 && net[3]) ? net[3].replace(rep2, ":") : "").trim(),
+                bssid: ((net.length > 4 && net[4]) ? net[4].replace(rep2, ":") : "").trim(),
+                security: (net.length > 5 && net[5] ? net[5] : "").trim()
             };
         }).filter(n => n.ssid && n.ssid.length > 0);
 

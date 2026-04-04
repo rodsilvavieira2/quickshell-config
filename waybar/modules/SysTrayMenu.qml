@@ -16,22 +16,24 @@ PopupWindow {
     signal menuOpened(qsWindow: var)
 
     color: "transparent"
-    property real padding: 6
+    property real padding: 8
+    property int minMenuWidth: 248
+    property int maxMenuWidth: 320
+    readonly property int maxMenuContentHeight: Math.max(
+        180,
+        Math.min(520, Math.round((root.screen ? root.screen.height : 900) * 0.62))
+    )
 
-    implicitHeight: {
-        let result = 0;
-        for (let child of stackView.children) {
-            result = Math.max(child.implicitHeight, result);
-        }
-        return result + menuPanel.padding * 2 + root.padding * 2;
-    }
-    implicitWidth: {
-        let result = 0;
-        for (let child of stackView.children) {
-            result = Math.max(child.implicitWidth, result);
-        }
-        return result + menuPanel.padding * 2 + root.padding * 2;
-    }
+    readonly property Item currentMenuItem: stackView.currentItem
+
+    implicitHeight: (currentMenuItem ? currentMenuItem.implicitHeight : 0) + menuPanel.padding * 2 + root.padding * 2
+    implicitWidth: Math.min(
+        root.maxMenuWidth,
+        Math.max(
+            root.minMenuWidth,
+            (currentMenuItem ? currentMenuItem.implicitWidth : 0) + menuPanel.padding * 2 + root.padding * 2
+        )
+    )
 
     function open() {
         root.visible = true;
@@ -56,7 +58,7 @@ PopupWindow {
 
         DS.Surface {
             id: menuPanel
-            readonly property real padding: 4
+            readonly property real padding: 6
             anchors {
                 left: parent.left
                 right: parent.right
@@ -64,11 +66,11 @@ PopupWindow {
                 margins: root.padding
             }
 
-            backgroundColor: Root.Config.mantle
-            radius: 10
+            backgroundColor: Root.Config.surface1
+            radius: 18
             borderWidth: 1
-            borderColor: Root.Config.surface0
-            shadowLevel: 1
+            borderColor: Root.Config.dividerColor
+            shadowLevel: 2
             clip: true
 
             implicitWidth: stackView.implicitWidth + menuPanel.padding * 2
@@ -95,66 +97,92 @@ PopupWindow {
         }
     }
 
-    component SubMenu: ColumnLayout {
+    component SubMenu: Item {
         id: submenu
         required property var handle
         property bool isSubMenu: false
+        readonly property int contentImplicitHeight: menuContent.implicitHeight
+        readonly property int viewportHeight: Math.min(contentImplicitHeight, root.maxMenuContentHeight)
+
+        implicitWidth: Math.max(root.minMenuWidth - menuPanel.padding * 2, menuContent.implicitWidth)
+        implicitHeight: viewportHeight
 
         QsMenuOpener {
             id: menuOpener
             menu: submenu.handle
         }
 
-        spacing: 0
+        ScrollView {
+            anchors.fill: parent
+            clip: true
+            contentWidth: availableWidth
+            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
-        Loader {
-            Layout.fillWidth: true
-            visible: submenu.isSubMenu
-            active: visible
+            Item {
+                width: Math.max(parent.width, 1)
+                implicitHeight: menuContent.implicitHeight
 
-            sourceComponent: DS.SearchResultItem {
-                Layout.fillWidth: true
-                title: "Back"
-                leading: Component {
-                    Text {
-                        text: "‹"
-                        color: Root.Config.text
-                        font.pixelSize: 16
+                ColumnLayout {
+                    id: menuContent
+                    width: parent.width
+                    spacing: 2
+
+                    Loader {
+                        Layout.fillWidth: true
+                        visible: submenu.isSubMenu
+                        active: visible
+
+                        sourceComponent: DS.SearchResultItem {
+                            Layout.fillWidth: true
+                            minHeight: 38
+                            horizontalPadding: 14
+                            verticalPadding: 8
+                            itemRadius: 12
+                            title: "Back"
+                            leading: Component {
+                                Text {
+                                    text: "‹"
+                                    color: Root.Config.text
+                                    font.pixelSize: 16
+                                }
+                            }
+                            onClicked: stackView.pop()
+                        }
                     }
-                }
-                onClicked: stackView.pop()
-            }
-        }
 
-        Repeater {
-            id: menuEntriesRepeater
-            property bool iconColumnNeeded: {
-                for (let i = 0; i < menuOpener.children.values.length; i++) {
-                    if (menuOpener.children.values[i].icon.length > 0)
-                        return true;
-                }
-                return false;
-            }
-            property bool specialInteractionColumnNeeded: {
-                for (let i = 0; i < menuOpener.children.values.length; i++) {
-                    if (menuOpener.children.values[i].buttonType !== QsMenuButtonType.None)
-                        return true;
-                }
-                return false;
-            }
-            model: menuOpener.children
-            delegate: SysTrayMenuEntry {
-                required property QsMenuEntry modelData
-                forceIconColumn: menuEntriesRepeater.iconColumnNeeded
-                forceSpecialInteractionColumn: menuEntriesRepeater.specialInteractionColumnNeeded
-                menuEntry: modelData
+                    Repeater {
+                        id: menuEntriesRepeater
+                        property bool iconColumnNeeded: {
+                            for (let i = 0; i < menuOpener.children.values.length; i++) {
+                                if (menuOpener.children.values[i].icon.length > 0)
+                                    return true;
+                            }
+                            return false;
+                        }
+                        property bool specialInteractionColumnNeeded: {
+                            for (let i = 0; i < menuOpener.children.values.length; i++) {
+                                if (menuOpener.children.values[i].buttonType !== QsMenuButtonType.None)
+                                    return true;
+                            }
+                            return false;
+                        }
+                        model: menuOpener.children
+                        delegate: SysTrayMenuEntry {
+                            required property QsMenuEntry modelData
+                            Layout.fillWidth: true
+                            forceIconColumn: menuEntriesRepeater.iconColumnNeeded
+                            forceSpecialInteractionColumn: menuEntriesRepeater.specialInteractionColumnNeeded
+                            menuEntry: modelData
 
-                onDismiss: root.close()
-                onOpenSubmenu: handle => {
-                    stackView.push(subMenuComponent.createObject(null, {
-                        handle: handle,
-                        isSubMenu: true
-                    }));
+                            onDismiss: root.close()
+                            onOpenSubmenu: handle => {
+                                stackView.push(subMenuComponent.createObject(null, {
+                                    handle: handle,
+                                    isSubMenu: true
+                                }));
+                            }
+                        }
+                    }
                 }
             }
         }
