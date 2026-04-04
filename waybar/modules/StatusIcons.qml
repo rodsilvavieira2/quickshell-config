@@ -138,9 +138,9 @@ Item {
                         : Qt.resolvedUrl("../assets/ethernet.svg"))
                     : Qt.resolvedUrl("../assets/wifi-off.svg")
                 valueText: root.networkConnected ? root.activeSsid : ""
-                backgroundColor: root.networkConnected ? Root.Config.blue : Root.Config.chipColor
-                iconColor: root.networkConnected ? Root.Config.crust : Root.Config.subtext0
-                labelColor: root.networkConnected ? Root.Config.crust : Root.Config.subtext0
+                backgroundColor: root.networkConnected ? Root.Config.chipActiveColor : Root.Config.chipColor
+                iconColor: root.networkConnected ? "#2E2436" : Qt.rgba(255/255, 255/255, 255/255, 0.9)
+                labelColor: root.networkConnected ? "#2E2436" : Qt.rgba(255/255, 255/255, 255/255, 0.9)
                 valueMaxWidth: 110
                 clickable: true
                 onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "openCategory", "network"])

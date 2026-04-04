@@ -14,8 +14,8 @@ import "../services"
 Item {
     id: root
 
-    implicitWidth: trayRow.implicitWidth
-    implicitHeight: trayRow.implicitHeight
+    implicitWidth: trayContainer.implicitWidth
+    implicitHeight: trayContainer.implicitHeight
 
     property list<var> pinnedItems: TrayService.pinnedItems
     property list<var> unpinnedItems: TrayService.unpinnedItems
@@ -70,10 +70,18 @@ Item {
         }
     }
 
-    Row {
-        id: trayRow
+    Rectangle {
+        id: trayContainer
         anchors.centerIn: parent
-        spacing: 4
+        implicitWidth: trayRow.implicitWidth + 20
+        implicitHeight: 34
+        radius: 999
+        color: Qt.rgba(255/255, 255/255, 255/255, 0.10)
+
+        Row {
+            id: trayRow
+            anchors.centerIn: parent
+            spacing: 12
 
         // Overflow button
         Item {
@@ -87,8 +95,8 @@ Item {
                 clickable: true
                 selected: root.overflowOpen
                 containerColor: "transparent"
-                hoverContainerColor: Root.Config.surface0
-                pressedContainerColor: Root.Config.surface0
+                hoverContainerColor: Qt.rgba(255/255, 255/255, 255/255, 0.14)
+                pressedContainerColor: Qt.rgba(255/255, 255/255, 255/255, 0.18)
                 borderColor: "transparent"
                 horizontalPadding: Math.max(6, Root.Config.chipPaddingHorizontal - 1)
                 verticalPadding: Root.Config.chipPaddingVertical
@@ -123,6 +131,7 @@ Item {
                 onMenuOpened: (qsWindow) => root.setActiveMenuAndGrab(qsWindow);
             }
         }
+    }
     }
 
     // Overflow popup (loaded on demand)

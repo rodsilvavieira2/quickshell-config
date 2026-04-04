@@ -30,45 +30,44 @@ Item {
         onTriggered: root.updateDateTime()
     }
 
-    DS.Chip {
-        id: contentRow
+    MouseArea {
+        id: contentArea
         anchors.centerIn: parent
-        clickable: true
-        containerColor: "transparent"
-        hoverContainerColor: Root.Config.surface0
-        pressedContainerColor: Root.Config.surface1
-        borderColor: "transparent"
-        horizontalPadding: Root.Config.chipPaddingHorizontal
-        verticalPadding: Root.Config.chipPaddingVertical
-        leading: Component {
-            RowLayout {
-                spacing: 8
+        implicitWidth: clockLayout.implicitWidth
+        implicitHeight: clockLayout.implicitHeight
+        cursorShape: Qt.PointingHandCursor
+        onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "calendar", "call", "calendar", "toggle"])
 
-                Text {
-                    text: root.timeString
-                    color: Root.Config.text
-                    font.family: Root.Config.textFontFamily
-                    font.pixelSize: 13
-                    font.bold: true
-                }
+        RowLayout {
+            id: clockLayout
+            anchors.centerIn: parent
+            spacing: 8
 
-                Rectangle {
-                    Layout.alignment: Qt.AlignVCenter
-                    implicitWidth: 3
-                    implicitHeight: 3
-                    radius: 1.5
-                    color: Root.Config.overlay0
-                }
+            Text {
+                Layout.alignment: Qt.AlignVCenter
+                text: root.timeString
+                color: Qt.rgba(255/255, 255/255, 255/255, 0.92)
+                font.family: Root.Config.textFontFamily
+                font.pixelSize: 16
+                font.weight: 600
+            }
 
-                Text {
-                    text: root.dateString
-                    color: Root.Config.subtext0
-                    font.family: Root.Config.textFontFamily
-                    font.pixelSize: 10
-                    font.bold: true
-                }
+            Rectangle {
+                Layout.alignment: Qt.AlignVCenter
+                implicitWidth: 4
+                implicitHeight: 4
+                radius: 2
+                color: Qt.rgba(255/255, 255/255, 255/255, 0.4)
+            }
+
+            Text {
+                Layout.alignment: Qt.AlignVCenter
+                text: root.dateString
+                color: Qt.rgba(255/255, 255/255, 255/255, 0.72)
+                font.family: Root.Config.textFontFamily
+                font.pixelSize: 14
+                font.weight: 500
             }
         }
-        onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "calendar", "call", "calendar", "toggle"])
     }
 }

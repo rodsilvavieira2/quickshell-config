@@ -27,36 +27,35 @@ PanelWindow {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.topMargin: Root.Config.barTopMargin
+        anchors.leftMargin: 12
+        anchors.rightMargin: 12
         height: Root.Config.barHeight
         radius: Root.Config.barRadius
         color: Root.Config.barColor
         border.width: 1
         border.color: Root.Config.barBorderColor
 
-        RowLayout {
+        Item {
             anchors.fill: parent
             anchors.leftMargin: Root.Config.barPaddingHorizontal
             anchors.rightMargin: Root.Config.barPaddingHorizontal
             anchors.topMargin: Root.Config.barPaddingTop
             anchors.bottomMargin: Root.Config.barPaddingBottom
-            spacing: Root.Config.sectionSpacing
 
             Modules.Workspaces {
                 id: workspacesContent
-                Layout.alignment: Qt.AlignVCenter
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
             }
-
-            Item { Layout.fillWidth: true }
 
             Modules.Clock {
                 id: clockContent
-                Layout.alignment: Qt.AlignVCenter
+                anchors.centerIn: parent
             }
 
-            Item { Layout.fillWidth: true }
-
             RowLayout {
-                Layout.alignment: Qt.AlignVCenter
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
                 spacing: Root.Config.sectionSpacing
 
                 Item {

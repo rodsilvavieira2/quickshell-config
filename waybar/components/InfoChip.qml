@@ -10,8 +10,8 @@ Item {
     property url iconSource: ""
     property string iconText: ""
     property string valueText: ""
-    property color iconColor: Root.Config.text
-    property color labelColor: Root.Config.subtext0
+    property color iconColor: Qt.rgba(255/255, 255/255, 255/255, 0.90)
+    property color labelColor: Qt.rgba(255/255, 255/255, 255/255, 0.90)
     property color hoverIconColor: iconColor
     property color hoverLabelColor: labelColor
     property color backgroundColor: Root.Config.chipColor
@@ -27,7 +27,7 @@ Item {
     readonly property bool hovered: chip.hovered
 
     implicitWidth: chip.implicitWidth
-    implicitHeight: chip.implicitHeight
+    implicitHeight: 34
 
     DS.Chip {
         id: chip
