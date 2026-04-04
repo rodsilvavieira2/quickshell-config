@@ -175,34 +175,6 @@ ShellRoot {
                 anchors.margins: Design.Tokens.space.s20
                 spacing: Design.Tokens.space.s16
 
-                DS.TopAppBar {
-                    Layout.fillWidth: true
-                    title: "Settings"
-                    subtitle: "Material 3 adapted system settings for your Quickshell desktop"
-
-                    DS.SearchBar {
-                        id: searchBar
-                        implicitWidth: 340
-                        text: shellRoot.searchQuery
-                        placeholderText: "Search settings"
-                        onTextChanged: shellRoot.searchQuery = text
-                        onAccepted: {
-                            if (shellRoot.searchResults.length > 0) {
-                                const firstResult = shellRoot.searchResults[0];
-                                shellRoot.selectedCategoryId = firstResult.categoryId;
-                                shellRoot.pendingEntryId = firstResult.entryId;
-                                shellRoot.searchQuery = "";
-                            }
-                        }
-                    }
-
-                    DS.IconButton {
-                        iconName: "x"
-                        preferredHeight: 40
-                        onClicked: shellRoot.closeApp()
-                    }
-                }
-
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -218,63 +190,65 @@ ShellRoot {
                             width: parent.width
                             spacing: Design.Tokens.component.drawer.sectionGap
 
-                            DS.Card {
-                                Layout.fillWidth: true
-                                padding: Design.Tokens.space.s16
-
-                                RowLayout {
-                                    width: parent.width
-                                    spacing: Design.Tokens.space.s12
-
-                                    Rectangle {
-                                        Layout.preferredWidth: 44
-                                        Layout.preferredHeight: 44
-                                        radius: Design.Tokens.shape.full
-                                        color: Design.ThemePalette.withAlpha(Design.Tokens.color.primary, Design.ThemeSettings.isDark ? 0.24 : 0.18)
-
-                                        DS.LucideIcon {
-                                            anchors.centerIn: parent
-                                            name: "settings-2"
-                                            color: Design.Tokens.color.primary
-                                            iconSize: 20
-                                        }
-                                    }
-
-                                    ColumnLayout {
-                                        Layout.fillWidth: true
-                                        spacing: Design.Tokens.space.s2
-
-                                        Text {
-                                            text: "Settings"
-                                            color: Design.Tokens.color.text.primary
-                                            font.family: Design.Tokens.font.family.title
-                                            font.pixelSize: Design.Tokens.font.size.title
-                                            font.weight: Design.Tokens.font.weight.semibold
-                                        }
-
-                                        Text {
-                                            text: "Material You desktop controls"
-                                            color: Design.Tokens.color.text.secondary
-                                            font.family: Design.Tokens.font.family.caption
-                                            font.pixelSize: Design.Tokens.font.size.caption
-                                        }
-                                    }
-                                }
+                            Text {
+                                text: "System Settings"
+                                color: Design.Tokens.color.text.primary
+                                font.family: Design.Tokens.font.family.headline
+                                font.pixelSize: Design.Tokens.font.size.title
+                                font.weight: Design.Tokens.font.weight.bold
+                                Layout.leftMargin: Design.Tokens.space.s16
+                                Layout.bottomMargin: Design.Tokens.space.s24
                             }
 
                             Repeater {
                                 model: registry.categories
 
-                                DS.NavigationDrawerItem {
+                                Rectangle {
                                     required property var modelData
                                     Layout.fillWidth: true
-                                    iconName: modelData.iconName
-                                    text: modelData.label
-                                    selected: shellRoot.selectedCategoryId === modelData.id
-                                    onClicked: {
-                                        shellRoot.selectedCategoryId = modelData.id;
-                                        shellRoot.pendingEntryId = "";
-                                        shellRoot.searchQuery = "";
+                                    implicitHeight: 48
+                                    radius: height / 2
+                                    color: shellRoot.selectedCategoryId === modelData.id ? Design.Tokens.color.primary : "transparent"
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: Design.Tokens.space.s16
+                                        anchors.rightMargin: Design.Tokens.space.s16
+                                        spacing: Design.Tokens.space.s16
+
+                                        DS.LucideIcon {
+                                            Layout.alignment: Qt.AlignVCenter
+                                            name: modelData.iconName
+                                            color: shellRoot.selectedCategoryId === modelData.id ? Design.Tokens.color.onPrimary : Design.Tokens.color.text.secondary
+                                            iconSize: 20
+                                        }
+
+                                        Text {
+                                            Layout.fillWidth: true
+                                            Layout.alignment: Qt.AlignVCenter
+                                            text: modelData.label
+                                            color: shellRoot.selectedCategoryId === modelData.id ? Design.Tokens.color.onPrimary : Design.Tokens.color.text.secondary
+                                            font.family: Design.Tokens.font.family.label
+                                            font.pixelSize: Design.Tokens.font.size.body
+                                            font.weight: shellRoot.selectedCategoryId === modelData.id ? Design.Tokens.font.weight.semibold : Design.Tokens.font.weight.medium
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: {
+                                            shellRoot.selectedCategoryId = parent.modelData.id;
+                                            shellRoot.pendingEntryId = "";
+                                            shellRoot.searchQuery = "";
+                                        }
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            radius: parent.radius
+                                            color: Design.Tokens.color.text.primary
+                                            opacity: parent.containsMouse && shellRoot.selectedCategoryId !== modelData.id ? 0.08 : 0
+                                        }
                                     }
                                 }
                             }

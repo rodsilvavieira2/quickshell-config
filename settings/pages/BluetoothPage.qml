@@ -23,12 +23,12 @@ PageScaffold {
     readonly property color heroCardColor: Design.ThemePalette.mix(
         Design.Tokens.color.primary,
         Design.Tokens.color.surfaceContainerHigh,
-        Design.ThemeSettings.isDark ? 0.68 : 0.88
+        Design.ThemeSettings.isDark ? 0.58 : 0.84
     )
     readonly property color heroCircleColor: Design.ThemePalette.mix(
         Design.Tokens.color.primary,
         Design.Tokens.color.surfaceContainerHighest,
-        Design.ThemeSettings.isDark ? 0.32 : 0.64
+        Design.ThemeSettings.isDark ? 0.18 : 0.56
     )
     readonly property color connectedCardColor: Design.ThemePalette.mix(
         Design.Tokens.color.primary,
@@ -38,7 +38,7 @@ PageScaffold {
     readonly property color pairChipColor: Design.ThemePalette.mix(
         Design.Tokens.color.primary,
         Design.Tokens.color.surfaceContainer,
-        Design.ThemeSettings.isDark ? 0.8 : 0.92
+        Design.ThemeSettings.isDark ? 0.72 : 0.88
     )
     readonly property color savedCardColor: Design.ThemePalette.mix(
         Design.Tokens.color.primary,
@@ -47,7 +47,7 @@ PageScaffold {
     )
     readonly property color heroBorderColor: Design.ThemePalette.withAlpha(
         Design.Tokens.color.primary,
-        Design.ThemeSettings.isDark ? 0.24 : 0.14
+        Design.ThemeSettings.isDark ? 0.34 : 0.18
     )
     readonly property color connectedBorderColor: Design.ThemePalette.withAlpha(
         Design.Tokens.color.primary,
@@ -55,7 +55,7 @@ PageScaffold {
     )
     readonly property color pairBorderColor: Design.ThemePalette.withAlpha(
         Design.Tokens.color.primary,
-        Design.ThemeSettings.isDark ? 0.3 : 0.18
+        Design.ThemeSettings.isDark ? 0.38 : 0.22
     )
     readonly property color savedBorderColor: Design.ThemePalette.withAlpha(
         Design.Tokens.color.primary,
@@ -69,7 +69,7 @@ PageScaffold {
     readonly property color heroSubtitleColor: Design.ThemePalette.mix(
         Design.Tokens.color.primary,
         Design.Tokens.color.text.primary,
-        Design.ThemeSettings.isDark ? 0.66 : 0.82
+        Design.ThemeSettings.isDark ? 0.78 : 0.88
     )
     readonly property color sectionLabelColor: Design.ThemePalette.withAlpha(
         Design.Tokens.color.text.primary,
@@ -259,9 +259,17 @@ PageScaffold {
             anchors.fill: parent
             radius: height / 2
             color: switchRoot.checked
-                ? Design.ThemePalette.withAlpha(Design.Tokens.color.primary, Design.ThemeSettings.isDark ? 0.46 : 0.3)
-                : Design.ThemePalette.withAlpha(Design.Tokens.color.surfaceContainerHighest, Design.ThemeSettings.isDark ? 0.92 : 1)
+                ? Design.ThemePalette.mix(
+                    Design.Tokens.color.primary,
+                    Design.Tokens.color.surfaceContainerHighest,
+                    Design.ThemeSettings.isDark ? 0.78 : 0.68
+                )
+                : Design.ThemePalette.withAlpha(Design.Tokens.color.surfaceContainerHighest, Design.ThemeSettings.isDark ? 0.98 : 1)
             opacity: switchRoot.enabled ? 1 : Design.Tokens.opacities.disabled
+            border.width: Design.Tokens.border.width.thin
+            border.color: switchRoot.checked
+                ? Design.ThemePalette.withAlpha(Design.Tokens.color.primaryForeground, Design.ThemeSettings.isDark ? 0.26 : 0.18)
+                : Design.ThemePalette.withAlpha(Design.Tokens.color.text.primary, Design.ThemeSettings.isDark ? 0.18 : 0.1)
 
             Rectangle {
                 width: 26
@@ -269,7 +277,18 @@ PageScaffold {
                 radius: 13
                 y: 4
                 x: switchRoot.checked ? parent.width - width - 4 : 4
-                color: switchRoot.checked ? Design.Tokens.color.primaryForeground : Design.Tokens.color.text.secondary
+                color: switchRoot.checked
+                    ? Design.ThemePalette.mix(
+                        Design.Tokens.color.primaryForeground,
+                        Design.Tokens.color.text.primary,
+                        Design.ThemeSettings.isDark ? 0.9 : 0.82
+                    )
+                    : Design.Tokens.color.text.secondary
+                border.width: Design.Tokens.border.width.thin
+                border.color: Design.ThemePalette.withAlpha(
+                    Design.Tokens.color.text.primary,
+                    Design.ThemeSettings.isDark ? 0.14 : 0.08
+                )
 
                 Behavior on x {
                     NumberAnimation {
@@ -296,10 +315,10 @@ PageScaffold {
 
         implicitHeight: 52
         implicitWidth: chipRow.implicitWidth + Design.Tokens.space.s24 * 2
-        radius: Design.Tokens.radius.pill
-        color: root.pairChipColor
+        radius: height / 2
+        color: Design.Tokens.color.surfaceContainerLow
         border.width: Design.Tokens.border.width.thin
-        border.color: root.pairBorderColor
+        border.color: Design.Tokens.color.outlineVariant
 
         Behavior on color {
             ColorAnimation {
@@ -361,15 +380,13 @@ PageScaffold {
         readonly property bool selected: root.selectedAddress !== "" && root.selectedAddress === (card.device && card.device.address ? card.device.address : "")
         readonly property color borderTone: selected
             ? Design.ThemePalette.withAlpha(Design.Tokens.color.primary, Design.ThemeSettings.isDark ? 0.5 : 0.34)
-            : connectedStyle
-                ? root.connectedBorderColor
-                : root.savedBorderColor
+            : Design.Tokens.color.outlineVariant
 
         Layout.fillWidth: true
         implicitHeight: 74
-        radius: 24
-        color: connectedStyle ? root.connectedCardColor : root.savedCardColor
-        border.width: Design.Tokens.border.width.thin
+        radius: 28
+        color: connectedStyle ? Design.Tokens.color.surfaceContainerHigh : "transparent"
+        border.width: connectedStyle ? 0 : Design.Tokens.border.width.thin
         border.color: borderTone
 
         Behavior on color {
@@ -406,7 +423,7 @@ PageScaffold {
                 DS.LucideIcon {
                     anchors.centerIn: parent
                     name: root.deviceIconName(card.device)
-                    color: connectedStyle ? Design.Tokens.color.text.primary : Design.ThemePalette.withAlpha(Design.Tokens.color.text.primary, 0.9)
+                    color: connectedStyle ? Design.Tokens.color.primary : Design.Tokens.color.text.secondary
                     iconSize: 20
                 }
             }
@@ -433,16 +450,16 @@ PageScaffold {
                     Rectangle {
                         visible: connectedStyle
                         Layout.alignment: Qt.AlignVCenter
-                        Layout.preferredWidth: 7
-                        Layout.preferredHeight: 7
+                        Layout.preferredWidth: 8
+                        Layout.preferredHeight: 8
                         radius: 4
-                        color: root.subtleAccentColor
+                        color: Design.Tokens.color.primary
                     }
 
                     Text {
                         Layout.fillWidth: true
                         text: root.statusLine(card.device)
-                        color: connectedStyle ? root.subtleAccentColor : Design.ThemePalette.withAlpha(Design.Tokens.color.text.secondary, 0.92)
+                        color: connectedStyle ? Design.Tokens.color.primary : Design.Tokens.color.text.secondary
                         font.family: Design.Tokens.font.family.caption
                         font.pixelSize: Design.Tokens.font.size.caption
                         font.weight: connectedStyle ? Design.Tokens.font.weight.medium : Design.Tokens.font.weight.regular
@@ -471,10 +488,10 @@ PageScaffold {
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: 108
-            radius: 30
-            color: root.heroCardColor
-            border.width: Design.Tokens.border.width.thin
-            border.color: root.heroBorderColor
+            radius: 28
+            color: Design.Tokens.color.surfaceContainerHigh
+            border.width: 0
+            border.color: "transparent"
 
             RowLayout {
                 anchors.fill: parent
@@ -487,7 +504,7 @@ PageScaffold {
                     Layout.preferredWidth: 58
                     Layout.preferredHeight: 58
                     radius: 29
-                    color: root.heroCircleColor
+                    color: Design.Tokens.color.surfaceContainerHighest
 
                     DS.LucideIcon {
                         anchors.centerIn: parent
@@ -517,7 +534,7 @@ PageScaffold {
                         text: root.adapter && root.adapter.enabled
                             ? `Discoverable as "${root.adapterLabel()}"`
                             : "Turn on Bluetooth to pair nearby devices."
-                        color: root.heroSubtitleColor
+                        color: Design.Tokens.color.text.secondary
                         font.family: Design.Tokens.font.family.body
                         font.pixelSize: Design.Tokens.font.size.body
                         wrapMode: Text.Wrap
@@ -561,7 +578,7 @@ PageScaffold {
 
             Text {
                 text: "CONNECTED"
-                color: root.sectionLabelColor
+                color: Design.Tokens.color.text.secondary
                 font.family: Design.Tokens.font.family.label
                 font.pixelSize: Design.Tokens.font.size.caption
                 font.weight: Design.Tokens.font.weight.semibold
@@ -586,7 +603,7 @@ PageScaffold {
 
             Text {
                 text: "SAVED DEVICES"
-                color: root.sectionLabelColor
+                color: Design.Tokens.color.text.secondary
                 font.family: Design.Tokens.font.family.label
                 font.pixelSize: Design.Tokens.font.size.caption
                 font.weight: Design.Tokens.font.weight.semibold
