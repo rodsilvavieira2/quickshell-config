@@ -17,8 +17,8 @@ Item {
     implicitWidth: trayContainer.implicitWidth
     implicitHeight: trayContainer.implicitHeight
 
-    property list<var> pinnedItems: TrayService.pinnedItems
-    property list<var> unpinnedItems: TrayService.unpinnedItems
+    property var pinnedItems: TrayService.pinnedItems
+    property var unpinnedItems: TrayService.unpinnedItems
     property var activeMenu: null
     property bool overflowOpen: false
 
@@ -74,9 +74,9 @@ Item {
         id: trayContainer
         anchors.centerIn: parent
         implicitWidth: trayRow.implicitWidth + 20
-        implicitHeight: 34
+        implicitHeight: Root.Config.chipHeight
         radius: 999
-        color: Qt.rgba(255/255, 255/255, 255/255, 0.10)
+        color: Root.Config.pillColor
 
         Row {
             id: trayRow
@@ -95,8 +95,10 @@ Item {
                 clickable: true
                 selected: root.overflowOpen
                 containerColor: "transparent"
-                hoverContainerColor: Qt.rgba(255/255, 255/255, 255/255, 0.14)
-                pressedContainerColor: Qt.rgba(255/255, 255/255, 255/255, 0.18)
+                hoverContainerColor: Root.Config.surface0
+                pressedContainerColor: Root.Config.surface1
+                selectedContainerColor: Root.Config.chipActiveColor
+                selectedContentColor: Root.Config.chipActiveForeground
                 borderColor: "transparent"
                 horizontalPadding: Math.max(6, Root.Config.chipPaddingHorizontal - 1)
                 verticalPadding: Root.Config.chipPaddingVertical

@@ -5,7 +5,6 @@ import Quickshell
 import Quickshell.Io
 
 import ".." as Root
-import "../shared/ui" as DS
 
 Item {
     id: root
@@ -13,8 +12,8 @@ Item {
     property string timeString: ""
     property string dateString: ""
 
-    implicitWidth: contentRow.implicitWidth
-    implicitHeight: contentRow.implicitHeight
+    implicitWidth: contentArea.implicitWidth
+    implicitHeight: contentArea.implicitHeight
 
     function updateDateTime() {
         const now = new Date();
@@ -46,9 +45,9 @@ Item {
             Text {
                 Layout.alignment: Qt.AlignVCenter
                 text: root.timeString
-                color: Qt.rgba(255/255, 255/255, 255/255, 0.92)
+                color: Root.Config.text
                 font.family: Root.Config.textFontFamily
-                font.pixelSize: 16
+                font.pixelSize: Root.Config.clockTimeFontSize
                 font.weight: 600
             }
 
@@ -57,15 +56,15 @@ Item {
                 implicitWidth: 4
                 implicitHeight: 4
                 radius: 2
-                color: Qt.rgba(255/255, 255/255, 255/255, 0.4)
+                color: Root.Config.dividerColor
             }
 
             Text {
                 Layout.alignment: Qt.AlignVCenter
                 text: root.dateString
-                color: Qt.rgba(255/255, 255/255, 255/255, 0.72)
+                color: Root.Config.subtext0
                 font.family: Root.Config.textFontFamily
-                font.pixelSize: 14
+                font.pixelSize: Root.Config.clockDateFontSize
                 font.weight: 500
             }
         }

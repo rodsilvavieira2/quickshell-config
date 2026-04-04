@@ -11,7 +11,7 @@ Item {
     property color backgroundColor: "transparent"
     property color hoverColor: Root.Config.surface0
     property bool clickable: true
-    property int buttonSize: Math.max(Root.Config.iconButtonSize + 8, Root.Config.barHeight - 10)
+    property int buttonSize: Root.Config.iconButtonSize
 
     signal clicked()
 

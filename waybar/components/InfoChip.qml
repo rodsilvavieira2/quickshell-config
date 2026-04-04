@@ -10,8 +10,8 @@ Item {
     property url iconSource: ""
     property string iconText: ""
     property string valueText: ""
-    property color iconColor: Qt.rgba(255/255, 255/255, 255/255, 0.90)
-    property color labelColor: Qt.rgba(255/255, 255/255, 255/255, 0.90)
+    property color iconColor: Root.Config.text
+    property color labelColor: Root.Config.text
     property color hoverIconColor: iconColor
     property color hoverLabelColor: labelColor
     property color backgroundColor: Root.Config.chipColor
@@ -27,7 +27,7 @@ Item {
     readonly property bool hovered: chip.hovered
 
     implicitWidth: chip.implicitWidth
-    implicitHeight: 34
+    implicitHeight: Root.Config.chipHeight
 
     DS.Chip {
         id: chip
@@ -77,7 +77,7 @@ Item {
                         text: root.iconText
                         color: chip.hovered && root.clickable ? root.hoverIconColor : root.iconColor
                         font.family: Root.Config.iconFontFamily
-                        font.pixelSize: Root.Config.iconSize
+                        font.pixelSize: Root.Config.iconSize - 1
                         font.bold: root.highlighted
                     }
                 }

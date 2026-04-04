@@ -17,8 +17,8 @@ MouseArea {
 
     hoverEnabled: true
     acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-    implicitWidth: 32
-    implicitHeight: 32
+    implicitWidth: Root.Config.trayItemSize
+    implicitHeight: Root.Config.trayItemSize
     cursorShape: Qt.PointingHandCursor
 
     onPressed: event => {
@@ -73,7 +73,7 @@ MouseArea {
         padding: 0
         radius: 999
         borderWidth: 0
-        backgroundColor: root.containsMouse ? Qt.rgba(255/255, 255/255, 255/255, 0.14) : "transparent"
+        backgroundColor: root.containsMouse ? Root.Config.surface0 : "transparent"
 
         IconImage {
             anchors.centerIn: parent

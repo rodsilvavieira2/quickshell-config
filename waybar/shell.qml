@@ -19,7 +19,7 @@ PanelWindow {
         right: true
     }
 
-    implicitHeight: Root.Config.barHeight + Root.Config.barBottomGap
+    implicitHeight: Root.Config.barTopMargin + Root.Config.barHeight + Root.Config.barBottomGap
     color: "transparent"
 
     Rectangle {

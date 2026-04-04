@@ -84,22 +84,14 @@ Item {
                 property var wsWindows: root.windowList.filter(w => w.workspace.id === wsId)
                 property bool hasWindows: wsWindows.length > 0
 
-                Layout.preferredWidth: 32
-                Layout.preferredHeight: 32
+                Layout.preferredWidth: Root.Config.workspaceChipSize
+                Layout.preferredHeight: Root.Config.workspaceChipSize
                 text: String(wsIndicator.wsId)
                 selected: isActive
                 occupied: hasWindows
                 clickable: true
 
-                chipRadius: 999
-                containerColor: "transparent"
-                hoverContainerColor: Qt.rgba(255/255, 255/255, 255/255, 0.05)
-                pressedContainerColor: Qt.rgba(255/255, 255/255, 255/255, 0.10)
-                selectedContainerColor: "#E9DDF7"
-                borderColor: Qt.rgba(255/255, 255/255, 255/255, 0.18)
-                selectedBorderColor: "transparent"
-                contentColor: Qt.rgba(255/255, 255/255, 255/255, 0.72)
-                selectedContentColor: "#2E2436"
+                chipRadius: Math.round(Root.Config.workspaceChipSize / 2)
                 contentFontSize: 14
 
                 onClicked: Hyprland.dispatch("workspace " + wsIndicator.wsId)

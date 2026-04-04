@@ -71,9 +71,9 @@ Item {
             height: btChip.height
             anchors.verticalCenter: parent.verticalCenter
 
-            readonly property bool btEnabled: Bluetooth.defaultAdapter?.enabled ?? false
+            readonly property bool btEnabled: Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.enabled
             readonly property var connectedDevice: {
-                const devices = Bluetooth.devices?.values ?? []
+                const devices = Bluetooth.devices && Bluetooth.devices.values ? Bluetooth.devices.values : []
                 return devices.find(d => d.connected)
             }
             readonly property bool btConnected: connectedDevice !== undefined
@@ -86,9 +86,9 @@ Item {
                         ? Qt.resolvedUrl("../assets/bluetooth.svg")
                         : Qt.resolvedUrl("../assets/bluetooth-off.svg"))
                 valueText: btItem.btConnected ? btItem.connectedDevice.name : ""
-                backgroundColor: btItem.btConnected ? Root.Config.mauve : Root.Config.chipColor
-                iconColor: btItem.btConnected ? Root.Config.crust : Root.Config.subtext0
-                labelColor: btItem.btConnected ? Root.Config.crust : Root.Config.subtext0
+                backgroundColor: btItem.btConnected ? Root.Config.secondaryContainer : Root.Config.chipColor
+                iconColor: btItem.btConnected ? Root.Config.secondaryContainerForeground : Root.Config.subtext0
+                labelColor: btItem.btConnected ? Root.Config.secondaryContainerForeground : Root.Config.subtext0
                 valueMaxWidth: 110
                 clickable: true
                 onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "openCategory", "bluetooth"])
@@ -98,9 +98,15 @@ Item {
         // Volume icon + label
         Item {
             id: volItem
-            readonly property bool muted: Pipewire.defaultAudioSink?.audio?.muted ?? false
+            readonly property bool muted: Pipewire.defaultAudioSink
+                && Pipewire.defaultAudioSink.audio
+                && Pipewire.defaultAudioSink.audio.muted
             readonly property real volume: {
-                const v = Pipewire.defaultAudioSink?.audio?.volume ?? 0
+                const v = Pipewire.defaultAudioSink
+                    && Pipewire.defaultAudioSink.audio
+                    && Pipewire.defaultAudioSink.audio.volume !== undefined
+                    ? Pipewire.defaultAudioSink.audio.volume
+                    : 0
                 return isNaN(v) ? 0 : v
             }
 
@@ -139,8 +145,8 @@ Item {
                     : Qt.resolvedUrl("../assets/wifi-off.svg")
                 valueText: root.networkConnected ? root.activeSsid : ""
                 backgroundColor: root.networkConnected ? Root.Config.chipActiveColor : Root.Config.chipColor
-                iconColor: root.networkConnected ? "#2E2436" : Qt.rgba(255/255, 255/255, 255/255, 0.9)
-                labelColor: root.networkConnected ? "#2E2436" : Qt.rgba(255/255, 255/255, 255/255, 0.9)
+                iconColor: root.networkConnected ? Root.Config.chipActiveForeground : Root.Config.subtext0
+                labelColor: root.networkConnected ? Root.Config.chipActiveForeground : Root.Config.subtext0
                 valueMaxWidth: 110
                 clickable: true
                 onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "openCategory", "network"])
