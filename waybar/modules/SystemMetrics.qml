@@ -1,47 +1,48 @@
-import QtQuick
-import QtQuick.Layouts
-
 import ".." as Root
 import "../components"
-import "../services"
+import "../services" as Services
+import QtQuick
+import QtQuick.Layouts
 
 Item {
     id: root
 
+    readonly property real memUsage: Services.SystemStatsService.memTotal > 0 ? Services.SystemStatsService.memUsed / Services.SystemStatsService.memTotal : 0
+    readonly property string cpuValue: Math.round(Services.SystemStatsService.cpuUsage * 100) + "%"
+    readonly property string memValue: Services.SystemStatsService.memTotal > 0 ? Math.round(root.memUsage * 100) + "%" : "--%"
+    readonly property string gpuValue: Math.round(Services.SystemStatsService.gpuUsage * 100) + "%"
+
     implicitWidth: metricsRow.implicitWidth
     implicitHeight: metricsRow.implicitHeight
 
-    readonly property string cpuValue: Math.round(SystemStatsService.cpuUsage * 100) + "%"
-    readonly property string memValue: SystemStatsService.memTotal > 0
-        ? Math.round((SystemStatsService.memUsed / SystemStatsService.memTotal) * 100) + "%"
-        : "--%"
-    readonly property string gpuValue: Math.round(SystemStatsService.gpuUsage * 100) + "%"
-
     RowLayout {
         id: metricsRow
+
         anchors.centerIn: parent
         spacing: Root.Config.pillSpacing
 
-        InfoChip {
-            iconText: "󰍛"
+        CircularMetricChip {
+            metricLabel: "CPU"
+            value: Services.SystemStatsService.cpuUsage
             valueText: root.cpuValue
-            iconColor: Root.Config.blue
-            labelColor: Root.Config.text
+            accentColor: Root.Config.blue
         }
 
-        InfoChip {
-            iconText: "󰘚"
+        CircularMetricChip {
+            metricLabel: "RAM"
+            value: root.memUsage
             valueText: root.memValue
-            iconColor: Root.Config.green
-            labelColor: Root.Config.text
+            accentColor: Root.Config.green
         }
 
-        InfoChip {
-            visible: SystemStatsService.hasGpu
-            iconText: "󰢮"
+        CircularMetricChip {
+            visible: Services.SystemStatsService.hasGpu
+            metricLabel: "GPU"
+            value: Services.SystemStatsService.gpuUsage
             valueText: root.gpuValue
-            iconColor: Root.Config.mauve
-            labelColor: Root.Config.text
+            accentColor: Root.Config.mauve
         }
+
     }
+
 }

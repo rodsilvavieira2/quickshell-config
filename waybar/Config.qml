@@ -1,7 +1,6 @@
-pragma Singleton
-
-import QtQuick
 import "./shared/designsystem"
+import QtQuick
+pragma Singleton
 
 QtObject {
     readonly property color base: Tokens.color.surface
@@ -27,7 +26,6 @@ QtObject {
     readonly property color teal: Tokens.color.info
     readonly property string textFontFamily: Tokens.font.family.label
     readonly property string iconFontFamily: Tokens.font.family.icon
-
     readonly property int radius: Tokens.radius.md
     readonly property int barRadius: Math.round(barHeight / 2)
     readonly property int barHeight: 56
@@ -47,18 +45,20 @@ QtObject {
     readonly property int iconButtonSize: 36
     readonly property int clockTimeFontSize: 15
     readonly property int clockDateFontSize: 13
-
     readonly property int chipRadius: 999
     readonly property int chipPaddingHorizontal: 12
     readonly property int chipPaddingVertical: 6
+    readonly property int metricChipPaddingHorizontal: 10
+    readonly property int metricChipSpacing: 8
+    readonly property int metricGaugeSize: 24
+    readonly property int metricGaugeThickness: 3
+    readonly property int metricGaugeLabelFontSize: 8
     readonly property color chipColor: Tokens.color.surfaceContainerHigh
     readonly property color chipHoverColor: Tokens.color.surfaceContainerHighest
     readonly property color chipActiveColor: Tokens.color.primaryContainer
     readonly property color chipActiveForeground: Tokens.color.primaryContainerForeground
     readonly property color activeAccent: Tokens.color.primary
-
     readonly property int workspaceCount: 5
-
     readonly property color barColor: Tokens.color.surface
     readonly property color barBorderColor: Tokens.color.outlineVariant
     readonly property color dividerColor: Tokens.color.outlineVariant

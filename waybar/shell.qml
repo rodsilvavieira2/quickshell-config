@@ -1,26 +1,25 @@
 //@ pragma UseQApplication
 
+import "." as Root
+import "./services"
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Wayland
 import Quickshell.Services.SystemTray
-
-import "." as Root
-import "./services"
+import Quickshell.Wayland
 import "modules" as Modules
 
 PanelWindow {
     id: root
+
+    implicitHeight: Root.Config.barTopMargin + Root.Config.barHeight + Root.Config.barBottomGap
+    color: "transparent"
 
     anchors {
         top: true
         left: true
         right: true
     }
-
-    implicitHeight: Root.Config.barTopMargin + Root.Config.barHeight + Root.Config.barBottomGap
-    color: "transparent"
 
     Rectangle {
         anchors.left: parent.left
@@ -44,12 +43,14 @@ PanelWindow {
 
             Modules.Workspaces {
                 id: workspacesContent
+
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
             }
 
             Modules.Clock {
                 id: clockContent
+
                 anchors.centerIn: parent
             }
 
@@ -64,23 +65,35 @@ PanelWindow {
                     visible: width > 0
                     clip: true
 
-                    Behavior on Layout.preferredWidth {
-                        NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
-                    }
-
                     Modules.MusicIndicator {
                         id: musicContent
+
                         anchors.centerIn: parent
+                    }
+
+                    Behavior on Layout.preferredWidth {
+                        NumberAnimation {
+                            duration: 260
+                            easing.type: Easing.OutCubic
+                        }
                     }
                 }
 
                 Modules.StatusIcons {
                     id: statusIconsContent
+
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
+                Modules.SystemMetrics {
+                    id: systemMetricsContent
+
                     Layout.alignment: Qt.AlignVCenter
                 }
 
                 RowLayout {
                     id: trayContent
+
                     visible: TrayService.visibleItems.length > 0
                     spacing: Root.Config.pillSpacing
 
@@ -97,6 +110,7 @@ PanelWindow {
 
                 Modules.ControlCenterLauncher {
                     id: launcherContent
+
                     Layout.alignment: Qt.AlignVCenter
                 }
             }
