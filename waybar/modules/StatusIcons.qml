@@ -91,7 +91,7 @@ Item {
                 labelColor: btItem.btConnected ? Root.Config.crust : Root.Config.subtext0
                 valueMaxWidth: 110
                 clickable: true
-                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "toggle"])
+                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "openCategory", "bluetooth"])
             }
         }
 
@@ -143,7 +143,7 @@ Item {
                 labelColor: root.networkConnected ? Root.Config.crust : Root.Config.subtext0
                 valueMaxWidth: 110
                 clickable: true
-                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "toggle"])
+                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "openCategory", "network"])
             }
         }
     }

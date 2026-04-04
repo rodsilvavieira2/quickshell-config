@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dynamic Amethyst - Appearance &amp; Wallpaper</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#540bda",
+          "background-light": "#f6f5f8",
+          "background-dark": "#0F0D13",
+          "surface-1": "#1D192B",
+          "surface-2": "#2B233C",
+          "text-main": "#E6E1E5",
+          "text-muted": "#CAC4D0",
+          "active-bg": "#4F378B"
+        },
+        fontFamily: {
+          "display": ["Plus Jakarta Sans"],
+          "body": ["Plus Jakarta Sans"]
+        },
+        borderRadius: {"DEFAULT": "1rem", "lg": "1.25rem", "xl": "1.75rem", "full": "9999px"},
+      },
+    },
+  }
+</script>
+<style>
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: theme('colors.background-dark');
+    color: theme('colors.text-main');
+  }
+</style>
+</head>
+<body class="flex h-screen overflow-hidden antialiased selection:bg-primary selection:text-white">
+<!-- Sidebar -->
+<aside class="w-[280px] bg-surface-1 flex-shrink-0 flex flex-col border-r border-surface-2/50 z-10 relative">
+<!-- Header -->
+<header class="h-[72px] flex items-center px-6 border-b border-surface-2/30">
+<div class="flex items-center gap-3 text-text-main">
+<div class="size-6 text-primary" data-icon="settings" data-size="24px" data-weight="fill">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+</div>
+<h2 class="text-xl font-bold tracking-tight">Settings</h2>
+</div>
+</header>
+<!-- Navigation -->
+<nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+<!-- Active Pill -->
+<a class="flex items-center gap-4 px-4 py-3 h-[48px] rounded-full bg-active-bg text-primary group transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface-1" href="#">
+<div class="size-6 flex items-center justify-center transition-transform group-active:scale-95" data-icon="palette" data-size="24px" data-weight="fill">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">palette</span>
+</div>
+<span class="font-medium text-[15px] flex-1">Appearance &amp; Wallpaper</span>
+</a>
+<!-- Inactive Links -->
+<a class="flex items-center gap-4 px-4 py-3 h-[48px] rounded-full text-text-muted hover:bg-surface-2 hover:text-text-main group transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface-1" href="#">
+<div class="size-6 flex items-center justify-center transition-transform group-active:scale-95" data-icon="wifi" data-size="24px">
+<span class="material-symbols-outlined">wifi</span>
+</div>
+<span class="font-medium text-[15px] flex-1">Network &amp; Internet</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 h-[48px] rounded-full text-text-muted hover:bg-surface-2 hover:text-text-main group transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface-1" href="#">
+<div class="size-6 flex items-center justify-center transition-transform group-active:scale-95" data-icon="bluetooth" data-size="24px">
+<span class="material-symbols-outlined">bluetooth</span>
+</div>
+<span class="font-medium text-[15px] flex-1">Bluetooth &amp; Devices</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 h-[48px] rounded-full text-text-muted hover:bg-surface-2 hover:text-text-main group transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface-1" href="#">
+<div class="size-6 flex items-center justify-center transition-transform group-active:scale-95" data-icon="volume_up" data-size="24px">
+<span class="material-symbols-outlined">volume_up</span>
+</div>
+<span class="font-medium text-[15px] flex-1">Audio &amp; Sound</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 h-[48px] rounded-full text-text-muted hover:bg-surface-2 hover:text-text-main group transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface-1" href="#">
+<div class="size-6 flex items-center justify-center transition-transform group-active:scale-95" data-icon="info" data-size="24px">
+<span class="material-symbols-outlined">info</span>
+</div>
+<span class="font-medium text-[15px] flex-1">System About</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto bg-background-dark relative">
+<div class="max-w-[960px] mx-auto px-10 py-12">
+<!-- Page Header -->
+<header class="mb-10">
+<h1 class="text-[32px] font-bold leading-tight mb-2 tracking-tight text-text-main">Appearance &amp; Wallpaper</h1>
+<p class="text-[15px] text-text-muted leading-relaxed">Manage system themes, colors, and visual identity.</p>
+</header>
+<div class="space-y-12">
+<!-- Theme Toggle Section -->
+<section class="bg-surface-1 rounded-xl p-6 border border-surface-2/30">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex-1">
+<h3 class="text-[20px] font-semibold text-text-main mb-1">System Theme</h3>
+<p class="text-[13px] text-text-muted">Choose your preferred visual style.</p>
+</div>
+<!-- Segmented Toggle -->
+<div class="bg-surface-2 rounded-full p-1 flex items-center shrink-0">
+<button class="h-[40px] px-6 rounded-full text-[14px] font-medium text-text-muted hover:text-text-main transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset">Light</button>
+<button class="h-[40px] px-6 rounded-full text-[14px] font-medium bg-active-bg text-primary shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset">Dark</button>
+<button class="h-[40px] px-6 rounded-full text-[14px] font-medium text-text-muted hover:text-text-main transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset">Auto</button>
+</div>
+</div>
+</section>
+<!-- Wallpaper Grid Section -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<div>
+<h3 class="text-[20px] font-semibold text-text-main mb-1">Wallpapers</h3>
+<p class="text-[13px] text-text-muted">Select a background for your desktop.</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Selected Wallpaper -->
+<button class="group relative aspect-video rounded-[20px] overflow-hidden focus:outline-none focus:ring-4 focus:ring-primary focus:ring-offset-4 focus:ring-offset-background-dark outline outline-2 outline-primary outline-offset-2 transition-all block w-full text-left cursor-pointer">
+<div class="absolute inset-0 bg-surface-2/20 mix-blend-overlay z-10 pointer-events-none"></div>
+<img alt="Abstract fluid shapes in deep purple, magenta, and blue hues with smooth gradients" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" data-alt="Abstract fluid shapes in deep purple, magenta, and blue hues with smooth gradients" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfm-oJ0U6BYiWrKwTZs1VOoBsK6Qloyaq_IUooO_QlxqvRjzy4OS52oZQwd4H_r4CLxKB9iiXHAyovtfDO8OXuLPUc6jVogRj2IqJduqDv7UGatKcTNKonYQQBdqReyxTBjujsZ1wowPLZwONO3yuzJYnC6GWiIT-OydPV-cNmIU8erUmLy0_JkKSaYLUrHpSnCV1FTRIOSAoqCD6875DoeFYQBToFrp5b8uCTQzKuUjqACKrZKHdwO-1vvlk_Ply3J_saaAm2sQ"/>
+<div class="absolute top-3 right-3 z-20 size-6 bg-primary rounded-full flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[16px] text-white" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</button>
+<!-- Standard Wallpapers -->
+<button class="group relative aspect-video rounded-[20px] overflow-hidden focus:outline-none focus:ring-4 focus:ring-primary focus:ring-offset-4 focus:ring-offset-background-dark border border-surface-2 transition-all block w-full text-left cursor-pointer">
+<div class="absolute inset-0 bg-surface-2/10 mix-blend-overlay z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<img alt="Minimalist 3D rendered landscape with smooth neon waves against a dark background" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" data-alt="Minimalist 3D rendered landscape with smooth neon waves against a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXZO2n2tgRg0PJbKyZAYMVKoBIJxFPYZNlH96veHFWPoCUQrkTV3F74DZaQhzCkKP7NmIu1OT0yzp3aUY8YheR_-4-jqEr3B_Um84WrB_8SKxzNsGKlDq9E2KNeKpYi9g1esgXm97x2lG_hNvcHAcsdauu6HSMHIKYCY200CWlxVqQaM4UmXZ8vT0wkUpPSSF8--NGe3G6C5VDLSGqzsm8xPxWxrFPzg5SQFO6D15OVy3hGtl5j-duXKfKIQJ7CpHedb6BIAi9SA"/>
+</button>
+<button class="group relative aspect-video rounded-[20px] overflow-hidden focus:outline-none focus:ring-4 focus:ring-primary focus:ring-offset-4 focus:ring-offset-background-dark border border-surface-2 transition-all block w-full text-left cursor-pointer">
+<div class="absolute inset-0 bg-surface-2/10 mix-blend-overlay z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<img alt="Dark moody geometric low poly abstract texture with subtle purple highlights" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" data-alt="Dark moody geometric low poly abstract texture with subtle purple highlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDU5buKh0V73NcZCPiqgrxqzVmMTyz5YZO24g8GtxTlDVyWHF5386a4u3DumRdp9HcB4P44dNJyOs4RyJcirVZdB7XwssqgZrB4q9pf42fV00EaKLtPJ0zz3zRO1TY6bfDRSc0zaN8JjVeRrtt6SvuPg6Talsdx6cYtChy3FTie7Gd0mSMfm50_rRwXb0lMGUhqV2qjwKCVeW9FRPjrmSzeWf-PC3FpfArgtn99OjW0dXjpy0dNGT70caegux6cAAhns3cbODqq1g"/>
+</button>
+<button class="group relative aspect-video rounded-[20px] overflow-hidden focus:outline-none focus:ring-4 focus:ring-primary focus:ring-offset-4 focus:ring-offset-background-dark border border-surface-2 transition-all block w-full text-left cursor-pointer">
+<div class="absolute inset-0 bg-surface-2/10 mix-blend-overlay z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<img alt="Vibrant liquid color swirl blending pink, purple, and deep blue on black canvas" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" data-alt="Vibrant liquid color swirl blending pink, purple, and deep blue on black canvas" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBouMBSSHxx3fjrmZS_I9QU1unlVt7C8TaOEqBp_S_4NISZDqTXw2Y4U0Cl_N0YHdlrFTIXfBcLGlPi4X5mbb3XwZq_hkdy0_SiIvPLs1QjKaEOU6DliK5SA-Ka9tq6IePuyZqx0q5obPBshD5VRi5W4wi1SQBTUBP59ma_mJBjUF1K5j8htwmjyqI5hTC_nXMgFyboVsRkZ7Nd0qppO3t_jhCvjZHa4xNNbPJv9FfQMQxOFqY6j8joxRSWeQxuckftFCy2CxzDqg"/>
+</button>
+<button class="group relative aspect-video rounded-[20px] overflow-hidden focus:outline-none focus:ring-4 focus:ring-primary focus:ring-offset-4 focus:ring-offset-background-dark border border-surface-2 transition-all block w-full text-left cursor-pointer">
+<div class="absolute inset-0 bg-surface-2/10 mix-blend-overlay z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<img alt="Deep space nebula with vibrant magenta and purple star clusters against dark void" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" data-alt="Deep space nebula with vibrant magenta and purple star clusters against dark void" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCemnydgd_ia7tATSNkzhmh9fRHL8bz_9gsE5e_dLzaR-sBPJMsF-ZKdjNvBo4Hda5NuDe1oUPIpxN2PFyKhlj-RjFmnO0za-ElIQgTp-RB6FjIAbgYXcITgTIHJdqaXqnRvNyJ6OZLNyzykA4tkoaJgy_sdSPMel71hpNzXiJjTUP4T1ktDGEeeNXQ4yPg_yhQM-AGBX28cwhESXAr5Y0aApmZYKpkoAiDgJIZ4fn7UoYPVDbtpMIU0r4xpcMr8R3qdtst1XpO5A"/>
+</button>
+<!-- Skeleton Loaders for Demonstration -->
+<div class="aspect-video rounded-[20px] bg-surface-2/40 animate-pulse border border-surface-2/50 relative overflow-hidden">
+<div class="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-surface-2/20 to-transparent"></div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<style>
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+</style>
+</body></html>

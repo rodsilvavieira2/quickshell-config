@@ -17,6 +17,7 @@ Item {
         const shared = {
             "x": Qt.resolvedUrl("../assets/lucide/x.svg"),
             "search": Qt.resolvedUrl("../assets/lucide/search.svg"),
+            "plus": Qt.resolvedUrl("../assets/lucide/plus.svg"),
             "chevron-left": Qt.resolvedUrl("../assets/lucide/chevron-left.svg"),
             "chevron-right": Qt.resolvedUrl("../assets/lucide/chevron-right.svg"),
             "palette": Qt.resolvedUrl("../assets/lucide/palette.svg"),

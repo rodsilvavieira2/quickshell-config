@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dynamic Amethyst - Bluetooth &amp; Devices</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#540bda",
+                        "primary-light": "#D0BCFF",
+                        "background-base": "#0F0D13",
+                        "surface-1": "#1D192B",
+                        "surface-2": "#2B233C",
+                        "text-main": "#E6E1E5",
+                        "text-muted": "#CAC4D0",
+                        "active-bg": "#4F378B",
+                        "background-light": "#f6f5f8",
+                        "background-dark": "#161022",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"],
+                        "outfit": ["Outfit", "sans-serif"],
+                        "jakarta": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem", 
+                        "lg": "2rem", 
+                        "xl": "3rem", 
+                        "full": "9999px",
+                        "panel": "28px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0F0D13;
+            color: #E6E1E5;
+        }
+        h1, h2, h3, .font-outfit {
+            font-family: 'Outfit', sans-serif;
+        }
+        /* Ripple effect animation for radar */
+        @keyframes radar-ripple {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+        .animate-radar::before, .animate-radar::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background-color: rgba(208, 188, 255, 0.4);
+            animation: radar-ripple 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+        }
+        .animate-radar::after {
+            animation-delay: -1s;
+        }
+        
+        /* Custom Toggle Switch Styles */
+        .peer:checked ~ .peer-checked\:bg-active-bg {
+            background-color: #4F378B;
+        }
+        .peer:checked ~ div .peer-checked\:translate-x-6 {
+            transform: translateX(1.5rem);
+        }
+        .peer:checked ~ div .peer-checked\:bg-primary-light {
+            background-color: #D0BCFF;
+        }
+        
+        /* Smooth transition for device list fading out */
+        .device-list-container {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        #bt-toggle:not(:checked) ~ .device-list-container {
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="flex min-h-screen overflow-hidden">
+<!-- Shared SideNavBar -->
+<div class="relative flex h-auto min-h-screen w-[280px] flex-col bg-surface-1 dark group/design-root overflow-x-hidden border-r border-surface-2 shrink-0">
+<div class="layout-container flex h-full grow flex-col py-8 px-4">
+<h1 class="text-text-main text-lg font-outfit font-semibold leading-normal px-4 mb-6">System Settings</h1>
+<div class="flex flex-col gap-2">
+<!-- Nav Item: Appearance & Wallpaper -->
+<div class="flex items-center gap-4 px-4 py-3 rounded-full hover:bg-surface-2 cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-text-muted" style="font-variation-settings: 'FILL' 0;">palette</span>
+<p class="text-text-muted text-sm font-jakarta font-medium leading-normal">Appearance &amp; Wallpaper</p>
+</div>
+<!-- Nav Item: Network & Internet -->
+<div class="flex items-center gap-4 px-4 py-3 rounded-full hover:bg-surface-2 cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-text-muted" style="font-variation-settings: 'FILL' 0;">wifi</span>
+<p class="text-text-muted text-sm font-jakarta font-medium leading-normal">Network &amp; Internet</p>
+</div>
+<!-- Nav Item: Bluetooth & Devices (Active) -->
+<div class="flex items-center gap-4 px-4 py-3 rounded-full bg-active-bg cursor-pointer">
+<span class="material-symbols-outlined text-primary-light" style="font-variation-settings: 'FILL' 1;">bluetooth</span>
+<p class="text-primary-light text-sm font-jakarta font-medium leading-normal">Bluetooth &amp; Devices</p>
+</div>
+<!-- Nav Item: Audio & Sound -->
+<div class="flex items-center gap-4 px-4 py-3 rounded-full hover:bg-surface-2 cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-text-muted" style="font-variation-settings: 'FILL' 0;">volume_up</span>
+<p class="text-text-muted text-sm font-jakarta font-medium leading-normal">Audio &amp; Sound</p>
+</div>
+<!-- Nav Item: System About -->
+<div class="flex items-center gap-4 px-4 py-3 rounded-full hover:bg-surface-2 cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-text-muted" style="font-variation-settings: 'FILL' 0;">info</span>
+<p class="text-text-muted text-sm font-jakarta font-medium leading-normal">System About</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-screen overflow-y-auto bg-background-base relative">
+<div class="max-w-4xl w-full mx-auto p-8 lg:p-12 pb-24">
+<!-- Header -->
+<header class="mb-10 flex items-center justify-between">
+<h2 class="text-[28px] font-outfit font-semibold text-text-main">Bluetooth &amp; Devices</h2>
+</header>
+<!-- Master Bluetooth Toggle Card -->
+<section class="bg-surface-1 rounded-panel p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative">
+<div class="flex items-center gap-5">
+<div class="w-14 h-14 rounded-full bg-surface-2 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary-light text-3xl" style="font-variation-settings: 'FILL' 1;">bluetooth</span>
+</div>
+<div>
+<h3 class="text-xl font-outfit font-medium text-text-main mb-1">Bluetooth</h3>
+<p class="text-sm font-jakarta text-text-muted">Discoverable as "Amethyst Desktop"</p>
+</div>
+</div>
+<!-- Material 3 Switch -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="bt-toggle" type="checkbox"/>
+<div class="w-14 h-8 bg-surface-2 peer-focus:outline-none rounded-full peer peer-checked:bg-active-bg transition-colors duration-300 relative">
+<div class="absolute top-[4px] left-[4px] w-6 h-6 bg-text-muted rounded-full transition-all duration-300 peer-checked:translate-x-6 peer-checked:bg-primary-light flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[16px] text-active-bg opacity-0 peer-checked:opacity-100 transition-opacity" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+</label>
+<!-- Sibling container that fades based on toggle -->
+<div class="device-list-container absolute top-full left-0 w-full mt-8">
+<!-- Add Device Action -->
+<div class="mb-8">
+<button class="flex items-center gap-3 bg-surface-1 hover:bg-surface-2 border border-surface-2 text-primary-light px-6 py-4 rounded-full transition-all duration-200 group w-full md:w-auto">
+<span class="material-symbols-outlined group-hover:rotate-90 transition-transform duration-300">add</span>
+<span class="font-jakarta font-semibold text-sm">Pair New Device</span>
+</button>
+</div>
+<!-- Connected Devices Group -->
+<div class="mb-10">
+<h4 class="text-sm font-jakarta font-medium text-text-muted mb-4 uppercase tracking-wider px-2">Connected</h4>
+<div class="flex flex-col gap-2">
+<!-- Connected Device 1 -->
+<div class="h-[72px] bg-surface-1 rounded-panel flex items-center px-6 group transition-colors hover:bg-surface-2 relative overflow-hidden">
+<div class="flex items-center gap-4 flex-1">
+<span class="material-symbols-outlined text-primary-light text-2xl" style="font-variation-settings: 'FILL' 1;">headphones</span>
+<div class="flex flex-col">
+<span class="font-outfit text-[16px] text-text-main font-medium">Sony WH-1000XM5</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-light animate-pulse"></span>
+<span class="font-jakarta text-[13px] text-primary-light font-medium">Connected • 85% battery</span>
+</div>
+</div>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity bg-surface-2 hover:bg-background-base text-text-main px-4 py-2 rounded-full text-sm font-jakarta font-medium border border-transparent hover:border-surface-2">
+                                    Disconnect
+                                </button>
+</div>
+<!-- Connected Device 2 -->
+<div class="h-[72px] bg-surface-1 rounded-panel flex items-center px-6 group transition-colors hover:bg-surface-2 relative overflow-hidden">
+<div class="flex items-center gap-4 flex-1">
+<span class="material-symbols-outlined text-primary-light text-2xl" style="font-variation-settings: 'FILL' 1;">keyboard</span>
+<div class="flex flex-col">
+<span class="font-outfit text-[16px] text-text-main font-medium">Keychron K8 Pro</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-light"></span>
+<span class="font-jakarta text-[13px] text-primary-light font-medium">Connected</span>
+</div>
+</div>
+</div>
+<button class="opacity-0 group-hover:opacity-100 transition-opacity bg-surface-2 hover:bg-background-base text-text-main px-4 py-2 rounded-full text-sm font-jakarta font-medium border border-transparent hover:border-surface-2">
+                                    Disconnect
+                                </button>
+</div>
+</div>
+</div>
+<!-- Saved Devices Group -->
+<div>
+<h4 class="text-sm font-jakarta font-medium text-text-muted mb-4 uppercase tracking-wider px-2">Saved Devices</h4>
+<div class="flex flex-col gap-2">
+<!-- Saved Device 1 -->
+<div class="h-[72px] bg-transparent border border-surface-2 rounded-panel flex items-center px-6 group transition-colors hover:bg-surface-1">
+<div class="flex items-center gap-4 flex-1">
+<span class="material-symbols-outlined text-text-muted text-2xl">mouse</span>
+<div class="flex flex-col">
+<span class="font-outfit text-[16px] text-text-main font-medium">MX Master 3S</span>
+<span class="font-jakarta text-[13px] text-text-muted">Not connected</span>
+</div>
+</div>
+<div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="bg-surface-2 hover:bg-background-base text-text-main w-10 h-10 rounded-full flex items-center justify-center border border-transparent hover:border-surface-2" title="Connect">
+<span class="material-symbols-outlined text-[20px]">link</span>
+</button>
+<button class="bg-surface-2 hover:bg-background-base text-text-muted hover:text-red-400 w-10 h-10 rounded-full flex items-center justify-center border border-transparent hover:border-surface-2" title="Forget device">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Saved Device 2 -->
+<div class="h-[72px] bg-transparent border border-surface-2 rounded-panel flex items-center px-6 group transition-colors hover:bg-surface-1">
+<div class="flex items-center gap-4 flex-1">
+<span class="material-symbols-outlined text-text-muted text-2xl">gamepad</span>
+<div class="flex flex-col">
+<span class="font-outfit text-[16px] text-text-main font-medium">Xbox Wireless Controller</span>
+<span class="font-jakarta text-[13px] text-text-muted">Not connected</span>
+</div>
+</div>
+<div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="bg-surface-2 hover:bg-background-base text-text-main w-10 h-10 rounded-full flex items-center justify-center border border-transparent hover:border-surface-2" title="Connect">
+<span class="material-symbols-outlined text-[20px]">link</span>
+</button>
+<button class="bg-surface-2 hover:bg-background-base text-text-muted hover:text-red-400 w-10 h-10 rounded-full flex items-center justify-center border border-transparent hover:border-surface-2" title="Forget device">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Saved Device 3 -->
+<div class="h-[72px] bg-transparent border border-surface-2 rounded-panel flex items-center px-6 group transition-colors hover:bg-surface-1">
+<div class="flex items-center gap-4 flex-1">
+<span class="material-symbols-outlined text-text-muted text-2xl">smartphone</span>
+<div class="flex flex-col">
+<span class="font-outfit text-[16px] text-text-main font-medium">Pixel 8 Pro</span>
+<span class="font-jakarta text-[13px] text-text-muted">Not connected</span>
+</div>
+</div>
+<div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="bg-surface-2 hover:bg-background-base text-text-main w-10 h-10 rounded-full flex items-center justify-center border border-transparent hover:border-surface-2" title="Connect">
+<span class="material-symbols-outlined text-[20px]">link</span>
+</button>
+<button class="bg-surface-2 hover:bg-background-base text-text-muted hover:text-red-400 w-10 h-10 rounded-full flex items-center justify-center border border-transparent hover:border-surface-2" title="Forget device">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div> <!-- End fading container -->
+</section>
+</div>
+<!-- Decorative subtle gradient for background depth -->
+<div class="fixed bottom-0 right-0 w-[800px] h-[800px] bg-primary rounded-full blur-[200px] opacity-[0.03] pointer-events-none -z-10 translate-x-1/4 translate-y-1/4"></div>
+</main>
+<!-- Modal for "Pair New Device" (Hidden by default, represented here structurally for context of the PRD requirements) -->
+<!-- Add 'hidden' class to root div to hide in static view -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-background-base/80 backdrop-blur-sm hidden" id="pairing-modal">
+<div class="bg-surface-1 w-full max-w-md rounded-[32px] p-8 shadow-2xl border border-surface-2 flex flex-col items-center text-center relative overflow-hidden">
+<button class="absolute top-6 right-6 text-text-muted hover:text-text-main bg-surface-2 rounded-full p-2 w-10 h-10 flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h3 class="text-2xl font-outfit font-semibold text-text-main mb-2 mt-4">Pair New Device</h3>
+<p class="text-sm font-jakarta text-text-muted mb-12">Make sure your device is in pairing mode.</p>
+<!-- Radar Animation -->
+<div class="relative w-32 h-32 flex items-center justify-center mb-12">
+<div class="absolute inset-0 rounded-full bg-active-bg flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-primary-light text-4xl">bluetooth_searching</span>
+</div>
+<div class="absolute inset-0 animate-radar z-0"></div>
+</div>
+<p class="text-sm font-jakarta text-primary-light animate-pulse">Searching for devices...</p>
+</div>
+</div>
+</body></html>

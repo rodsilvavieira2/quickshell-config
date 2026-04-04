@@ -25,10 +25,13 @@ PanelWindow {
     BrightnessService { id: brightnessService }
     NotificationService { id: notificationService }
 
-    Process {
-        id: settingsProcess
-        command: ["nm-connection-editor"]
-        onStarted: root.shouldShow = false
+    function openSettings(categoryId) {
+        root.shouldShow = false;
+        if (categoryId && categoryId.length > 0) {
+            Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "openCategory", categoryId]);
+        } else {
+            Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "open"]);
+        }
     }
 
     Process {
@@ -340,11 +343,13 @@ PanelWindow {
 
                             QuickToggle {
                                 iconName: "ethernet"
-                                label: "Ethernet"
-                                subLabel: networkService.activeEthernet ? "Connected" : "Disconnected"
-                                active: networkService.activeEthernet !== null
+                                label: "Network"
+                                subLabel: !networkService.networkingEnabled
+                                    ? "Disabled"
+                                    : (networkService.activeConnection || (networkService.activeEthernet ? "Connected" : "Idle"))
+                                active: networkService.networkingEnabled
                                 activeColor: Appearance.colors.info
-                                onClicked: settingsProcess.running = true
+                                onClicked: networkService.toggleNetworking(() => {})
                             }
 
                             QuickToggle {
@@ -375,7 +380,7 @@ PanelWindow {
                                 subLabel: "Connections and adapters"
                                 active: false
                                 activeColor: Appearance.colors.cSecondary
-                                onClicked: settingsProcess.running = true
+                                onClicked: root.openSettings("")
                             }
                         }
 

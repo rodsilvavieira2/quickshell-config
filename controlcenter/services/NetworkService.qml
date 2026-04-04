@@ -13,6 +13,7 @@ Item {
     property bool isConnected: false
     property string activeInterface: ""
     property string activeConnection: ""
+    property bool networkingEnabled: true
     property bool wifiEnabled: true
     readonly property bool scanning: rescanProc.running
     readonly property list<AccessPoint> networks: []
@@ -39,6 +40,7 @@ Item {
     readonly property string nmcliCommandConnection: "connection"
     readonly property string nmcliCommandWifi: "wifi"
     readonly property string nmcliCommandRadio: "radio"
+    readonly property string nmcliCommandNetworking: "networking"
     readonly property string deviceStatusFields: "DEVICE,TYPE,STATE,CONNECTION"
     readonly property string connectionListFields: "NAME,TYPE"
     readonly property string wirelessSsidField: "802-11-wireless.ssid"
@@ -186,6 +188,40 @@ Item {
             if (callback)
                 callback(result.output);
         });
+    }
+
+    function getNetworkingStatus(callback: var): void {
+        executeCommand([root.nmcliCommandNetworking], result => {
+            if (result.success) {
+                const enabled = result.output.trim() === "enabled";
+                root.networkingEnabled = enabled;
+                if (callback)
+                    callback(enabled);
+            } else if (callback) {
+                callback(root.networkingEnabled);
+            }
+        });
+    }
+
+    function enableNetworking(enabled: bool, callback: var): void {
+        const cmd = enabled ? "on" : "off";
+        executeCommand([root.nmcliCommandNetworking, cmd], result => {
+            if (result.success) {
+                getNetworkingStatus(() => {});
+                Qt.callLater(() => {
+                    getWifiStatus(() => {});
+                    refreshStatus(() => {});
+                    getNetworks(() => {});
+                    getEthernetInterfaces(() => {});
+                });
+            }
+            if (callback)
+                callback(result);
+        });
+    }
+
+    function toggleNetworking(callback: var): void {
+        enableNetworking(!root.networkingEnabled, callback);
     }
 
     function getWirelessInterfaces(callback: var): void {
@@ -619,35 +655,37 @@ Item {
     }
 
     function refreshStatus(callback: var): void {
-        getDeviceStatus(output => {
-            const lines = output.trim().split("\n");
-            let connected = false;
-            let activeIf = "";
-            let activeConn = "";
+        getNetworkingStatus(() => {
+            getDeviceStatus(output => {
+                const lines = output.trim().split("\n");
+                let connected = false;
+                let activeIf = "";
+                let activeConn = "";
 
-            for (const line of lines) {
-                const parts = line.split(":");
-                if (parts.length >= 4) {
-                    const state = parts[2] || "";
-                    if (isConnectedState(state)) {
-                        connected = true;
-                        activeIf = parts[0] || "";
-                        activeConn = parts[3] || "";
-                        break;
+                for (const line of lines) {
+                    const parts = line.split(":");
+                    if (parts.length >= 4) {
+                        const state = parts[2] || "";
+                        if (isConnectedState(state)) {
+                            connected = true;
+                            activeIf = parts[0] || "";
+                            activeConn = parts[3] || "";
+                            break;
+                        }
                     }
                 }
-            }
 
-            root.isConnected = connected;
-            root.activeInterface = activeIf;
-            root.activeConnection = activeConn;
+                root.isConnected = connected;
+                root.activeInterface = activeIf;
+                root.activeConnection = activeConn;
 
-            if (callback)
-                callback({
-                    connected,
-                    interface: activeIf,
-                    connection: activeConn
-                });
+                if (callback)
+                    callback({
+                        connected,
+                        interface: activeIf,
+                        connection: activeConn
+                    });
+            });
         });
     }
 
@@ -1283,6 +1321,7 @@ Item {
     }
 
     function refreshOnConnectionChange(): void {
+        getNetworkingStatus(() => {});
         getNetworks(networks => {
             const newActive = root.active;
 
@@ -1323,6 +1362,7 @@ Item {
     }
 
     Component.onCompleted: {
+        getNetworkingStatus(() => {});
         getWifiStatus(() => {});
         getNetworks(() => {});
         loadSavedConnections(() => {});

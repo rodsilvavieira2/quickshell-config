@@ -22,27 +22,33 @@ Item {
         anchors.fill: parent
         clip: true
         contentWidth: availableWidth
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
         Item {
             width: Math.max(scrollView.availableWidth, 1)
-            implicitHeight: pageColumn.implicitHeight
+            implicitHeight: pageColumn.implicitHeight + Design.Tokens.space.s32
 
             ColumnLayout {
                 id: pageColumn
                 anchors.top: parent.top
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: Math.min(parent.width, root.maxContentWidth)
-                spacing: Design.Tokens.space.s20
+                spacing: Design.Tokens.space.s24
+
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Design.Tokens.space.s4
+                }
 
                 ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: Design.Tokens.space.s4
+                    spacing: Design.Tokens.space.s8
 
                     Text {
                         text: root.title
                         color: Design.Tokens.color.text.primary
                         font.family: Design.Tokens.font.family.headline
-                        font.pixelSize: Design.Tokens.font.size.headline
+                        font.pixelSize: Math.round(Design.Tokens.font.size.headline * 1.25)
                         font.weight: Design.Tokens.font.weight.semibold
                     }
 
@@ -60,7 +66,7 @@ Item {
                 ColumnLayout {
                     id: contentColumn
                     Layout.fillWidth: true
-                    spacing: Design.Tokens.space.s16
+                    spacing: Design.Tokens.space.s24
                 }
 
                 Item {

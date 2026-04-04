@@ -7,6 +7,7 @@ import QtQuick.Window
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
+import Quickshell.Bluetooth
 
 import "./shared/designsystem" as Design
 import "./shared/ui" as DS
@@ -26,7 +27,11 @@ ShellRoot {
         gtkAdapter: gtkAdapter,
         wallpaperAdapter: wallpaperAdapter,
         displayAdapter: displayAdapter,
-        inputAdapter: inputAdapter
+        inputAdapter: inputAdapter,
+        audioService: audioService,
+        networkService: networkService,
+        bluetoothService: Bluetooth,
+        bluetoothSessionService: bluetoothSessionService
     })
     readonly property var currentCategory: registry.categoryById(selectedCategoryId)
     readonly property var searchResults: registry.search(searchQuery)
@@ -51,7 +56,7 @@ ShellRoot {
     }
 
     function openPage(categoryId, entryId) {
-        selectedCategoryId = categoryId || selectedCategoryId;
+        selectedCategoryId = registry.normalizeCategoryId(categoryId || selectedCategoryId);
         pendingEntryId = entryId || "";
         appOpen = true;
         centerWindow();
@@ -69,6 +74,18 @@ ShellRoot {
 
     ThemeAdapter {
         id: themeAdapter
+    }
+
+    NetworkService {
+        id: networkService
+    }
+
+    AudioService {
+        id: audioService
+    }
+
+    BluetoothSessionService {
+        id: bluetoothSessionService
     }
 
     GtkAppearanceAdapter {
@@ -105,6 +122,14 @@ ShellRoot {
 
         function open() {
             shellRoot.openPage(shellRoot.selectedCategoryId, "");
+        }
+
+        function openCategory(categoryId: string) {
+            shellRoot.openPage(categoryId, "");
+        }
+
+        function openEntry(categoryId: string, entryId: string) {
+            shellRoot.openPage(categoryId, entryId);
         }
 
         function close() {
@@ -193,6 +218,50 @@ ShellRoot {
                             width: parent.width
                             spacing: Design.Tokens.component.drawer.sectionGap
 
+                            DS.Card {
+                                Layout.fillWidth: true
+                                padding: Design.Tokens.space.s16
+
+                                RowLayout {
+                                    width: parent.width
+                                    spacing: Design.Tokens.space.s12
+
+                                    Rectangle {
+                                        Layout.preferredWidth: 44
+                                        Layout.preferredHeight: 44
+                                        radius: Design.Tokens.shape.full
+                                        color: Design.ThemePalette.withAlpha(Design.Tokens.color.primary, Design.ThemeSettings.isDark ? 0.24 : 0.18)
+
+                                        DS.LucideIcon {
+                                            anchors.centerIn: parent
+                                            name: "settings-2"
+                                            color: Design.Tokens.color.primary
+                                            iconSize: 20
+                                        }
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        spacing: Design.Tokens.space.s2
+
+                                        Text {
+                                            text: "Settings"
+                                            color: Design.Tokens.color.text.primary
+                                            font.family: Design.Tokens.font.family.title
+                                            font.pixelSize: Design.Tokens.font.size.title
+                                            font.weight: Design.Tokens.font.weight.semibold
+                                        }
+
+                                        Text {
+                                            text: "Material You desktop controls"
+                                            color: Design.Tokens.color.text.secondary
+                                            font.family: Design.Tokens.font.family.caption
+                                            font.pixelSize: Design.Tokens.font.size.caption
+                                        }
+                                    }
+                                }
+                            }
+
                             Repeater {
                                 model: registry.categories
 
@@ -208,6 +277,10 @@ ShellRoot {
                                         shellRoot.searchQuery = "";
                                     }
                                 }
+                            }
+
+                            Item {
+                                Layout.fillHeight: true
                             }
                         }
                     }
