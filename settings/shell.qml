@@ -219,7 +219,7 @@ ShellRoot {
                                         DS.LucideIcon {
                                             Layout.alignment: Qt.AlignVCenter
                                             name: modelData.iconName
-                                            color: shellRoot.selectedCategoryId === modelData.id ? Design.Tokens.color.onPrimary : Design.Tokens.color.text.secondary
+                                            color: shellRoot.selectedCategoryId === modelData.id ? Design.Tokens.color.primaryForeground : Design.Tokens.color.text.secondary
                                             iconSize: 20
                                         }
 
@@ -227,7 +227,7 @@ ShellRoot {
                                             Layout.fillWidth: true
                                             Layout.alignment: Qt.AlignVCenter
                                             text: modelData.label
-                                            color: shellRoot.selectedCategoryId === modelData.id ? Design.Tokens.color.onPrimary : Design.Tokens.color.text.secondary
+                                            color: shellRoot.selectedCategoryId === modelData.id ? Design.Tokens.color.primaryForeground : Design.Tokens.color.text.secondary
                                             font.family: Design.Tokens.font.family.label
                                             font.pixelSize: Design.Tokens.font.size.body
                                             font.weight: shellRoot.selectedCategoryId === modelData.id ? Design.Tokens.font.weight.semibold : Design.Tokens.font.weight.medium
@@ -245,7 +245,7 @@ ShellRoot {
                                         }
                                         Rectangle {
                                             anchors.fill: parent
-                                            radius: parent.radius
+                                            radius: height / 2
                                             color: Design.Tokens.color.text.primary
                                             opacity: parent.containsMouse && shellRoot.selectedCategoryId !== modelData.id ? 0.08 : 0
                                         }
