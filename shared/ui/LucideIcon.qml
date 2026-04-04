@@ -8,7 +8,8 @@ Item {
     property url source: ""
     property color color: "white"
     property int iconSize: 16
-    property real opticalScale: 1.14
+    property real opticalScale: 1.0
+    readonly property int renderedIconSize: Math.max(1, Math.round(root.iconSize * root.opticalScale))
 
     function resolvedSource() {
         if (root.source.toString().length > 0)
@@ -75,17 +76,17 @@ Item {
     Item {
         id: iconFrame
         anchors.centerIn: parent
-        width: root.iconSize * root.opticalScale
-        height: root.iconSize * root.opticalScale
+        width: root.renderedIconSize
+        height: root.renderedIconSize
 
         Image {
             id: iconSource
             anchors.fill: parent
             source: root.effectiveSource
-            sourceSize: Qt.size(root.iconSize * root.opticalScale * 2, root.iconSize * root.opticalScale * 2)
+            sourceSize: Qt.size(root.renderedIconSize, root.renderedIconSize)
             fillMode: Image.PreserveAspectFit
-            smooth: true
-            mipmap: true
+            smooth: false
+            mipmap: false
             visible: false
         }
     }

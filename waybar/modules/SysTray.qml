@@ -76,7 +76,7 @@ Item {
         implicitWidth: trayRow.implicitWidth + 20
         implicitHeight: Root.Config.chipHeight
         radius: 999
-        color: Root.Config.pillColor
+        color: Root.Config.chipColor
 
         Row {
             id: trayRow
