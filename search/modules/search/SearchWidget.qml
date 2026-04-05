@@ -4,7 +4,6 @@ import QtQuick.Controls
 import "../../common"
 import "../../common/widgets"
 import "../../services"
-import "../../shared/designsystem" as Design
 
 Item {
     id: root
@@ -35,10 +34,12 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
+            Layout.topMargin: 10
+            Layout.bottomMargin: 8
             implicitHeight: 1
-            color: Design.Tokens.color.outlineVariant
+            color: Appearance.colors.colSeparator
             visible: LauncherSearch.results.length > 0
-            opacity: 0.6
+            opacity: 0.72
         }
 
         SearchResults {

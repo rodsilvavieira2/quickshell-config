@@ -50,14 +50,21 @@ Scope {
 
         DS.Panel {
             id: panel
-            width: 640
-            height: LauncherSearch.results.length > 0 ? 460 : 76
+            width: 556
+            height: LauncherSearch.results.length > 0 ? 392 : 72
             anchors.centerIn: parent
-            anchors.verticalCenterOffset: -60
-            padding: 0
-            clipContent: true
-            backgroundColor: Design.Tokens.color.surfaceContainer
-            borderColor: Design.Tokens.color.outlineVariant
+            anchors.verticalCenterOffset: -42
+            padding: 12
+            clipContent: false
+            backgroundColor: Design.ThemePalette.withAlpha(
+                Design.Tokens.color.surfaceContainer,
+                Design.ThemeSettings.isDark ? 0.94 : 0.90
+            )
+            borderColor: Design.ThemePalette.withAlpha(
+                Design.Tokens.color.outlineVariant,
+                Design.ThemeSettings.isDark ? 0.82 : 0.72
+            )
+            shadowLevel: Design.Tokens.shadow.lg
 
             Behavior on height {
                 NumberAnimation { duration: 200; easing.type: Easing.OutCubic }

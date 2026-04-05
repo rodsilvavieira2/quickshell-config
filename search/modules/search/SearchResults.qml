@@ -8,11 +8,11 @@ import "../../services"
 ListView {
     id: root
     clip: true
-    spacing: 2
-    topMargin: 8
-    bottomMargin: 8
-    leftMargin: 8
-    rightMargin: 8
+    spacing: 4
+    topMargin: 2
+    bottomMargin: 4
+    leftMargin: 0
+    rightMargin: 0
     model: LauncherSearch.results
     currentIndex: 0
     boundsBehavior: Flickable.StopAtBounds
@@ -23,17 +23,17 @@ ListView {
         required property int index
         entry: modelData
         active: ListView.isCurrentItem
-        width: ListView.view.width - ListView.view.leftMargin - ListView.view.rightMargin
-        x: ListView.view.leftMargin
+        itemIndex: index
+        width: ListView.view.width
     }
 
     ScrollBar.vertical: ScrollBar {
         policy: ScrollBar.AsNeeded
         contentItem: Rectangle {
-            implicitWidth: 3
-            radius: 1.5
+            implicitWidth: 4
+            radius: 2
             color: Appearance.colors.colLayer2Hover
-            opacity: 0.7
+            opacity: 0.48
         }
     }
 }
