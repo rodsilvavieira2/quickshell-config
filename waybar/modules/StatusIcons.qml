@@ -91,7 +91,7 @@ Item {
                 labelColor: btItem.btConnected ? Root.Config.secondaryContainerForeground : Root.Config.subtext0
                 valueMaxWidth: 110
                 clickable: true
-                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "openCategory", "bluetooth"])
+                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "bluetooth", "call", "bluetooth", "open"])
             }
         }
 
