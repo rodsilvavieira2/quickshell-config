@@ -115,8 +115,8 @@ ShellRoot {
         FocusScope {
             id: contentFrame
             anchors.centerIn: parent
-            width: Math.min(1352, Math.max(1196, (window.screen ? window.screen.width : 1280) - 24))
-            height: Math.min(988, Math.max(884, (window.screen ? window.screen.height : 900) - 24))
+            width: Math.min(1149, Math.max(1017, (window.screen ? window.screen.width : 1280) - 60))
+            height: Math.min(840, Math.max(751, (window.screen ? window.screen.height : 900) - 60))
             opacity: shellRoot.panelOpen ? 1 : 0
             scale: shellRoot.panelOpen ? 1 : 0.985
             focus: shellRoot.panelOpen
@@ -1097,243 +1097,364 @@ ShellRoot {
 
                 Item {
                     id: detailContent
+                    readonly property var selectedDevice: bluetoothService.selectedDevice
+                    readonly property bool hasBattery: selectedDevice && selectedDevice.batteryAvailable
+                    readonly property bool isSaved: selectedDevice && (selectedDevice.paired || selectedDevice.bonded || selectedDevice.trusted)
+                    readonly property string heroMetricValue: hasBattery
+                        ? bluetoothService.batteryPercent(selectedDevice)
+                        : (selectedDevice && selectedDevice.connected ? "Active" : "Standby")
+                    readonly property string heroMetricLabel: hasBattery ? "Battery remaining" : "Connection state"
+                    readonly property string heroMetricBadge: selectedDevice && selectedDevice.connected ? "ACTIVE" : "SAVED"
                     width: parent.width
-                    height: detailColumn.implicitHeight + 120
+                    height: detailColumn.implicitHeight + 104
 
                     ColumnLayout {
                         id: detailColumn
-                        width: Math.min(parent.width - 112, 760)
+                        width: Math.min(parent.width - 88, 920)
                         anchors.top: parent.top
-                        anchors.topMargin: 82
+                        anchors.topMargin: 52
                         anchors.horizontalCenter: parent.horizontalCenter
-                        spacing: 18
+                        spacing: 20
 
-                        Rectangle {
+                        RowLayout {
                             Layout.fillWidth: true
-                            implicitHeight: heroColumn.implicitHeight + 40
-                            radius: 34
-                            color: shellRoot.cardTone
-                            border.width: 1
-                            border.color: shellRoot.borderTone
+                            spacing: 20
 
-                            ColumnLayout {
-                                id: heroColumn
-                                anchors.fill: parent
-                                anchors.margins: 20
-                                spacing: 18
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignTop
+                                implicitHeight: heroInfoRow.implicitHeight
 
                                 RowLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 18
+                                    id: heroInfoRow
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    spacing: 20
 
                                     Rectangle {
-                                        width: 108
-                                        height: 108
+                                        Layout.preferredWidth: 112
+                                        Layout.preferredHeight: 112
                                         radius: 32
                                         color: shellRoot.highlightTone
+                                        border.width: 1
+                                        border.color: shellRoot.borderTone
 
                                         DeviceGlyph {
                                             anchors.centerIn: parent
-                                            size: 58
-                                            device: bluetoothService.selectedDevice
-                                            typeKey: bluetoothService.typeKey(bluetoothService.selectedDevice)
-                                            containerColor: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.24)
-                                            contentColor: shellRoot.textPrimaryTone
+                                            size: 64
+                                            device: detailContent.selectedDevice
+                                            typeKey: bluetoothService.typeKey(detailContent.selectedDevice)
+                                            containerColor: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.18)
+                                            contentColor: shellRoot.accentTone
                                         }
                                     }
 
                                     ColumnLayout {
                                         Layout.fillWidth: true
                                         Layout.alignment: Qt.AlignVCenter
-                                        spacing: 6
+                                        spacing: 8
+
+                                        Rectangle {
+                                            implicitWidth: heroStatusLabel.implicitWidth + 28
+                                            implicitHeight: 30
+                                            radius: 15
+                                            color: Design.ThemePalette.withAlpha(bluetoothService.statusColor(detailContent.selectedDevice), 0.18)
+                                            border.width: 1
+                                            border.color: Design.ThemePalette.withAlpha(bluetoothService.statusColor(detailContent.selectedDevice), 0.28)
+
+                                            Text {
+                                                id: heroStatusLabel
+                                                anchors.centerIn: parent
+                                                text: bluetoothService.baseStatusText(detailContent.selectedDevice, true).toUpperCase()
+                                                color: bluetoothService.statusColor(detailContent.selectedDevice)
+                                                font.family: "JetBrainsMono Nerd Font"
+                                                font.pixelSize: 11
+                                                font.weight: Font.Bold
+                                            }
+                                        }
 
                                         Text {
                                             Layout.fillWidth: true
-                                            text: bluetoothService.deviceLabel(bluetoothService.selectedDevice)
+                                            text: bluetoothService.deviceLabel(detailContent.selectedDevice)
                                             color: shellRoot.textPrimaryTone
                                             font.family: "JetBrainsMono Nerd Font"
-                                            font.pixelSize: 28
+                                            font.pixelSize: 38
                                             font.weight: Font.Bold
                                             elide: Text.ElideRight
                                         }
 
                                         Text {
                                             Layout.fillWidth: true
-                                            text: bluetoothService.summaryText(bluetoothService.selectedDevice)
+                                            text: bluetoothService.summaryText(detailContent.selectedDevice)
                                             color: shellRoot.textSecondaryTone
                                             font.family: "JetBrainsMono Nerd Font"
                                             font.pixelSize: 13
                                             wrapMode: Text.Wrap
                                         }
-
-                                        RowLayout {
-                                            Layout.fillWidth: true
-                                            spacing: 8
-
-                                            Rectangle {
-                                                implicitWidth: statusLabel.implicitWidth + 24
-                                                implicitHeight: 30
-                                                radius: 15
-                                                color: Design.ThemePalette.withAlpha(bluetoothService.statusColor(bluetoothService.selectedDevice), 0.22)
-                                                border.width: 1
-                                                border.color: Design.ThemePalette.withAlpha(bluetoothService.statusColor(bluetoothService.selectedDevice), 0.34)
-
-                                                Text {
-                                                    id: statusLabel
-                                                    anchors.centerIn: parent
-                                                    text: bluetoothService.baseStatusText(bluetoothService.selectedDevice, true)
-                                                    color: shellRoot.textPrimaryTone
-                                                    font.family: "JetBrainsMono Nerd Font"
-                                                    font.pixelSize: 12
-                                                    font.weight: Font.DemiBold
-                                                }
-                                            }
-
-                                            Rectangle {
-                                                visible: bluetoothService.selectedDevice && bluetoothService.selectedDevice.batteryAvailable
-                                                implicitWidth: batteryLabel.implicitWidth + 24
-                                                implicitHeight: 30
-                                                radius: 15
-                                                color: shellRoot.highlightTone
-                                                border.width: 1
-                                                border.color: shellRoot.borderTone
-
-                                                Text {
-                                                    id: batteryLabel
-                                                    anchors.centerIn: parent
-                                                    text: bluetoothService.batteryPercent(bluetoothService.selectedDevice)
-                                                    color: shellRoot.textPrimaryTone
-                                                    font.family: "JetBrainsMono Nerd Font"
-                                                    font.pixelSize: 12
-                                                    font.weight: Font.DemiBold
-                                                }
-                                            }
-
-                                            Rectangle {
-                                                implicitWidth: typeLabel.implicitWidth + 24
-                                                implicitHeight: 30
-                                                radius: 15
-                                                color: shellRoot.highlightTone
-                                                border.width: 1
-                                                border.color: shellRoot.borderTone
-
-                                                Text {
-                                                    id: typeLabel
-                                                    anchors.centerIn: parent
-                                                    text: bluetoothService.typeLabel(bluetoothService.selectedDevice)
-                                                    color: shellRoot.textSecondaryTone
-                                                    font.family: "JetBrainsMono Nerd Font"
-                                                    font.pixelSize: 12
-                                                    font.weight: Font.Medium
-                                                }
-                                            }
-                                        }
                                     }
                                 }
+                            }
 
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    height: 1
-                                    color: shellRoot.separatorTone
+                            Rectangle {
+                                Layout.preferredWidth: 240
+                                Layout.preferredHeight: 136
+                                Layout.alignment: Qt.AlignTop
+                                radius: 28
+                                color: Design.ThemePalette.withAlpha(shellRoot.accentToneMuted, 0.22)
+                                border.width: 1
+                                border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.12)
+
+                                ColumnLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 18
+                                    spacing: 6
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+
+                                        DS.LucideIcon {
+                                            name: detailContent.hasBattery ? "bluetooth-connected" : "bluetooth"
+                                            iconSize: 16
+                                            color: shellRoot.accentTone
+                                        }
+
+                                        Item { Layout.fillWidth: true }
+
+                                        Text {
+                                            text: detailContent.heroMetricBadge
+                                            color: detailContent.selectedDevice && detailContent.selectedDevice.connected
+                                                ? Design.Tokens.color.success
+                                                : shellRoot.accentTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 12
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+
+                                    Item { Layout.fillHeight: true }
+
+                                    Text {
+                                        text: detailContent.heroMetricValue
+                                        color: shellRoot.textPrimaryTone
+                                        font.family: "JetBrainsMono Nerd Font"
+                                        font.pixelSize: 34
+                                        font.weight: Font.Bold
+                                    }
+
+                                    Text {
+                                        text: detailContent.heroMetricLabel
+                                        color: shellRoot.textSecondaryTone
+                                        font.family: "JetBrainsMono Nerd Font"
+                                        font.pixelSize: 12
+                                    }
                                 }
+                            }
+                        }
+
+                        GridLayout {
+                            Layout.fillWidth: true
+                            columns: width > 760 ? 2 : 1
+                            columnSpacing: 18
+                            rowSpacing: 18
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 104
+                                radius: 28
+                                color: shellRoot.cardToneSoft
+                                border.width: 1
+                                border.color: shellRoot.borderTone
 
                                 RowLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 12
+                                    anchors.fill: parent
+                                    anchors.margins: 18
+                                    spacing: 14
 
                                     Rectangle {
-                                        Layout.fillWidth: true
-                                        Layout.preferredHeight: 74
-                                        radius: 24
-                                        color: shellRoot.cardToneSoft
-                                        border.width: 1
-                                        border.color: shellRoot.borderTone
+                                        Layout.preferredWidth: 46
+                                        Layout.preferredHeight: 46
+                                        radius: 23
+                                        color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.08)
 
-                                        Column {
-                                            anchors.left: parent.left
-                                            anchors.leftMargin: 18
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            spacing: 4
-
-                                            Text {
-                                                text: "Last Update"
-                                                color: shellRoot.textMutedTone
-                                                font.family: "JetBrainsMono Nerd Font"
-                                                font.pixelSize: 11
-                                                font.weight: Font.Medium
-                                            }
-
-                                            Text {
-                                                text: bluetoothService.relativeTime(bluetoothService.lastUpdated(bluetoothService.selectedDevice))
-                                                color: shellRoot.textPrimaryTone
-                                                font.family: "JetBrainsMono Nerd Font"
-                                                font.pixelSize: 16
-                                                font.weight: Font.DemiBold
-                                            }
+                                        DS.LucideIcon {
+                                            anchors.centerIn: parent
+                                            name: "check"
+                                            iconSize: 18
+                                            color: shellRoot.accentTone
                                         }
                                     }
 
-                                    Rectangle {
+                                    ColumnLayout {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 74
-                                        radius: 24
-                                        color: shellRoot.cardToneSoft
-                                        border.width: 1
-                                        border.color: shellRoot.borderTone
+                                        Layout.alignment: Qt.AlignVCenter
+                                        spacing: 3
 
-                                        Column {
-                                            anchors.left: parent.left
-                                            anchors.leftMargin: 18
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            spacing: 4
+                                        Text {
+                                            text: "Status"
+                                            color: shellRoot.textSecondaryTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 12
+                                        }
 
-                                            Text {
-                                                text: "Connection"
-                                                color: shellRoot.textMutedTone
-                                                font.family: "JetBrainsMono Nerd Font"
-                                                font.pixelSize: 11
-                                                font.weight: Font.Medium
-                                            }
+                                        Text {
+                                            text: detailContent.isSaved ? "Saved" : bluetoothService.baseStatusText(detailContent.selectedDevice, true)
+                                            color: shellRoot.textPrimaryTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 17
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                }
+                            }
 
-                                            Text {
-                                                text: bluetoothService.selectedDevice.connected ? "Active" : "Standby"
-                                                color: shellRoot.textPrimaryTone
-                                                font.family: "JetBrainsMono Nerd Font"
-                                                font.pixelSize: 16
-                                                font.weight: Font.DemiBold
-                                            }
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 104
+                                radius: 28
+                                color: shellRoot.cardToneSoft
+                                border.width: 1
+                                border.color: shellRoot.borderTone
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 18
+                                    spacing: 14
+
+                                    Rectangle {
+                                        Layout.preferredWidth: 46
+                                        Layout.preferredHeight: 46
+                                        radius: 23
+                                        color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.08)
+
+                                        DS.LucideIcon {
+                                            anchors.centerIn: parent
+                                            name: "music-4"
+                                            iconSize: 18
+                                            color: shellRoot.accentTone
                                         }
                                     }
 
-                                    Rectangle {
+                                    ColumnLayout {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 74
-                                        radius: 24
-                                        color: shellRoot.cardToneSoft
-                                        border.width: 1
-                                        border.color: shellRoot.borderTone
+                                        Layout.alignment: Qt.AlignVCenter
+                                        spacing: 3
 
-                                        Column {
-                                            anchors.left: parent.left
-                                            anchors.leftMargin: 18
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            spacing: 4
+                                        Text {
+                                            text: "Device Type"
+                                            color: shellRoot.textSecondaryTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 12
+                                        }
 
-                                            Text {
-                                                text: "Saved"
-                                                color: shellRoot.textMutedTone
-                                                font.family: "JetBrainsMono Nerd Font"
-                                                font.pixelSize: 11
-                                                font.weight: Font.Medium
-                                            }
+                                        Text {
+                                            text: bluetoothService.typeLabel(detailContent.selectedDevice)
+                                            color: shellRoot.textPrimaryTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 17
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                }
+                            }
 
-                                            Text {
-                                                text: (bluetoothService.selectedDevice.paired || bluetoothService.selectedDevice.bonded || bluetoothService.selectedDevice.trusted) ? "Yes" : "No"
-                                                color: shellRoot.textPrimaryTone
-                                                font.family: "JetBrainsMono Nerd Font"
-                                                font.pixelSize: 16
-                                                font.weight: Font.DemiBold
-                                            }
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 104
+                                radius: 28
+                                color: shellRoot.cardToneSoft
+                                border.width: 1
+                                border.color: shellRoot.borderTone
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 18
+                                    spacing: 14
+
+                                    Rectangle {
+                                        Layout.preferredWidth: 46
+                                        Layout.preferredHeight: 46
+                                        radius: 23
+                                        color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.08)
+
+                                        DS.LucideIcon {
+                                            anchors.centerIn: parent
+                                            name: "bluetooth"
+                                            iconSize: 18
+                                            color: shellRoot.accentTone
+                                        }
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        Layout.alignment: Qt.AlignVCenter
+                                        spacing: 3
+
+                                        Text {
+                                            text: "MAC Address"
+                                            color: shellRoot.textSecondaryTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 12
+                                        }
+
+                                        Text {
+                                            text: detailContent.selectedDevice && detailContent.selectedDevice.address
+                                                ? detailContent.selectedDevice.address
+                                                : "Unavailable"
+                                            color: shellRoot.textPrimaryTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 17
+                                            font.weight: Font.Bold
+                                            wrapMode: Text.WrapAnywhere
+                                        }
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 104
+                                radius: 28
+                                color: shellRoot.cardToneSoft
+                                border.width: 1
+                                border.color: shellRoot.borderTone
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: 18
+                                    spacing: 14
+
+                                    Rectangle {
+                                        Layout.preferredWidth: 46
+                                        Layout.preferredHeight: 46
+                                        radius: 23
+                                        color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.08)
+
+                                        DS.LucideIcon {
+                                            anchors.centerIn: parent
+                                            name: "wifi"
+                                            iconSize: 18
+                                            color: shellRoot.accentTone
+                                        }
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        Layout.alignment: Qt.AlignVCenter
+                                        spacing: 3
+
+                                        Text {
+                                            text: "Last Update"
+                                            color: shellRoot.textSecondaryTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 12
+                                        }
+
+                                        Text {
+                                            text: bluetoothService.relativeTime(bluetoothService.lastUpdated(detailContent.selectedDevice))
+                                            color: shellRoot.textPrimaryTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 17
+                                            font.weight: Font.Bold
                                         }
                                     }
                                 }
@@ -1363,7 +1484,7 @@ ShellRoot {
                                 }
 
                                 Repeater {
-                                    model: bluetoothService.detailRows(bluetoothService.selectedDevice)
+                                    model: bluetoothService.detailRows(detailContent.selectedDevice)
 
                                     delegate: RowLayout {
                                         required property var modelData
@@ -1371,7 +1492,7 @@ ShellRoot {
                                         spacing: 18
 
                                         Text {
-                                            Layout.preferredWidth: 136
+                                            Layout.preferredWidth: 160
                                             text: modelData.label
                                             color: shellRoot.textMutedTone
                                             font.family: "JetBrainsMono Nerd Font"
@@ -1394,7 +1515,7 @@ ShellRoot {
 
                         Rectangle {
                             Layout.fillWidth: true
-                            visible: bluetoothService.capabilityRows(bluetoothService.selectedDevice).length > 0
+                            visible: bluetoothService.capabilityRows(detailContent.selectedDevice).length > 0
                             implicitHeight: capabilityColumn.implicitHeight + 40
                             radius: 30
                             color: shellRoot.cardToneSoft
@@ -1420,7 +1541,7 @@ ShellRoot {
                                     spacing: 10
 
                                     Repeater {
-                                        model: bluetoothService.capabilityRows(bluetoothService.selectedDevice)
+                                        model: bluetoothService.capabilityRows(detailContent.selectedDevice)
 
                                         delegate: Rectangle {
                                             required property string modelData
@@ -1474,7 +1595,7 @@ ShellRoot {
                                     spacing: 10
 
                                     Repeater {
-                                        model: bluetoothService.deviceActions(bluetoothService.selectedDevice)
+                                        model: bluetoothService.deviceActions(detailContent.selectedDevice)
 
                                         delegate: Rectangle {
                                             required property var modelData
@@ -1506,10 +1627,10 @@ ShellRoot {
                                             MouseArea {
                                                 id: actionMouseArea
                                                 anchors.fill: parent
-                                                enabled: !modelData.disabled && bluetoothService.selectedDevice !== null
+                                                enabled: !modelData.disabled && detailContent.selectedDevice !== null
                                                 hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
-                                                onClicked: bluetoothService.performAction(modelData.id, bluetoothService.selectedDevice)
+                                                onClicked: bluetoothService.performAction(modelData.id, detailContent.selectedDevice)
                                             }
                                         }
                                     }
