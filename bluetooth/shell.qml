@@ -19,22 +19,23 @@ ShellRoot {
     id: shellRoot
 
     property bool panelOpen: false
+    property bool pairingModalOpen: false
     property string focusedScreenName: Hyprland.focusedMonitor?.name ?? ""
 
-    property color panelTone: "#17141c"
-    property color sidebarTone: "#1f1b25"
-    property color cardTone: "#2d2834"
-    property color cardToneSoft: "#25212d"
-    property color accentTone: "#6c4dc2"
-    property color accentToneStrong: "#5a3fa2"
-    property color accentToneMuted: "#7c6b98"
-    property color textPrimaryTone: "#f3eefc"
-    property color textSecondaryTone: "#b0a8bf"
-    property color textMutedTone: "#8a8298"
-    property color borderTone: "#312b39"
-    property color separatorTone: "#2a2532"
-    property color highlightTone: "#3a3442"
-    property color successTone: "#7bd88f"
+    readonly property color panelTone: Design.Tokens.color.surfaceDim
+    readonly property color sidebarTone: Design.Tokens.color.surfaceContainer
+    readonly property color cardTone: Design.Tokens.color.surfaceContainerHigh
+    readonly property color cardToneSoft: Design.Tokens.color.surfaceContainerLow
+    readonly property color accentTone: Design.Tokens.color.primary
+    readonly property color accentToneStrong: Design.ThemePalette.withAlpha(Design.Tokens.color.primary, 0.22)
+    readonly property color accentToneMuted: Design.Tokens.color.primaryContainer
+    readonly property color textPrimaryTone: Design.Tokens.color.text.primary
+    readonly property color textSecondaryTone: Design.Tokens.color.text.secondary
+    readonly property color textMutedTone: Design.ThemePalette.withAlpha(Design.Tokens.color.text.secondary, 0.82)
+    readonly property color borderTone: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.85)
+    readonly property color separatorTone: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.42)
+    readonly property color highlightTone: Design.Tokens.color.surfaceContainerHighest
+    readonly property color successTone: Design.Tokens.color.success
 
     function resolveScreen() {
         for (let index = 0; index < Quickshell.screens.values.length; index += 1) {
@@ -44,6 +45,17 @@ ShellRoot {
         }
 
         return Quickshell.screens.values.length > 0 ? Quickshell.screens.values[0] : null;
+    }
+
+    function openPairingModal() {
+        if (!bluetoothService.bluetoothEnabled) return;
+        shellRoot.pairingModalOpen = true;
+        bluetoothService.startDiscovery();
+    }
+
+    function closePairingModal() {
+        shellRoot.pairingModalOpen = false;
+        bluetoothService.stopDiscovery();
     }
 
     IpcHandler {
@@ -58,6 +70,7 @@ ShellRoot {
         }
 
         function close() {
+            shellRoot.closePairingModal();
             shellRoot.panelOpen = false;
         }
     }
@@ -93,19 +106,25 @@ ShellRoot {
         MouseArea {
             anchors.fill: parent
             enabled: shellRoot.panelOpen
-            onClicked: shellRoot.panelOpen = false
+            onClicked: {
+                if (shellRoot.pairingModalOpen) shellRoot.closePairingModal();
+                else shellRoot.panelOpen = false;
+            }
         }
 
         FocusScope {
             id: contentFrame
             anchors.centerIn: parent
-            width: Math.min(1040, Math.max(920, (window.screen ? window.screen.width : 1280) - 48))
-            height: Math.min(760, Math.max(680, (window.screen ? window.screen.height : 900) - 48))
+            width: Math.min(1352, Math.max(1196, (window.screen ? window.screen.width : 1280) - 24))
+            height: Math.min(988, Math.max(884, (window.screen ? window.screen.height : 900) - 24))
             opacity: shellRoot.panelOpen ? 1 : 0
             scale: shellRoot.panelOpen ? 1 : 0.985
             focus: shellRoot.panelOpen
 
-            Keys.onEscapePressed: shellRoot.panelOpen = false
+            Keys.onEscapePressed: {
+                if (shellRoot.pairingModalOpen) shellRoot.closePairingModal();
+                else shellRoot.panelOpen = false;
+            }
 
             Behavior on opacity {
                 NumberAnimation {
@@ -267,7 +286,7 @@ ShellRoot {
                                         text: bluetoothService.bluetoothEnabled
                                             ? (bluetoothService.adapter && bluetoothService.adapter.discoverable
                                                 ? "Visible to all nearby devices as\n\"" + bluetoothService.adapterName + "\""
-                                                : "Ready for paired devices and nearby discovery.")
+                                                : "Ready for your saved Bluetooth devices.")
                                             : "Turn Bluetooth on to connect or pair devices."
                                         color: shellRoot.textSecondaryTone
                                         font.family: "JetBrainsMono Nerd Font"
@@ -293,16 +312,18 @@ ShellRoot {
                                 }
 
                                 Rectangle {
-                                    visible: bluetoothService.sortedDevices.length > 0
+                                    visible: bluetoothService.pairedDevices.length > 0
                                     width: 22
                                     height: 22
                                     radius: 11
-                                    color: shellRoot.accentTone
+                                    color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.2)
+                                    border.width: 1
+                                    border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.28)
 
                                     Text {
                                         anchors.centerIn: parent
-                                        text: bluetoothService.sortedDevices.length
-                                        color: shellRoot.textPrimaryTone
+                                        text: bluetoothService.pairedDevices.length
+                                        color: shellRoot.accentTone
                                         font.family: "JetBrainsMono Nerd Font"
                                         font.pixelSize: 11
                                         font.weight: Font.Bold
@@ -316,7 +337,7 @@ ShellRoot {
 
                                 Loader {
                                     anchors.fill: parent
-                                    active: bluetoothService.sortedDevices.length === 0
+                                    active: bluetoothService.pairedDevices.length === 0
                                     sourceComponent: sidebarEmptyState
                                 }
 
@@ -324,8 +345,8 @@ ShellRoot {
                                     anchors.fill: parent
                                     clip: true
                                     spacing: 8
-                                    visible: bluetoothService.sortedDevices.length > 0
-                                    model: bluetoothService.sortedDevices
+                                    visible: bluetoothService.pairedDevices.length > 0
+                                    model: bluetoothService.pairedDevices
 
                                     ScrollBar.vertical: ScrollBar {
                                         policy: ScrollBar.AsNeeded
@@ -364,7 +385,7 @@ ShellRoot {
                             radius: width / 2
                             anchors.centerIn: parent
                             anchors.horizontalCenterOffset: -24
-                            color: Design.ThemePalette.withAlpha(shellRoot.accentToneStrong, 0.08)
+                            color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.08)
                         }
 
                         Rectangle {
@@ -374,7 +395,7 @@ ShellRoot {
                             anchors.centerIn: parent
                             anchors.horizontalCenterOffset: 64
                             anchors.verticalCenterOffset: 64
-                            color: Design.ThemePalette.withAlpha("#61b26f", 0.045)
+                            color: Design.ThemePalette.withAlpha(Design.Tokens.color.tertiary, 0.05)
                         }
 
                         Rectangle {
@@ -387,14 +408,16 @@ ShellRoot {
                             width: scanLabel.implicitWidth + 34
                             height: 30
                             radius: 15
-                            color: shellRoot.accentToneMuted
+                            color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.18)
+                            border.width: 1
+                            border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.24)
                             opacity: bluetoothService.bluetoothEnabled ? 1 : 0.45
 
                             Text {
                                 id: scanLabel
                                 anchors.centerIn: parent
-                                text: bluetoothService.scanning ? "Scanning..." : "Scan"
-                                color: "#231f2b"
+                                text: "Scan"
+                                color: shellRoot.accentTone
                                 font.family: "JetBrainsMono Nerd Font"
                                 font.pixelSize: 12
                                 font.weight: Font.Bold
@@ -403,7 +426,7 @@ ShellRoot {
                             Rectangle {
                                 anchors.fill: parent
                                 radius: parent.radius
-                                color: Design.ThemePalette.withAlpha("#ffffff", scanMouseArea.pressed ? 0.16 : scanMouseArea.containsMouse ? 0.08 : 0)
+                                color: Design.ThemePalette.withAlpha(shellRoot.accentTone, scanMouseArea.pressed ? 0.16 : scanMouseArea.containsMouse ? 0.08 : 0)
                             }
 
                             MouseArea {
@@ -412,7 +435,7 @@ ShellRoot {
                                 enabled: bluetoothService.bluetoothEnabled
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: bluetoothService.toggleDiscovery()
+                                onClicked: shellRoot.openPairingModal()
                             }
                         }
 
@@ -426,6 +449,398 @@ ShellRoot {
                             anchors.fill: parent
                             active: bluetoothService.selectedDevice !== null
                             sourceComponent: deviceDetailView
+                        }
+                    }
+                }
+
+                Item {
+                    anchors.fill: parent
+                    visible: shellRoot.pairingModalOpen
+                    z: 10
+
+                    Rectangle {
+                        anchors.fill: parent
+                        color: Design.ThemePalette.withAlpha(Design.Tokens.color.scrim, 0.28)
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: shellRoot.closePairingModal()
+                    }
+
+                    Rectangle {
+                        id: pairingModal
+                        anchors.centerIn: parent
+                        width: 364
+                        height: 520
+                        radius: 34
+                        color: Design.Tokens.color.surfaceBright
+                        border.width: 1
+                        border.color: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.58)
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: mouse => { mouse.accepted = true; }
+                        }
+
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: 22
+                            spacing: 16
+
+                            RowLayout {
+                                Layout.fillWidth: true
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: "Add a device"
+                                    color: Design.Tokens.color.text.primary
+                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.pixelSize: 16
+                                    font.weight: Font.Bold
+                                }
+
+                                Rectangle {
+                                    width: 28
+                                    height: 28
+                                    radius: 14
+                                    color: closeMouse.containsMouse
+                                        ? Design.ThemePalette.withAlpha(Design.Tokens.color.text.primary, 0.08)
+                                        : "transparent"
+
+                                    DS.LucideIcon {
+                                        anchors.centerIn: parent
+                                        name: "x"
+                                        iconSize: 16
+                                        color: Design.Tokens.color.text.secondary
+                                    }
+
+                                    MouseArea {
+                                        id: closeMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: shellRoot.closePairingModal()
+                                    }
+                                }
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 170
+
+                                Rectangle {
+                                    id: outerPulseRing
+                                    width: 162
+                                    height: 162
+                                    radius: 81
+                                    anchors.centerIn: parent
+                                    color: "transparent"
+                                    border.width: 2
+                                    border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.12)
+                                    opacity: 0.22
+                                    scale: 1
+                                }
+
+                                Rectangle {
+                                    id: innerPulseRing
+                                    width: 118
+                                    height: 118
+                                    radius: 59
+                                    anchors.centerIn: parent
+                                    color: "transparent"
+                                    border.width: 2
+                                    border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.18)
+                                    opacity: 0.28
+                                    scale: 1
+                                }
+
+                                Rectangle {
+                                    id: modalBluetoothIcon
+                                    width: 46
+                                    height: 46
+                                    radius: 23
+                                    anchors.centerIn: parent
+                                    anchors.verticalCenterOffset: -18
+                                    color: shellRoot.accentTone
+                                    scale: 1
+
+                                    DS.LucideIcon {
+                                        anchors.centerIn: parent
+                                        name: "bluetooth"
+                                        iconSize: 20
+                                        color: Design.Tokens.color.primaryForeground
+                                    }
+                                }
+
+                                Text {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.bottom: parent.bottom
+                                    anchors.bottomMargin: 8
+                                    text: bluetoothService.scanning ? "Scanning for nearby devices..." : "Nearby devices ready to pair"
+                                    color: Design.Tokens.color.text.secondary
+                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.pixelSize: 12
+                                }
+
+                                SequentialAnimation {
+                                    id: outerPulseAnimation
+                                    running: shellRoot.pairingModalOpen && bluetoothService.scanning
+                                    loops: Animation.Infinite
+
+                                    PauseAnimation { duration: 120 }
+
+                                    ParallelAnimation {
+                                        NumberAnimation {
+                                            target: outerPulseRing
+                                            property: "scale"
+                                            from: 0.94
+                                            to: 1.18
+                                            duration: 1600
+                                            easing.type: Easing.OutCubic
+                                        }
+
+                                        NumberAnimation {
+                                            target: outerPulseRing
+                                            property: "opacity"
+                                            from: 0.28
+                                            to: 0.04
+                                            duration: 1600
+                                            easing.type: Easing.OutCubic
+                                        }
+                                    }
+
+                                    ScriptAction {
+                                        script: {
+                                            outerPulseRing.scale = 0.94;
+                                            outerPulseRing.opacity = 0.28;
+                                        }
+                                    }
+
+                                    onRunningChanged: {
+                                        if (!running) {
+                                            outerPulseRing.scale = 1;
+                                            outerPulseRing.opacity = 0.22;
+                                        }
+                                    }
+                                }
+
+                                SequentialAnimation {
+                                    id: innerPulseAnimation
+                                    running: shellRoot.pairingModalOpen && bluetoothService.scanning
+                                    loops: Animation.Infinite
+
+                                    PauseAnimation { duration: 420 }
+
+                                    ParallelAnimation {
+                                        NumberAnimation {
+                                            target: innerPulseRing
+                                            property: "scale"
+                                            from: 0.96
+                                            to: 1.14
+                                            duration: 1350
+                                            easing.type: Easing.OutCubic
+                                        }
+
+                                        NumberAnimation {
+                                            target: innerPulseRing
+                                            property: "opacity"
+                                            from: 0.34
+                                            to: 0.06
+                                            duration: 1350
+                                            easing.type: Easing.OutCubic
+                                        }
+                                    }
+
+                                    ScriptAction {
+                                        script: {
+                                            innerPulseRing.scale = 0.96;
+                                            innerPulseRing.opacity = 0.34;
+                                        }
+                                    }
+
+                                    onRunningChanged: {
+                                        if (!running) {
+                                            innerPulseRing.scale = 1;
+                                            innerPulseRing.opacity = 0.28;
+                                        }
+                                    }
+                                }
+
+                                SequentialAnimation {
+                                    id: iconPulseAnimation
+                                    running: shellRoot.pairingModalOpen && bluetoothService.scanning
+                                    loops: Animation.Infinite
+
+                                    NumberAnimation {
+                                        target: modalBluetoothIcon
+                                        property: "scale"
+                                        from: 1
+                                        to: 1.08
+                                        duration: 720
+                                        easing.type: Easing.OutCubic
+                                    }
+
+                                    NumberAnimation {
+                                        target: modalBluetoothIcon
+                                        property: "scale"
+                                        from: 1.08
+                                        to: 1
+                                        duration: 720
+                                        easing.type: Easing.OutCubic
+                                    }
+
+                                    onRunningChanged: {
+                                        if (!running) {
+                                            modalBluetoothIcon.scale = 1;
+                                        }
+                                    }
+                                }
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+
+                                Loader {
+                                    anchors.fill: parent
+                                    active: bluetoothService.discoveredDevices.length === 0
+                                    sourceComponent: pairingEmptyState
+                                }
+
+                                ListView {
+                                    anchors.fill: parent
+                                    clip: true
+                                    spacing: 10
+                                    model: bluetoothService.discoveredDevices
+                                    visible: bluetoothService.discoveredDevices.length > 0
+
+                                    ScrollBar.vertical: ScrollBar {
+                                        policy: ScrollBar.AsNeeded
+                                    }
+
+                                    delegate: Rectangle {
+                                        required property var modelData
+                                        readonly property bool pairing: bluetoothService.statusKind(modelData) === "pairing"
+                                        width: ListView.view.width
+                                        height: 62
+                                        radius: 22
+                                        color: Design.ThemePalette.withAlpha(Design.Tokens.color.secondaryContainer, 0.34)
+                                        border.width: 1
+                                        border.color: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.32)
+
+                                        RowLayout {
+                                            anchors.fill: parent
+                                            anchors.leftMargin: 14
+                                            anchors.rightMargin: 14
+                                            spacing: 12
+
+                                            DeviceGlyph {
+                                                size: 34
+                                                device: modelData
+                                                typeKey: bluetoothService.typeKey(modelData)
+                                                containerColor: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.12)
+                                                contentColor: shellRoot.accentTone
+                                            }
+
+                                            ColumnLayout {
+                                                Layout.fillWidth: true
+                                                Layout.alignment: Qt.AlignVCenter
+                                                spacing: 1
+
+                                                Text {
+                                                    Layout.fillWidth: true
+                                                    text: bluetoothService.deviceLabel(modelData)
+                                                    color: Design.Tokens.color.text.primary
+                                                    font.family: "JetBrainsMono Nerd Font"
+                                                    font.pixelSize: 14
+                                                    font.weight: Font.DemiBold
+                                                    elide: Text.ElideRight
+                                                }
+
+                                                Text {
+                                                    Layout.fillWidth: true
+                                                    text: pairing ? "Pairing..." : "Ready to pair"
+                                                    color: Design.Tokens.color.text.secondary
+                                                    font.family: "JetBrainsMono Nerd Font"
+                                                    font.pixelSize: 11
+                                                    elide: Text.ElideRight
+                                                }
+                                            }
+
+                                            Rectangle {
+                                                Layout.preferredWidth: pairLabel.implicitWidth + 22
+                                                Layout.preferredHeight: 30
+                                                radius: 15
+                                                color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.16)
+                                                opacity: pairing ? 0.55 : 1
+
+                                                Text {
+                                                    id: pairLabel
+                                                    anchors.centerIn: parent
+                                                    text: pairing ? "Pairing" : "Pair"
+                                                    color: shellRoot.accentTone
+                                                    font.family: "JetBrainsMono Nerd Font"
+                                                    font.pixelSize: 12
+                                                    font.weight: Font.Bold
+                                                }
+
+                                                Rectangle {
+                                                    anchors.fill: parent
+                                                    radius: parent.radius
+                                                    color: Design.ThemePalette.withAlpha(shellRoot.accentTone, pairActionMouse.pressed ? 0.16 : pairActionMouse.containsMouse ? 0.08 : 0)
+                                                }
+
+                                                MouseArea {
+                                                    id: pairActionMouse
+                                                    anchors.fill: parent
+                                                    enabled: !pairing
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: bluetoothService.pairDevice(modelData)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 40
+
+                                Rectangle {
+                                    anchors.right: parent.right
+                                    width: cancelLabel.implicitWidth + 34
+                                    height: 36
+                                    radius: 18
+                                    color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.14)
+
+                                    Text {
+                                        id: cancelLabel
+                                        anchors.centerIn: parent
+                                        text: "Cancel"
+                                        color: shellRoot.accentTone
+                                        font.family: "JetBrainsMono Nerd Font"
+                                        font.pixelSize: 13
+                                        font.weight: Font.Bold
+                                    }
+
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: parent.radius
+                                        color: Design.ThemePalette.withAlpha(shellRoot.accentTone, cancelMouse.pressed ? 0.16 : cancelMouse.containsMouse ? 0.08 : 0)
+                                    }
+
+                                    MouseArea {
+                                        id: cancelMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: shellRoot.closePairingModal()
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -449,7 +864,7 @@ ShellRoot {
 
                 Text {
                     Layout.fillWidth: true
-                    text: bluetoothService.bluetoothEnabled ? "No devices found" : "Bluetooth is off"
+                    text: bluetoothService.bluetoothEnabled ? "No paired devices yet" : "Bluetooth is off"
                     horizontalAlignment: Text.AlignHCenter
                     color: shellRoot.textPrimaryTone
                     font.family: "JetBrainsMono Nerd Font"
@@ -461,10 +876,43 @@ ShellRoot {
                 Text {
                     Layout.fillWidth: true
                     text: bluetoothService.bluetoothEnabled
-                        ? "Use Scan to discover nearby devices."
+                        ? "Open Scan to discover and pair a nearby device."
                         : "Turn Bluetooth on to begin pairing."
                     horizontalAlignment: Text.AlignHCenter
                     color: shellRoot.textSecondaryTone
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: 11
+                    wrapMode: Text.Wrap
+                }
+            }
+        }
+
+        Component {
+            id: pairingEmptyState
+
+            ColumnLayout {
+                anchors.centerIn: parent
+                width: Math.min(parent.width - 24, 250)
+                spacing: 8
+
+                Text {
+                    Layout.fillWidth: true
+                    text: bluetoothService.scanning ? "Scanning..." : "No nearby devices"
+                    horizontalAlignment: Text.AlignHCenter
+                    color: Design.Tokens.color.text.primary
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: 14
+                    font.weight: Font.DemiBold
+                    wrapMode: Text.Wrap
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    text: bluetoothService.scanning
+                        ? "Keep the device nearby while Bluetooth discovery is active."
+                        : "Try scanning again or make sure the device is in pairing mode."
+                    horizontalAlignment: Text.AlignHCenter
+                    color: Design.Tokens.color.text.secondary
                     font.family: "JetBrainsMono Nerd Font"
                     font.pixelSize: 11
                     wrapMode: Text.Wrap
@@ -495,7 +943,7 @@ ShellRoot {
                             anchors.centerIn: parent
                             anchors.verticalCenterOffset: -4
                             rotation: -2
-                            color: "#393540"
+                            color: shellRoot.cardTone
                         }
 
                         Rectangle {
@@ -506,7 +954,7 @@ ShellRoot {
                             anchors.horizontalCenterOffset: 8
                             anchors.verticalCenterOffset: 6
                             rotation: 4
-                            color: Design.ThemePalette.withAlpha("#463f53", 0.24)
+                            color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.08)
                             z: -1
                         }
 
@@ -548,7 +996,9 @@ ShellRoot {
                                     width: 8
                                     height: 8
                                     radius: 4
-                                    color: index === 0 ? "#d8cbff" : "#726b81"
+                                    color: index === 0
+                                        ? Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.9)
+                                        : Design.ThemePalette.withAlpha(shellRoot.textSecondaryTone, 0.35)
                                 }
                             }
                         }
@@ -587,7 +1037,9 @@ ShellRoot {
                             width: pairButtonRow.implicitWidth + 42
                             height: 46
                             radius: 23
-                            color: shellRoot.accentToneMuted
+                            color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.18)
+                            border.width: 1
+                            border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.24)
                             opacity: bluetoothService.bluetoothEnabled ? 1 : 0.45
 
                             RowLayout {
@@ -598,12 +1050,12 @@ ShellRoot {
                                 DS.LucideIcon {
                                     name: "plus"
                                     iconSize: 16
-                                    color: "#231f2b"
+                                    color: shellRoot.accentTone
                                 }
 
                                 Text {
                                     text: "Pair New Device"
-                                    color: "#231f2b"
+                                    color: shellRoot.accentTone
                                     font.family: "JetBrainsMono Nerd Font"
                                     font.pixelSize: 14
                                     font.weight: Font.Bold
@@ -613,7 +1065,7 @@ ShellRoot {
                             Rectangle {
                                 anchors.fill: parent
                                 radius: parent.radius
-                                color: Design.ThemePalette.withAlpha("#ffffff", pairMouseArea.pressed ? 0.16 : pairMouseArea.containsMouse ? 0.08 : 0)
+                                color: Design.ThemePalette.withAlpha(shellRoot.accentTone, pairMouseArea.pressed ? 0.16 : pairMouseArea.containsMouse ? 0.08 : 0)
                             }
 
                             MouseArea {
@@ -622,7 +1074,7 @@ ShellRoot {
                                 enabled: bluetoothService.bluetoothEnabled
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: bluetoothService.toggleDiscovery()
+                                onClicked: shellRoot.openPairingModal()
                             }
                         }
                     }
@@ -1039,7 +1491,7 @@ ShellRoot {
                                             Text {
                                                 anchors.centerIn: parent
                                                 text: modelData.label
-                                                color: primaryVariant ? "#231f2b" : shellRoot.textPrimaryTone
+                                                color: primaryVariant ? Design.Tokens.color.primaryForeground : shellRoot.textPrimaryTone
                                                 font.family: "JetBrainsMono Nerd Font"
                                                 font.pixelSize: 13
                                                 font.weight: Font.Bold
@@ -1048,7 +1500,7 @@ ShellRoot {
                                             Rectangle {
                                                 anchors.fill: parent
                                                 radius: parent.radius
-                                                color: Design.ThemePalette.withAlpha("#ffffff", actionMouseArea.pressed ? 0.16 : actionMouseArea.containsMouse ? 0.08 : 0)
+                                                color: Design.ThemePalette.withAlpha(primaryVariant ? Design.Tokens.color.primaryForeground : shellRoot.textPrimaryTone, actionMouseArea.pressed ? 0.16 : actionMouseArea.containsMouse ? 0.08 : 0)
                                             }
 
                                             MouseArea {

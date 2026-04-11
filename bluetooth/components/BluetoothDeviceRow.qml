@@ -13,7 +13,15 @@ Item {
     property var service
     property bool selected: false
     readonly property string statusKind: root.service ? root.service.statusKind(root.device) : "available"
-    readonly property color accentColor: root.service ? root.service.statusColor(root.device) : "#7f5ed8"
+    readonly property color accentColor: root.service ? root.service.statusColor(root.device) : Design.Tokens.color.primary
+    readonly property color rowBackgroundColor: root.selected
+        ? Design.ThemePalette.withAlpha(Design.Tokens.color.primary, 0.18)
+        : mouseArea.containsMouse
+            ? Design.ThemePalette.withAlpha(Design.Tokens.color.text.primary, 0.06)
+            : "transparent"
+    readonly property color rowBorderColor: root.selected
+        ? Design.ThemePalette.withAlpha(Design.Tokens.color.primary, 0.28)
+        : "transparent"
 
     implicitHeight: 72
 
@@ -30,13 +38,9 @@ Item {
         id: bgPill
         anchors.fill: parent
         radius: 22
-        color: root.selected
-            ? "#5e43a7"
-            : mouseArea.containsMouse
-                ? "#2d2935"
-                : "transparent"
+        color: root.rowBackgroundColor
         border.width: 1
-        border.color: root.selected ? "#7057ba" : "transparent"
+        border.color: root.rowBorderColor
 
         Behavior on color {
             ColorAnimation {
@@ -59,11 +63,11 @@ Item {
             device: root.device
             typeKey: root.service ? root.service.typeKey(root.device) : "generic"
             containerColor: root.selected
-                ? Design.ThemePalette.withAlpha("#ffffff", 0.12)
-                : "#3a3541"
+                ? Design.ThemePalette.withAlpha(Design.Tokens.color.primary, 0.18)
+                : Design.ThemePalette.withAlpha(Design.Tokens.color.secondaryContainer, 0.72)
             contentColor: root.selected
-                ? "#efe8ff"
-                : "#c7c0d7"
+                ? Design.Tokens.color.primary
+                : Design.Tokens.color.secondaryContainerForeground
         }
 
         ColumnLayout {
@@ -74,7 +78,7 @@ Item {
             Text {
                 Layout.fillWidth: true
                 text: root.service ? root.service.deviceLabel(root.device) : ""
-                color: root.selected ? "#f4efff" : "#d9d1e5"
+                color: Design.Tokens.color.text.primary
                 font.family: "JetBrainsMono Nerd Font"
                 font.pixelSize: 15
                 font.weight: Font.DemiBold
@@ -84,7 +88,7 @@ Item {
             Text {
                 Layout.fillWidth: true
                 text: root.service ? root.service.sidebarStatusText(root.device) : ""
-                color: root.selected ? "#d7caf6" : "#9f98ae"
+                color: root.selected ? Design.Tokens.color.primary : Design.Tokens.color.text.secondary
                 font.family: "JetBrainsMono Nerd Font"
                 font.pixelSize: 11
                 elide: Text.ElideRight

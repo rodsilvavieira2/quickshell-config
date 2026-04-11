@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell.Bluetooth
+import "../shared/designsystem" as Design
 
 Item {
     id: root
@@ -43,6 +44,14 @@ Item {
 
         return next;
     }
+    readonly property var pairedDevices: root.sortedDevices.filter(device => {
+        if (!device) return false;
+        return device.paired || device.bonded || device.trusted || device.connected;
+    })
+    readonly property var discoveredDevices: root.sortedDevices.filter(device => {
+        if (!device) return false;
+        return !(device.paired || device.bonded || device.trusted || device.connected);
+    })
     readonly property var selectedDevice: root.findDevice(root.selectedAddress)
     readonly property int activeAttemptCount: {
         const attempts = root.attemptMap;
@@ -284,18 +293,18 @@ Item {
 
     function statusColor(device) {
         switch (root.statusKind(device)) {
-        case "connected": return "#7BD88F";
+        case "connected": return Design.Tokens.color.success;
         case "connecting":
         case "retrying":
         case "waiting":
         case "pairing":
-            return "#8CB4FF";
+            return Design.Tokens.color.info;
         case "failed":
         case "unavailable":
         case "blocked":
-            return "#FF8E8E";
+            return Design.Tokens.color.error;
         default:
-            return "#B4B9C4";
+            return Design.Tokens.color.text.secondary;
         }
     }
 
@@ -605,14 +614,24 @@ Item {
         if (!root.adapter || !root.bluetoothEnabled) return;
 
         if (root.adapter.discovering) {
-            root.adapter.discovering = false;
-            discoveryStopTimer.stop();
+            root.stopDiscovery();
             return;
         }
 
+        root.startDiscovery();
+    }
+
+    function startDiscovery() {
+        if (!root.adapter || !root.bluetoothEnabled) return;
         root.adapter.pairable = true;
         root.adapter.discovering = true;
         discoveryStopTimer.restart();
+    }
+
+    function stopDiscovery() {
+        if (!root.adapter) return;
+        root.adapter.discovering = false;
+        discoveryStopTimer.stop();
     }
 
     function scheduleReconnectSweep(force) {
