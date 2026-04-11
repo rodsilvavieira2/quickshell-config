@@ -14,13 +14,17 @@ Item {
     property bool selected: false
     readonly property string statusKind: root.service ? root.service.statusKind(root.device) : "available"
     readonly property color accentColor: root.service ? root.service.statusColor(root.device) : Design.Tokens.color.primary
+    readonly property color selectedContentColor: Design.ThemePalette.white
+    readonly property color unselectedGlyphContainerColor: Design.Tokens.color.primary
+    readonly property color glyphContentColor: Design.ThemePalette.white
+    readonly property color selectedGlyphContainerColor: Design.Tokens.color.primary
     readonly property color rowBackgroundColor: root.selected
-        ? Design.ThemePalette.withAlpha(Design.Tokens.color.primary, 0.18)
+        ? Design.Tokens.color.primary
         : mouseArea.containsMouse
             ? Design.ThemePalette.withAlpha(Design.Tokens.color.text.primary, 0.06)
             : "transparent"
     readonly property color rowBorderColor: root.selected
-        ? Design.ThemePalette.withAlpha(Design.Tokens.color.primary, 0.28)
+        ? Design.Tokens.color.primary
         : "transparent"
 
     implicitHeight: 72
@@ -63,11 +67,11 @@ Item {
             device: root.device
             typeKey: root.service ? root.service.typeKey(root.device) : "generic"
             containerColor: root.selected
-                ? Design.ThemePalette.withAlpha(Design.Tokens.color.primary, 0.18)
-                : Design.ThemePalette.withAlpha(Design.Tokens.color.secondaryContainer, 0.72)
+                ? root.selectedGlyphContainerColor
+                : root.unselectedGlyphContainerColor
             contentColor: root.selected
-                ? Design.Tokens.color.primary
-                : Design.Tokens.color.secondaryContainerForeground
+                ? root.selectedContentColor
+                : root.glyphContentColor
         }
 
         ColumnLayout {
@@ -78,7 +82,7 @@ Item {
             Text {
                 Layout.fillWidth: true
                 text: root.service ? root.service.deviceLabel(root.device) : ""
-                color: Design.Tokens.color.text.primary
+                color: root.selected ? root.selectedContentColor : Design.Tokens.color.text.primary
                 font.family: "JetBrainsMono Nerd Font"
                 font.pixelSize: 15
                 font.weight: Font.DemiBold
@@ -88,7 +92,7 @@ Item {
             Text {
                 Layout.fillWidth: true
                 text: root.service ? root.service.sidebarStatusText(root.device) : ""
-                color: root.selected ? Design.Tokens.color.primary : Design.Tokens.color.text.secondary
+                color: root.selected ? root.selectedContentColor : Design.Tokens.color.text.secondary
                 font.family: "JetBrainsMono Nerd Font"
                 font.pixelSize: 11
                 elide: Text.ElideRight

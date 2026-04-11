@@ -108,6 +108,12 @@ PanelWindow {
                     color: Root.Config.dividerColor
                 }
 
+                Modules.SidebarLeftLauncher {
+                    id: sidebarLeftLauncherContent
+
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
                 Modules.ControlCenterLauncher {
                     id: launcherContent
 

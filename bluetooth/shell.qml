@@ -27,8 +27,10 @@ ShellRoot {
     readonly property color cardTone: Design.Tokens.color.surfaceContainerHigh
     readonly property color cardToneSoft: Design.Tokens.color.surfaceContainerLow
     readonly property color accentTone: Design.Tokens.color.primary
+    readonly property color accentForegroundTone: Design.ThemePalette.white
     readonly property color accentToneStrong: Design.ThemePalette.withAlpha(Design.Tokens.color.primary, 0.22)
     readonly property color accentToneMuted: Design.Tokens.color.primaryContainer
+    readonly property color accentToneMutedForeground: Design.Tokens.color.primaryContainerForeground
     readonly property color textPrimaryTone: Design.Tokens.color.text.primary
     readonly property color textSecondaryTone: Design.Tokens.color.text.secondary
     readonly property color textMutedTone: Design.ThemePalette.withAlpha(Design.Tokens.color.text.secondary, 0.82)
@@ -183,13 +185,13 @@ ShellRoot {
                                     width: 40
                                     height: 40
                                     radius: 20
-                                    color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.88)
+                                    color: shellRoot.accentTone
 
                                     DS.LucideIcon {
                                         anchors.centerIn: parent
                                         name: bluetoothService.bluetoothEnabled ? "bluetooth" : "bluetooth-off"
                                         iconSize: 18
-                                        color: shellRoot.textPrimaryTone
+                                        color: shellRoot.accentForegroundTone
                                     }
                                 }
 
@@ -258,7 +260,7 @@ ShellRoot {
                                                 radius: 10
                                                 x: bluetoothService.bluetoothEnabled ? parent.width - width - 3 : 3
                                                 y: 3
-                                                color: bluetoothService.bluetoothEnabled ? shellRoot.textPrimaryTone : shellRoot.textSecondaryTone
+                                                color: bluetoothService.bluetoothEnabled ? shellRoot.accentForegroundTone : shellRoot.textSecondaryTone
 
                                                 Behavior on x {
                                                     NumberAnimation {
@@ -316,14 +318,14 @@ ShellRoot {
                                     width: 22
                                     height: 22
                                     radius: 11
-                                    color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.2)
+                                    color: shellRoot.accentTone
                                     border.width: 1
-                                    border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.28)
+                                    border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.24)
 
                                     Text {
                                         anchors.centerIn: parent
                                         text: bluetoothService.pairedDevices.length
-                                        color: shellRoot.accentTone
+                                        color: shellRoot.accentForegroundTone
                                         font.family: "JetBrainsMono Nerd Font"
                                         font.pixelSize: 11
                                         font.weight: Font.Bold
@@ -405,10 +407,11 @@ ShellRoot {
                             anchors.topMargin: 20
                             anchors.rightMargin: 18
                             z: 2
+                            visible: bluetoothService.selectedDevice === null
                             width: scanLabel.implicitWidth + 34
                             height: 30
                             radius: 15
-                            color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.18)
+                            color: shellRoot.accentTone
                             border.width: 1
                             border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.24)
                             opacity: bluetoothService.bluetoothEnabled ? 1 : 0.45
@@ -417,7 +420,7 @@ ShellRoot {
                                 id: scanLabel
                                 anchors.centerIn: parent
                                 text: "Scan"
-                                color: shellRoot.accentTone
+                                color: shellRoot.accentForegroundTone
                                 font.family: "JetBrainsMono Nerd Font"
                                 font.pixelSize: 12
                                 font.weight: Font.Bold
@@ -426,7 +429,7 @@ ShellRoot {
                             Rectangle {
                                 anchors.fill: parent
                                 radius: parent.radius
-                                color: Design.ThemePalette.withAlpha(shellRoot.accentTone, scanMouseArea.pressed ? 0.16 : scanMouseArea.containsMouse ? 0.08 : 0)
+                                color: Design.ThemePalette.withAlpha(shellRoot.accentForegroundTone, scanMouseArea.pressed ? 0.16 : scanMouseArea.containsMouse ? 0.08 : 0)
                             }
 
                             MouseArea {
@@ -569,7 +572,7 @@ ShellRoot {
                                         anchors.centerIn: parent
                                         name: "bluetooth"
                                         iconSize: 20
-                                        color: Design.Tokens.color.primaryForeground
+                                        color: shellRoot.accentForegroundTone
                                     }
                                 }
 
@@ -739,8 +742,8 @@ ShellRoot {
                                                 size: 34
                                                 device: modelData
                                                 typeKey: bluetoothService.typeKey(modelData)
-                                                containerColor: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.12)
-                                                contentColor: shellRoot.accentTone
+                                                containerColor: shellRoot.accentTone
+                                                contentColor: shellRoot.accentForegroundTone
                                             }
 
                                             ColumnLayout {
@@ -772,14 +775,14 @@ ShellRoot {
                                                 Layout.preferredWidth: pairLabel.implicitWidth + 22
                                                 Layout.preferredHeight: 30
                                                 radius: 15
-                                                color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.16)
+                                                color: shellRoot.accentTone
                                                 opacity: pairing ? 0.55 : 1
 
                                                 Text {
                                                     id: pairLabel
                                                     anchors.centerIn: parent
                                                     text: pairing ? "Pairing" : "Pair"
-                                                    color: shellRoot.accentTone
+                                                    color: shellRoot.accentForegroundTone
                                                     font.family: "JetBrainsMono Nerd Font"
                                                     font.pixelSize: 12
                                                     font.weight: Font.Bold
@@ -788,7 +791,7 @@ ShellRoot {
                                                 Rectangle {
                                                     anchors.fill: parent
                                                     radius: parent.radius
-                                                    color: Design.ThemePalette.withAlpha(shellRoot.accentTone, pairActionMouse.pressed ? 0.16 : pairActionMouse.containsMouse ? 0.08 : 0)
+                                                    color: Design.ThemePalette.withAlpha(shellRoot.accentForegroundTone, pairActionMouse.pressed ? 0.16 : pairActionMouse.containsMouse ? 0.08 : 0)
                                                 }
 
                                                 MouseArea {
@@ -814,13 +817,13 @@ ShellRoot {
                                     width: cancelLabel.implicitWidth + 34
                                     height: 36
                                     radius: 18
-                                    color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.14)
+                                    color: shellRoot.accentTone
 
                                     Text {
                                         id: cancelLabel
                                         anchors.centerIn: parent
                                         text: "Cancel"
-                                        color: shellRoot.accentTone
+                                        color: shellRoot.accentForegroundTone
                                         font.family: "JetBrainsMono Nerd Font"
                                         font.pixelSize: 13
                                         font.weight: Font.Bold
@@ -829,7 +832,7 @@ ShellRoot {
                                     Rectangle {
                                         anchors.fill: parent
                                         radius: parent.radius
-                                        color: Design.ThemePalette.withAlpha(shellRoot.accentTone, cancelMouse.pressed ? 0.16 : cancelMouse.containsMouse ? 0.08 : 0)
+                                        color: Design.ThemePalette.withAlpha(shellRoot.accentForegroundTone, cancelMouse.pressed ? 0.16 : cancelMouse.containsMouse ? 0.08 : 0)
                                     }
 
                                     MouseArea {
@@ -958,29 +961,29 @@ ShellRoot {
                             z: -1
                         }
 
-                        Rectangle {
-                            width: 74
-                            height: 74
-                            radius: 37
-                            anchors.centerIn: parent
-                            anchors.verticalCenterOffset: -6
-                            color: shellRoot.accentToneMuted
-
                             Rectangle {
+                                width: 74
+                                height: 74
+                                radius: 37
                                 anchors.centerIn: parent
-                                width: 40
-                                height: 40
-                                radius: 20
-                                color: Design.ThemePalette.withAlpha(shellRoot.panelTone, 0.28)
-                            }
+                                anchors.verticalCenterOffset: -6
+                                color: shellRoot.highlightTone
 
-                            DS.LucideIcon {
-                                anchors.centerIn: parent
-                                name: "bluetooth"
-                                iconSize: 28
-                                color: shellRoot.textPrimaryTone
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: 40
+                                    height: 40
+                                    radius: 20
+                                    color: shellRoot.accentTone
+                                }
+
+                                DS.LucideIcon {
+                                    anchors.centerIn: parent
+                                    name: "bluetooth"
+                                    iconSize: 28
+                                    color: shellRoot.accentForegroundTone
+                                }
                             }
-                        }
 
                         Row {
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -1037,7 +1040,7 @@ ShellRoot {
                             width: pairButtonRow.implicitWidth + 42
                             height: 46
                             radius: 23
-                            color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.18)
+                            color: shellRoot.accentTone
                             border.width: 1
                             border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.24)
                             opacity: bluetoothService.bluetoothEnabled ? 1 : 0.45
@@ -1050,12 +1053,12 @@ ShellRoot {
                                 DS.LucideIcon {
                                     name: "plus"
                                     iconSize: 16
-                                    color: shellRoot.accentTone
+                                    color: shellRoot.accentForegroundTone
                                 }
 
                                 Text {
                                     text: "Pair New Device"
-                                    color: shellRoot.accentTone
+                                    color: shellRoot.accentForegroundTone
                                     font.family: "JetBrainsMono Nerd Font"
                                     font.pixelSize: 14
                                     font.weight: Font.Bold
@@ -1065,7 +1068,7 @@ ShellRoot {
                             Rectangle {
                                 anchors.fill: parent
                                 radius: parent.radius
-                                color: Design.ThemePalette.withAlpha(shellRoot.accentTone, pairMouseArea.pressed ? 0.16 : pairMouseArea.containsMouse ? 0.08 : 0)
+                                color: Design.ThemePalette.withAlpha(shellRoot.accentForegroundTone, pairMouseArea.pressed ? 0.16 : pairMouseArea.containsMouse ? 0.08 : 0)
                             }
 
                             MouseArea {
@@ -1137,15 +1140,15 @@ ShellRoot {
                                         radius: 32
                                         color: shellRoot.highlightTone
                                         border.width: 1
-                                        border.color: shellRoot.borderTone
+                                        border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.18)
 
                                         DeviceGlyph {
                                             anchors.centerIn: parent
                                             size: 64
                                             device: detailContent.selectedDevice
                                             typeKey: bluetoothService.typeKey(detailContent.selectedDevice)
-                                            containerColor: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.18)
-                                            contentColor: shellRoot.accentTone
+                                            containerColor: shellRoot.accentTone
+                                            contentColor: shellRoot.accentForegroundTone
                                         }
                                     }
 
@@ -1200,9 +1203,9 @@ ShellRoot {
                                 Layout.preferredHeight: 136
                                 Layout.alignment: Qt.AlignTop
                                 radius: 28
-                                color: Design.ThemePalette.withAlpha(shellRoot.accentToneMuted, 0.22)
+                                color: shellRoot.accentTone
                                 border.width: 1
-                                border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.12)
+                                border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.18)
 
                                 ColumnLayout {
                                     anchors.fill: parent
@@ -1215,7 +1218,7 @@ ShellRoot {
                                         DS.LucideIcon {
                                             name: detailContent.hasBattery ? "bluetooth-connected" : "bluetooth"
                                             iconSize: 16
-                                            color: shellRoot.accentTone
+                                            color: shellRoot.accentForegroundTone
                                         }
 
                                         Item { Layout.fillWidth: true }
@@ -1224,7 +1227,7 @@ ShellRoot {
                                             text: detailContent.heroMetricBadge
                                             color: detailContent.selectedDevice && detailContent.selectedDevice.connected
                                                 ? Design.Tokens.color.success
-                                                : shellRoot.accentTone
+                                                : shellRoot.accentForegroundTone
                                             font.family: "JetBrainsMono Nerd Font"
                                             font.pixelSize: 12
                                             font.weight: Font.Bold
@@ -1235,7 +1238,7 @@ ShellRoot {
 
                                     Text {
                                         text: detailContent.heroMetricValue
-                                        color: shellRoot.textPrimaryTone
+                                        color: shellRoot.accentForegroundTone
                                         font.family: "JetBrainsMono Nerd Font"
                                         font.pixelSize: 34
                                         font.weight: Font.Bold
@@ -1243,7 +1246,7 @@ ShellRoot {
 
                                     Text {
                                         text: detailContent.heroMetricLabel
-                                        color: shellRoot.textSecondaryTone
+                                        color: Design.ThemePalette.withAlpha(shellRoot.accentForegroundTone, 0.74)
                                         font.family: "JetBrainsMono Nerd Font"
                                         font.pixelSize: 12
                                     }
@@ -1274,13 +1277,13 @@ ShellRoot {
                                         Layout.preferredWidth: 46
                                         Layout.preferredHeight: 46
                                         radius: 23
-                                        color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.08)
+                                        color: shellRoot.accentTone
 
                                         DS.LucideIcon {
                                             anchors.centerIn: parent
                                             name: "check"
                                             iconSize: 18
-                                            color: shellRoot.accentTone
+                                            color: shellRoot.accentForegroundTone
                                         }
                                     }
 
@@ -1324,13 +1327,13 @@ ShellRoot {
                                         Layout.preferredWidth: 46
                                         Layout.preferredHeight: 46
                                         radius: 23
-                                        color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.08)
+                                        color: shellRoot.accentTone
 
                                         DS.LucideIcon {
                                             anchors.centerIn: parent
                                             name: "music-4"
                                             iconSize: 18
-                                            color: shellRoot.accentTone
+                                            color: shellRoot.accentForegroundTone
                                         }
                                     }
 
@@ -1374,13 +1377,13 @@ ShellRoot {
                                         Layout.preferredWidth: 46
                                         Layout.preferredHeight: 46
                                         radius: 23
-                                        color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.08)
+                                        color: shellRoot.accentTone
 
                                         DS.LucideIcon {
                                             anchors.centerIn: parent
                                             name: "bluetooth"
                                             iconSize: 18
-                                            color: shellRoot.accentTone
+                                            color: shellRoot.accentForegroundTone
                                         }
                                     }
 
@@ -1427,13 +1430,13 @@ ShellRoot {
                                         Layout.preferredWidth: 46
                                         Layout.preferredHeight: 46
                                         radius: 23
-                                        color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.08)
+                                        color: shellRoot.accentTone
 
                                         DS.LucideIcon {
                                             anchors.centerIn: parent
                                             name: "wifi"
                                             iconSize: 18
-                                            color: shellRoot.accentTone
+                                            color: shellRoot.accentForegroundTone
                                         }
                                     }
 
@@ -1547,16 +1550,16 @@ ShellRoot {
                                             required property string modelData
                                             height: 34
                                             radius: 17
-                                            color: shellRoot.highlightTone
+                                            color: shellRoot.accentTone
                                             border.width: 1
-                                            border.color: shellRoot.borderTone
+                                            border.color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.18)
                                             width: capabilityText.implicitWidth + 24
 
                                             Text {
                                                 id: capabilityText
                                                 anchors.centerIn: parent
                                                 text: modelData
-                                                color: shellRoot.textSecondaryTone
+                                                color: shellRoot.accentForegroundTone
                                                 font.family: "JetBrainsMono Nerd Font"
                                                 font.pixelSize: 12
                                                 font.weight: Font.Medium
@@ -1604,7 +1607,7 @@ ShellRoot {
                                             width: Math.min(220, Math.max(180, actionFlow.width / 2 - 8))
                                             height: 44
                                             radius: 22
-                                            color: primaryVariant ? shellRoot.accentToneMuted : ghostVariant ? "transparent" : shellRoot.highlightTone
+                                            color: primaryVariant ? shellRoot.accentTone : ghostVariant ? "transparent" : shellRoot.accentTone
                                             border.width: ghostVariant ? 1 : 0
                                             border.color: ghostVariant ? shellRoot.borderTone : "transparent"
                                             opacity: modelData.disabled ? 0.45 : 1
@@ -1612,7 +1615,7 @@ ShellRoot {
                                             Text {
                                                 anchors.centerIn: parent
                                                 text: modelData.label
-                                                color: primaryVariant ? Design.Tokens.color.primaryForeground : shellRoot.textPrimaryTone
+                                                color: shellRoot.accentForegroundTone
                                                 font.family: "JetBrainsMono Nerd Font"
                                                 font.pixelSize: 13
                                                 font.weight: Font.Bold
@@ -1621,7 +1624,7 @@ ShellRoot {
                                             Rectangle {
                                                 anchors.fill: parent
                                                 radius: parent.radius
-                                                color: Design.ThemePalette.withAlpha(primaryVariant ? Design.Tokens.color.primaryForeground : shellRoot.textPrimaryTone, actionMouseArea.pressed ? 0.16 : actionMouseArea.containsMouse ? 0.08 : 0)
+                                                color: Design.ThemePalette.withAlpha(shellRoot.accentForegroundTone, actionMouseArea.pressed ? 0.16 : actionMouseArea.containsMouse ? 0.08 : 0)
                                             }
 
                                             MouseArea {
