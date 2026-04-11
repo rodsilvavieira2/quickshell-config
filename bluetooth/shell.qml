@@ -21,6 +21,21 @@ ShellRoot {
     property bool panelOpen: false
     property string focusedScreenName: Hyprland.focusedMonitor?.name ?? ""
 
+    property color panelTone: "#17141c"
+    property color sidebarTone: "#1f1b25"
+    property color cardTone: "#2d2834"
+    property color cardToneSoft: "#25212d"
+    property color accentTone: "#6c4dc2"
+    property color accentToneStrong: "#5a3fa2"
+    property color accentToneMuted: "#7c6b98"
+    property color textPrimaryTone: "#f3eefc"
+    property color textSecondaryTone: "#b0a8bf"
+    property color textMutedTone: "#8a8298"
+    property color borderTone: "#312b39"
+    property color separatorTone: "#2a2532"
+    property color highlightTone: "#3a3442"
+    property color successTone: "#7bd88f"
+
     function resolveScreen() {
         for (let index = 0; index < Quickshell.screens.values.length; index += 1) {
             if (Quickshell.screens.values[index].name === shellRoot.focusedScreenName) {
@@ -72,7 +87,7 @@ ShellRoot {
 
         DS.OverlayScrim {
             anchors.fill: parent
-            opacity: contentFrame.opacity
+            opacity: contentFrame.opacity * 0.92
         }
 
         MouseArea {
@@ -84,10 +99,10 @@ ShellRoot {
         FocusScope {
             id: contentFrame
             anchors.centerIn: parent
-            width: Math.min(1180, Math.max(880, (window.screen ? window.screen.width : 1280) - 64))
-            height: Math.min(820, Math.max(680, (window.screen ? window.screen.height : 900) - 64))
+            width: Math.min(1040, Math.max(920, (window.screen ? window.screen.width : 1280) - 48))
+            height: Math.min(760, Math.max(680, (window.screen ? window.screen.height : 900) - 48))
             opacity: shellRoot.panelOpen ? 1 : 0
-            scale: shellRoot.panelOpen ? 1 : 0.98
+            scale: shellRoot.panelOpen ? 1 : 0.985
             focus: shellRoot.panelOpen
 
             Keys.onEscapePressed: shellRoot.panelOpen = false
@@ -108,382 +123,506 @@ ShellRoot {
 
             Rectangle {
                 anchors.fill: parent
-                radius: 36
-                color: Design.Tokens.color.surface
-                border.width: Design.Tokens.border.width.thin
-                border.color: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.72)
-            }
+                radius: 34
+                color: shellRoot.panelTone
+                border.width: 1
+                border.color: shellRoot.borderTone
+                clip: true
 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: mouse => { mouse.accepted = true; }
-            }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: mouse => { mouse.accepted = true; }
+                }
 
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: Design.Tokens.space.s24
-                spacing: Design.Tokens.space.s20
+                RowLayout {
+                    anchors.fill: parent
+                    spacing: 0
 
-                DS.Panel {
-                    Layout.preferredWidth: 392
-                    Layout.fillHeight: true
-                    clipContent: true
-                    backgroundColor: Design.Tokens.color.surfaceContainer
-                    radius: 32
+                    Item {
+                        Layout.preferredWidth: 272
+                        Layout.fillHeight: true
 
-                    ColumnLayout {
-                        anchors.fill: parent
-                        spacing: Design.Tokens.space.s16
-
-                        Text {
-                            text: "Device Overview"
-                            color: Design.Tokens.color.text.primary
-                            font.family: "JetBrainsMono Nerd Font"
-                            font.pixelSize: Design.Tokens.font.size.title
-                            font.weight: Design.Tokens.font.weight.semibold
+                        Rectangle {
+                            anchors.fill: parent
+                            color: shellRoot.sidebarTone
                         }
 
-                        Text {
-                            text: "Bluetooth state, discoverability, and real-time reconnect feedback."
-                            color: Design.Tokens.color.text.secondary
-                            font.family: "JetBrainsMono Nerd Font"
-                            font.pixelSize: Design.Tokens.font.size.label
-                            wrapMode: Text.Wrap
-                            Layout.fillWidth: true
-                        }
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 20
+                            anchors.rightMargin: 18
+                            anchors.topMargin: 22
+                            anchors.bottomMargin: 22
+                            spacing: 0
 
-                        DS.SwitchRow {
-                            Layout.fillWidth: true
-                            title: "Bluetooth"
-                            subtitle: bluetoothService.bluetoothEnabled
-                                ? "Powered on and ready for paired devices."
-                                : "Turn it on to reconnect and discover devices."
-                            checked: bluetoothService.bluetoothEnabled
-                            rowEnabled: bluetoothService.bluetoothAvailable
-                            onToggled: checked => {
-                                if (bluetoothService.adapter) {
-                                    bluetoothService.adapter.enabled = checked;
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.bottomMargin: 22
+                                spacing: 14
+
+                                Rectangle {
+                                    width: 40
+                                    height: 40
+                                    radius: 20
+                                    color: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.88)
+
+                                    DS.LucideIcon {
+                                        anchors.centerIn: parent
+                                        name: bluetoothService.bluetoothEnabled ? "bluetooth" : "bluetooth-off"
+                                        iconSize: 18
+                                        color: shellRoot.textPrimaryTone
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 1
+
+                                    Text {
+                                        text: "Bluetooth"
+                                        color: shellRoot.textPrimaryTone
+                                        font.family: "JetBrainsMono Nerd Font"
+                                        font.pixelSize: 20
+                                        font.weight: Font.Bold
+                                    }
+
+                                    Text {
+                                        text: bluetoothService.bluetoothEnabled ? "On" : "Off"
+                                        color: bluetoothService.bluetoothEnabled ? shellRoot.successTone : shellRoot.textMutedTone
+                                        font.family: "JetBrainsMono Nerd Font"
+                                        font.pixelSize: 12
+                                        font.weight: Font.Medium
+                                    }
                                 }
                             }
-                        }
 
-                        DS.SwitchRow {
-                            Layout.fillWidth: true
-                            title: "Discoverable"
-                            subtitle: bluetoothService.bluetoothEnabled
-                                ? (bluetoothService.adapter && bluetoothService.adapter.discoverable
-                                    ? bluetoothService.adapterName + " can be seen by nearby devices."
-                                    : "Keep this desktop visible when you want to pair something new.")
-                                : "Bluetooth needs to be on first."
-                            checked: bluetoothService.adapter ? bluetoothService.adapter.discoverable : false
-                            rowEnabled: bluetoothService.bluetoothEnabled
-                            onToggled: checked => {
-                                if (bluetoothService.adapter) {
-                                    bluetoothService.adapter.discoverable = checked;
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.bottomMargin: 20
+                                implicitHeight: systemStatusColumn.implicitHeight + 28
+                                radius: 22
+                                color: shellRoot.cardTone
+                                border.width: 1
+                                border.color: shellRoot.borderTone
+
+                                ColumnLayout {
+                                    id: systemStatusColumn
+                                    anchors.fill: parent
+                                    anchors.margins: 18
+                                    spacing: 10
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 8
+
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: "System Status"
+                                            color: shellRoot.textPrimaryTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 14
+                                            font.weight: Font.DemiBold
+                                        }
+
+                                        Rectangle {
+                                            width: 44
+                                            height: 26
+                                            radius: 13
+                                            color: bluetoothService.bluetoothEnabled ? shellRoot.accentTone : shellRoot.highlightTone
+                                            border.width: 1
+                                            border.color: bluetoothService.bluetoothEnabled ? shellRoot.accentTone : shellRoot.separatorTone
+                                            opacity: bluetoothService.bluetoothAvailable ? 1 : 0.45
+
+                                            Rectangle {
+                                                width: 20
+                                                height: 20
+                                                radius: 10
+                                                x: bluetoothService.bluetoothEnabled ? parent.width - width - 3 : 3
+                                                y: 3
+                                                color: bluetoothService.bluetoothEnabled ? shellRoot.textPrimaryTone : shellRoot.textSecondaryTone
+
+                                                Behavior on x {
+                                                    NumberAnimation {
+                                                        duration: 120
+                                                        easing.type: Easing.OutCubic
+                                                    }
+                                                }
+                                            }
+
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                enabled: bluetoothService.bluetoothAvailable
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: {
+                                                    if (bluetoothService.adapter) {
+                                                        bluetoothService.adapter.enabled = !bluetoothService.bluetoothEnabled;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: bluetoothService.bluetoothEnabled
+                                            ? (bluetoothService.adapter && bluetoothService.adapter.discoverable
+                                                ? "Visible to all nearby devices as\n\"" + bluetoothService.adapterName + "\""
+                                                : "Ready for paired devices and nearby discovery.")
+                                            : "Turn Bluetooth on to connect or pair devices."
+                                        color: shellRoot.textSecondaryTone
+                                        font.family: "JetBrainsMono Nerd Font"
+                                        font.pixelSize: 12
+                                        wrapMode: Text.Wrap
+                                        lineHeight: 1.35
+                                    }
                                 }
                             }
-                        }
 
-                        DS.FeedbackBlock {
-                            Layout.fillWidth: true
-                            kind: bluetoothService.feedbackKind
-                            title: bluetoothService.feedbackTitle
-                            message: bluetoothService.feedbackMessage
-                        }
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.bottomMargin: 12
+                                spacing: 8
 
-                        Text {
-                            text: "DEVICES"
-                            color: Design.Tokens.color.text.secondary
-                            font.family: "JetBrainsMono Nerd Font"
-                            font.pixelSize: Design.Tokens.font.size.small
-                            font.weight: Design.Tokens.font.weight.semibold
-                            opacity: 0.9
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: "Paired Devices"
+                                    color: shellRoot.textPrimaryTone
+                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.pixelSize: 15
+                                    font.weight: Font.Bold
+                                }
+
+                                Rectangle {
+                                    visible: bluetoothService.sortedDevices.length > 0
+                                    width: 22
+                                    height: 22
+                                    radius: 11
+                                    color: shellRoot.accentTone
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: bluetoothService.sortedDevices.length
+                                        color: shellRoot.textPrimaryTone
+                                        font.family: "JetBrainsMono Nerd Font"
+                                        font.pixelSize: 11
+                                        font.weight: Font.Bold
+                                    }
+                                }
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+
+                                Loader {
+                                    anchors.fill: parent
+                                    active: bluetoothService.sortedDevices.length === 0
+                                    sourceComponent: sidebarEmptyState
+                                }
+
+                                ListView {
+                                    anchors.fill: parent
+                                    clip: true
+                                    spacing: 8
+                                    visible: bluetoothService.sortedDevices.length > 0
+                                    model: bluetoothService.sortedDevices
+
+                                    ScrollBar.vertical: ScrollBar {
+                                        policy: ScrollBar.AsNeeded
+                                    }
+
+                                    delegate: BluetoothDeviceRow {
+                                        required property var modelData
+                                        width: ListView.view.width
+                                        device: modelData
+                                        service: bluetoothService
+                                        selected: bluetoothService.selectedAddress === bluetoothService.deviceAddress(modelData)
+                                        onClicked: bluetoothService.setSelectedDevice(modelData)
+                                    }
+                                }
+                            }
                         }
 
                         Rectangle {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            radius: 28
-                            color: Design.Tokens.color.surfaceContainerLow
-                            border.width: Design.Tokens.border.width.thin
-                            border.color: Design.Tokens.color.outlineVariant
-
-                            Loader {
-                                anchors.fill: parent
-                                active: bluetoothService.sortedDevices.length === 0
-                                sourceComponent: emptyDevicesState
-                            }
-
-                            ListView {
-                                anchors.fill: parent
-                                anchors.margins: Design.Tokens.space.s12
-                                spacing: Design.Tokens.space.s12
-                                clip: true
-                                visible: bluetoothService.sortedDevices.length > 0
-                                model: bluetoothService.sortedDevices
-
-                                ScrollBar.vertical: ScrollBar {
-                                    policy: ScrollBar.AsNeeded
-                                }
-
-                                delegate: BluetoothDeviceRow {
-                                    required property var modelData
-                                    width: ListView.view.width
-                                    device: modelData
-                                    service: bluetoothService
-                                    selected: bluetoothService.selectedAddress === bluetoothService.deviceAddress(modelData)
-                                    onClicked: bluetoothService.setSelectedDevice(modelData)
-                                }
-                            }
+                            anchors.top: parent.top
+                            anchors.bottom: parent.bottom
+                            anchors.right: parent.right
+                            anchors.topMargin: 20
+                            anchors.bottomMargin: 20
+                            width: 1
+                            color: shellRoot.separatorTone
                         }
                     }
-                }
 
-                DS.Panel {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    clipContent: true
-                    backgroundColor: Design.Tokens.color.surfaceContainerHigh
-                    radius: 34
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
 
-                    ColumnLayout {
-                        anchors.fill: parent
-                        spacing: Design.Tokens.space.s16
+                        Rectangle {
+                            width: 460
+                            height: 460
+                            radius: width / 2
+                            anchors.centerIn: parent
+                            anchors.horizontalCenterOffset: -24
+                            color: Design.ThemePalette.withAlpha(shellRoot.accentToneStrong, 0.08)
+                        }
 
-                        DS.TopAppBar {
-                            Layout.fillWidth: true
-                            title: "Bluetooth & Devices"
-                            subtitle: "Manage Bluetooth devices and connection status."
+                        Rectangle {
+                            width: 220
+                            height: 220
+                            radius: width / 2
+                            anchors.centerIn: parent
+                            anchors.horizontalCenterOffset: 64
+                            anchors.verticalCenterOffset: 64
+                            color: Design.ThemePalette.withAlpha("#61b26f", 0.045)
+                        }
 
-                            DS.Button {
-                                text: bluetoothService.scanning ? "Scanning..." : "Add Device"
-                                variant: bluetoothService.scanning ? "tonal" : "primary"
-                                disabled: !bluetoothService.bluetoothEnabled
+                        Rectangle {
+                            id: scanButton
+                            anchors.top: parent.top
+                            anchors.right: parent.right
+                            anchors.topMargin: 20
+                            anchors.rightMargin: 18
+                            z: 2
+                            width: scanLabel.implicitWidth + 34
+                            height: 30
+                            radius: 15
+                            color: shellRoot.accentToneMuted
+                            opacity: bluetoothService.bluetoothEnabled ? 1 : 0.45
+
+                            Text {
+                                id: scanLabel
+                                anchors.centerIn: parent
+                                text: bluetoothService.scanning ? "Scanning..." : "Scan"
+                                color: "#231f2b"
+                                font.family: "JetBrainsMono Nerd Font"
+                                font.pixelSize: 12
+                                font.weight: Font.Bold
+                            }
+
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: parent.radius
+                                color: Design.ThemePalette.withAlpha("#ffffff", scanMouseArea.pressed ? 0.16 : scanMouseArea.containsMouse ? 0.08 : 0)
+                            }
+
+                            MouseArea {
+                                id: scanMouseArea
+                                anchors.fill: parent
+                                enabled: bluetoothService.bluetoothEnabled
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
                                 onClicked: bluetoothService.toggleDiscovery()
                             }
                         }
 
-                        Flickable {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            clip: true
-                            contentWidth: width
-                            contentHeight: detailColumn.implicitHeight
-                            boundsBehavior: Flickable.StopAtBounds
+                        Loader {
+                            anchors.fill: parent
+                            active: bluetoothService.selectedDevice === null
+                            sourceComponent: contentEmptyState
+                        }
 
-                            ScrollBar.vertical: ScrollBar {
-                                policy: ScrollBar.AsNeeded
+                        Loader {
+                            anchors.fill: parent
+                            active: bluetoothService.selectedDevice !== null
+                            sourceComponent: deviceDetailView
+                        }
+                    }
+                }
+            }
+        }
+
+        Component {
+            id: sidebarEmptyState
+
+            ColumnLayout {
+                anchors.centerIn: parent
+                width: Math.min(parent.width - 32, 210)
+                spacing: 8
+
+                DS.LucideIcon {
+                    Layout.alignment: Qt.AlignHCenter
+                    name: bluetoothService.bluetoothEnabled ? "bluetooth" : "bluetooth-off"
+                    iconSize: 22
+                    color: shellRoot.textMutedTone
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    text: bluetoothService.bluetoothEnabled ? "No devices found" : "Bluetooth is off"
+                    horizontalAlignment: Text.AlignHCenter
+                    color: shellRoot.textPrimaryTone
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: 14
+                    font.weight: Font.DemiBold
+                    wrapMode: Text.Wrap
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    text: bluetoothService.bluetoothEnabled
+                        ? "Use Scan to discover nearby devices."
+                        : "Turn Bluetooth on to begin pairing."
+                    horizontalAlignment: Text.AlignHCenter
+                    color: shellRoot.textSecondaryTone
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: 11
+                    wrapMode: Text.Wrap
+                }
+            }
+        }
+
+        Component {
+            id: contentEmptyState
+
+            Item {
+                anchors.fill: parent
+
+                ColumnLayout {
+                    anchors.centerIn: parent
+                    width: Math.min(parent.width - 80, 430)
+                    spacing: 22
+
+                    Item {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.preferredWidth: 248
+                        Layout.preferredHeight: 220
+
+                        Rectangle {
+                            width: 208
+                            height: 188
+                            radius: 38
+                            anchors.centerIn: parent
+                            anchors.verticalCenterOffset: -4
+                            rotation: -2
+                            color: "#393540"
+                        }
+
+                        Rectangle {
+                            width: 208
+                            height: 188
+                            radius: 38
+                            anchors.centerIn: parent
+                            anchors.horizontalCenterOffset: 8
+                            anchors.verticalCenterOffset: 6
+                            rotation: 4
+                            color: Design.ThemePalette.withAlpha("#463f53", 0.24)
+                            z: -1
+                        }
+
+                        Rectangle {
+                            width: 74
+                            height: 74
+                            radius: 37
+                            anchors.centerIn: parent
+                            anchors.verticalCenterOffset: -6
+                            color: shellRoot.accentToneMuted
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: 40
+                                height: 40
+                                radius: 20
+                                color: Design.ThemePalette.withAlpha(shellRoot.panelTone, 0.28)
                             }
 
-                            ColumnLayout {
-                                id: detailColumn
-                                width: parent.width
-                                spacing: Design.Tokens.space.s16
+                            DS.LucideIcon {
+                                anchors.centerIn: parent
+                                name: "bluetooth"
+                                iconSize: 28
+                                color: shellRoot.textPrimaryTone
+                            }
+                        }
 
-                                DS.Card {
-                                    Layout.fillWidth: true
-                                    backgroundColor: Design.Tokens.color.surfaceContainerHighest
-                                    radius: 28
+                        Row {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 28
+                            spacing: 7
 
-                                    RowLayout {
-                                        id: summaryLayout
-                                        width: parent.width
-                                        spacing: Design.Tokens.space.s16
+                            Repeater {
+                                model: 3
 
-                                        DeviceGlyph {
-                                            Layout.alignment: Qt.AlignTop
-                                            size: 72
-                                            device: bluetoothService.selectedDevice
-                                            typeKey: bluetoothService.typeKey(bluetoothService.selectedDevice)
-                                            containerColor: Design.ThemePalette.withAlpha(Design.Tokens.color.primary, 0.14)
-                                            contentColor: Design.Tokens.color.primary
-                                        }
+                                Rectangle {
+                                    required property int index
+                                    width: 8
+                                    height: 8
+                                    radius: 4
+                                    color: index === 0 ? "#d8cbff" : "#726b81"
+                                }
+                            }
+                        }
+                    }
 
-                                        ColumnLayout {
-                                            Layout.fillWidth: true
-                                            spacing: Design.Tokens.space.s8
+                    Text {
+                        Layout.fillWidth: true
+                        text: bluetoothService.bluetoothEnabled ? "Select a device" : "Bluetooth is off"
+                        horizontalAlignment: Text.AlignHCenter
+                        color: shellRoot.textPrimaryTone
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: 23
+                        font.weight: Font.Bold
+                    }
 
-                                            Text {
-                                                text: bluetoothService.selectedDevice
-                                                    ? bluetoothService.deviceLabel(bluetoothService.selectedDevice)
-                                                    : "No device selected"
-                                                color: Design.Tokens.color.text.primary
-                                                font.family: "JetBrainsMono Nerd Font"
-                                                font.pixelSize: Design.Tokens.font.size.headline
-                                                font.weight: Design.Tokens.font.weight.semibold
-                                                Layout.fillWidth: true
-                                                elide: Text.ElideRight
-                                            }
+                    Text {
+                        Layout.fillWidth: true
+                        text: bluetoothService.bluetoothEnabled
+                            ? "Choose a device from the sidebar to manage its connection, battery status, and advanced settings."
+                            : "Turn Bluetooth back on to reconnect saved devices or discover a new one nearby."
+                        horizontalAlignment: Text.AlignHCenter
+                        color: shellRoot.textSecondaryTone
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: 13
+                        wrapMode: Text.Wrap
+                        lineHeight: 1.45
+                    }
 
-                                            Text {
-                                                text: bluetoothService.summaryText(bluetoothService.selectedDevice)
-                                                color: Design.Tokens.color.text.secondary
-                                                font.family: "JetBrainsMono Nerd Font"
-                                                font.pixelSize: Design.Tokens.font.size.label
-                                                wrapMode: Text.Wrap
-                                                Layout.fillWidth: true
-                                            }
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 48
 
-                                            RowLayout {
-                                                Layout.fillWidth: true
-                                                spacing: Design.Tokens.space.s8
-                                                visible: bluetoothService.selectedDevice !== null
+                        Rectangle {
+                            id: pairButton
+                            anchors.centerIn: parent
+                            width: pairButtonRow.implicitWidth + 42
+                            height: 46
+                            radius: 23
+                            color: shellRoot.accentToneMuted
+                            opacity: bluetoothService.bluetoothEnabled ? 1 : 0.45
 
-                                                DS.Chip {
-                                                    text: bluetoothService.baseStatusText(bluetoothService.selectedDevice, true)
-                                                    contentColor: Design.Tokens.color.text.primary
-                                                    selectedContentColor: Design.Tokens.color.text.primary
-                                                    borderColor: Design.ThemePalette.withAlpha(bluetoothService.statusColor(bluetoothService.selectedDevice), 0.35)
-                                                    containerColor: Design.ThemePalette.withAlpha(bluetoothService.statusColor(bluetoothService.selectedDevice), 0.14)
-                                                    hoverContainerColor: containerColor
-                                                    pressedContainerColor: containerColor
-                                                }
+                            RowLayout {
+                                id: pairButtonRow
+                                anchors.centerIn: parent
+                                spacing: 8
 
-                                                DS.Chip {
-                                                    visible: bluetoothService.selectedDevice && bluetoothService.selectedDevice.batteryAvailable
-                                                    text: "Battery " + bluetoothService.batteryPercent(bluetoothService.selectedDevice)
-                                                    contentColor: Design.Tokens.color.text.primary
-                                                    selectedContentColor: Design.Tokens.color.text.primary
-                                                    borderColor: Design.Tokens.color.outlineVariant
-                                                    containerColor: Design.Tokens.color.surfaceContainerLow
-                                                    hoverContainerColor: containerColor
-                                                    pressedContainerColor: containerColor
-                                                }
-                                            }
-                                        }
-                                    }
+                                DS.LucideIcon {
+                                    name: "plus"
+                                    iconSize: 16
+                                    color: "#231f2b"
                                 }
 
                                 Text {
-                                    text: "DEVICE DETAILS"
-                                    color: Design.Tokens.color.text.secondary
+                                    text: "Pair New Device"
+                                    color: "#231f2b"
                                     font.family: "JetBrainsMono Nerd Font"
-                                    font.pixelSize: Design.Tokens.font.size.small
-                                    font.weight: Design.Tokens.font.weight.semibold
+                                    font.pixelSize: 14
+                                    font.weight: Font.Bold
                                 }
+                            }
 
-                                DS.Card {
-                                    Layout.fillWidth: true
-                                    visible: bluetoothService.selectedDevice !== null
-                                    backgroundColor: Design.Tokens.color.surfaceContainer
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: parent.radius
+                                color: Design.ThemePalette.withAlpha("#ffffff", pairMouseArea.pressed ? 0.16 : pairMouseArea.containsMouse ? 0.08 : 0)
+                            }
 
-                                    ColumnLayout {
-                                        id: detailsLayout
-                                        width: parent.width
-                                        spacing: Design.Tokens.space.s12
-
-                                        Repeater {
-                                            model: bluetoothService.detailRows(bluetoothService.selectedDevice)
-
-                                            delegate: RowLayout {
-                                                required property var modelData
-                                                Layout.fillWidth: true
-                                                spacing: Design.Tokens.space.s16
-
-                                                Text {
-                                                    text: modelData.label
-                                                    color: Design.Tokens.color.text.secondary
-                                                    font.family: "JetBrainsMono Nerd Font"
-                                                    font.pixelSize: Design.Tokens.font.size.label
-                                                    Layout.preferredWidth: 140
-                                                }
-
-                                                Text {
-                                                    Layout.fillWidth: true
-                                                    text: modelData.value
-                                                    color: Design.Tokens.color.text.primary
-                                                    font.family: "JetBrainsMono Nerd Font"
-                                                    font.pixelSize: Design.Tokens.font.size.body
-                                                    wrapMode: Text.WrapAnywhere
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                DS.Card {
-                                    Layout.fillWidth: true
-                                    visible: bluetoothService.capabilityRows(bluetoothService.selectedDevice).length > 0
-                                    backgroundColor: Design.Tokens.color.surfaceContainer
-
-                                    ColumnLayout {
-                                        id: capabilitiesLayout
-                                        width: parent.width
-                                        spacing: Design.Tokens.space.s12
-
-                                        Text {
-                                            text: "Capabilities"
-                                            color: Design.Tokens.color.text.primary
-                                            font.family: "JetBrainsMono Nerd Font"
-                                            font.pixelSize: Design.Tokens.font.size.body
-                                            font.weight: Design.Tokens.font.weight.semibold
-                                        }
-
-                                        Repeater {
-                                            model: bluetoothService.capabilityRows(bluetoothService.selectedDevice)
-
-                                            delegate: Rectangle {
-                                                required property string modelData
-                                                Layout.fillWidth: true
-                                                implicitHeight: 40
-                                                radius: 20
-                                                color: Design.Tokens.color.surfaceContainerLow
-                                                border.width: Design.Tokens.border.width.thin
-                                                border.color: Design.ThemePalette.withAlpha(Design.Tokens.color.outlineVariant, 0.88)
-
-                                                Text {
-                                                    anchors.centerIn: parent
-                                                    text: modelData
-                                                    color: Design.Tokens.color.text.primary
-                                                    font.family: "JetBrainsMono Nerd Font"
-                                                    font.pixelSize: Design.Tokens.font.size.label
-                                                    font.weight: Design.Tokens.font.weight.medium
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                DS.Card {
-                                    Layout.fillWidth: true
-                                    backgroundColor: Design.Tokens.color.surfaceContainer
-
-                                    ColumnLayout {
-                                        id: actionsLayout
-                                        width: parent.width
-                                        spacing: Design.Tokens.space.s16
-
-                                        Text {
-                                            text: "Actions"
-                                            color: Design.Tokens.color.text.primary
-                                            font.family: "JetBrainsMono Nerd Font"
-                                            font.pixelSize: Design.Tokens.font.size.body
-                                            font.weight: Design.Tokens.font.weight.semibold
-                                        }
-
-                                        Flow {
-                                            width: actionsLayout.width
-                                            spacing: Design.Tokens.space.s12
-
-                                            Repeater {
-                                                model: bluetoothService.deviceActions(bluetoothService.selectedDevice)
-
-                                                delegate: DS.Button {
-                                                    required property var modelData
-                                                    text: modelData.label
-                                                    variant: modelData.variant
-                                                    disabled: modelData.disabled || bluetoothService.selectedDevice === null
-                                                    onClicked: bluetoothService.performAction(modelData.id, bluetoothService.selectedDevice)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                Item {
-                                    Layout.fillHeight: true
-                                    Layout.minimumHeight: 4
-                                }
+                            MouseArea {
+                                id: pairMouseArea
+                                anchors.fill: parent
+                                enabled: bluetoothService.bluetoothEnabled
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: bluetoothService.toggleDiscovery()
                             }
                         }
                     }
@@ -492,42 +631,440 @@ ShellRoot {
         }
 
         Component {
-            id: emptyDevicesState
+            id: deviceDetailView
 
-            ColumnLayout {
-                anchors.centerIn: parent
-                width: Math.min(parent.width - 48, 280)
-                spacing: Design.Tokens.space.s12
+            Flickable {
+                clip: true
+                contentWidth: width
+                contentHeight: detailContent.height
+                boundsBehavior: Flickable.StopAtBounds
 
-                DeviceGlyph {
-                    Layout.alignment: Qt.AlignHCenter
-                    size: 64
-                    typeKey: "generic"
-                    containerColor: Design.Tokens.color.secondaryContainer
-                    contentColor: Design.Tokens.color.secondaryContainerForeground
+                ScrollBar.vertical: ScrollBar {
+                    policy: ScrollBar.AsNeeded
                 }
 
-                Text {
-                    Layout.fillWidth: true
-                    text: bluetoothService.bluetoothEnabled ? "No Bluetooth devices yet" : "Bluetooth is currently off"
-                    horizontalAlignment: Text.AlignHCenter
-                    color: Design.Tokens.color.text.primary
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: Design.Tokens.font.size.title
-                    font.weight: Design.Tokens.font.weight.semibold
-                    wrapMode: Text.Wrap
-                }
+                Item {
+                    id: detailContent
+                    width: parent.width
+                    height: detailColumn.implicitHeight + 120
 
-                Text {
-                    Layout.fillWidth: true
-                    text: bluetoothService.bluetoothEnabled
-                        ? "Saved devices and nearby discoveries will appear here. Use Add Device to start scanning."
-                        : "Turn Bluetooth on to reconnect paired devices and see nearby peripherals."
-                    horizontalAlignment: Text.AlignHCenter
-                    color: Design.Tokens.color.text.secondary
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: Design.Tokens.font.size.label
-                    wrapMode: Text.Wrap
+                    ColumnLayout {
+                        id: detailColumn
+                        width: Math.min(parent.width - 112, 760)
+                        anchors.top: parent.top
+                        anchors.topMargin: 82
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 18
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            implicitHeight: heroColumn.implicitHeight + 40
+                            radius: 34
+                            color: shellRoot.cardTone
+                            border.width: 1
+                            border.color: shellRoot.borderTone
+
+                            ColumnLayout {
+                                id: heroColumn
+                                anchors.fill: parent
+                                anchors.margins: 20
+                                spacing: 18
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 18
+
+                                    Rectangle {
+                                        width: 108
+                                        height: 108
+                                        radius: 32
+                                        color: shellRoot.highlightTone
+
+                                        DeviceGlyph {
+                                            anchors.centerIn: parent
+                                            size: 58
+                                            device: bluetoothService.selectedDevice
+                                            typeKey: bluetoothService.typeKey(bluetoothService.selectedDevice)
+                                            containerColor: Design.ThemePalette.withAlpha(shellRoot.accentTone, 0.24)
+                                            contentColor: shellRoot.textPrimaryTone
+                                        }
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        Layout.alignment: Qt.AlignVCenter
+                                        spacing: 6
+
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: bluetoothService.deviceLabel(bluetoothService.selectedDevice)
+                                            color: shellRoot.textPrimaryTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 28
+                                            font.weight: Font.Bold
+                                            elide: Text.ElideRight
+                                        }
+
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: bluetoothService.summaryText(bluetoothService.selectedDevice)
+                                            color: shellRoot.textSecondaryTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 13
+                                            wrapMode: Text.Wrap
+                                        }
+
+                                        RowLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 8
+
+                                            Rectangle {
+                                                implicitWidth: statusLabel.implicitWidth + 24
+                                                implicitHeight: 30
+                                                radius: 15
+                                                color: Design.ThemePalette.withAlpha(bluetoothService.statusColor(bluetoothService.selectedDevice), 0.22)
+                                                border.width: 1
+                                                border.color: Design.ThemePalette.withAlpha(bluetoothService.statusColor(bluetoothService.selectedDevice), 0.34)
+
+                                                Text {
+                                                    id: statusLabel
+                                                    anchors.centerIn: parent
+                                                    text: bluetoothService.baseStatusText(bluetoothService.selectedDevice, true)
+                                                    color: shellRoot.textPrimaryTone
+                                                    font.family: "JetBrainsMono Nerd Font"
+                                                    font.pixelSize: 12
+                                                    font.weight: Font.DemiBold
+                                                }
+                                            }
+
+                                            Rectangle {
+                                                visible: bluetoothService.selectedDevice && bluetoothService.selectedDevice.batteryAvailable
+                                                implicitWidth: batteryLabel.implicitWidth + 24
+                                                implicitHeight: 30
+                                                radius: 15
+                                                color: shellRoot.highlightTone
+                                                border.width: 1
+                                                border.color: shellRoot.borderTone
+
+                                                Text {
+                                                    id: batteryLabel
+                                                    anchors.centerIn: parent
+                                                    text: bluetoothService.batteryPercent(bluetoothService.selectedDevice)
+                                                    color: shellRoot.textPrimaryTone
+                                                    font.family: "JetBrainsMono Nerd Font"
+                                                    font.pixelSize: 12
+                                                    font.weight: Font.DemiBold
+                                                }
+                                            }
+
+                                            Rectangle {
+                                                implicitWidth: typeLabel.implicitWidth + 24
+                                                implicitHeight: 30
+                                                radius: 15
+                                                color: shellRoot.highlightTone
+                                                border.width: 1
+                                                border.color: shellRoot.borderTone
+
+                                                Text {
+                                                    id: typeLabel
+                                                    anchors.centerIn: parent
+                                                    text: bluetoothService.typeLabel(bluetoothService.selectedDevice)
+                                                    color: shellRoot.textSecondaryTone
+                                                    font.family: "JetBrainsMono Nerd Font"
+                                                    font.pixelSize: 12
+                                                    font.weight: Font.Medium
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    height: 1
+                                    color: shellRoot.separatorTone
+                                }
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 12
+
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 74
+                                        radius: 24
+                                        color: shellRoot.cardToneSoft
+                                        border.width: 1
+                                        border.color: shellRoot.borderTone
+
+                                        Column {
+                                            anchors.left: parent.left
+                                            anchors.leftMargin: 18
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            spacing: 4
+
+                                            Text {
+                                                text: "Last Update"
+                                                color: shellRoot.textMutedTone
+                                                font.family: "JetBrainsMono Nerd Font"
+                                                font.pixelSize: 11
+                                                font.weight: Font.Medium
+                                            }
+
+                                            Text {
+                                                text: bluetoothService.relativeTime(bluetoothService.lastUpdated(bluetoothService.selectedDevice))
+                                                color: shellRoot.textPrimaryTone
+                                                font.family: "JetBrainsMono Nerd Font"
+                                                font.pixelSize: 16
+                                                font.weight: Font.DemiBold
+                                            }
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 74
+                                        radius: 24
+                                        color: shellRoot.cardToneSoft
+                                        border.width: 1
+                                        border.color: shellRoot.borderTone
+
+                                        Column {
+                                            anchors.left: parent.left
+                                            anchors.leftMargin: 18
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            spacing: 4
+
+                                            Text {
+                                                text: "Connection"
+                                                color: shellRoot.textMutedTone
+                                                font.family: "JetBrainsMono Nerd Font"
+                                                font.pixelSize: 11
+                                                font.weight: Font.Medium
+                                            }
+
+                                            Text {
+                                                text: bluetoothService.selectedDevice.connected ? "Active" : "Standby"
+                                                color: shellRoot.textPrimaryTone
+                                                font.family: "JetBrainsMono Nerd Font"
+                                                font.pixelSize: 16
+                                                font.weight: Font.DemiBold
+                                            }
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 74
+                                        radius: 24
+                                        color: shellRoot.cardToneSoft
+                                        border.width: 1
+                                        border.color: shellRoot.borderTone
+
+                                        Column {
+                                            anchors.left: parent.left
+                                            anchors.leftMargin: 18
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            spacing: 4
+
+                                            Text {
+                                                text: "Saved"
+                                                color: shellRoot.textMutedTone
+                                                font.family: "JetBrainsMono Nerd Font"
+                                                font.pixelSize: 11
+                                                font.weight: Font.Medium
+                                            }
+
+                                            Text {
+                                                text: (bluetoothService.selectedDevice.paired || bluetoothService.selectedDevice.bonded || bluetoothService.selectedDevice.trusted) ? "Yes" : "No"
+                                                color: shellRoot.textPrimaryTone
+                                                font.family: "JetBrainsMono Nerd Font"
+                                                font.pixelSize: 16
+                                                font.weight: Font.DemiBold
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            implicitHeight: detailsColumn.implicitHeight + 40
+                            radius: 30
+                            color: shellRoot.cardToneSoft
+                            border.width: 1
+                            border.color: shellRoot.borderTone
+
+                            ColumnLayout {
+                                id: detailsColumn
+                                anchors.fill: parent
+                                anchors.margins: 20
+                                spacing: 14
+
+                                Text {
+                                    text: "Details"
+                                    color: shellRoot.textPrimaryTone
+                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.pixelSize: 16
+                                    font.weight: Font.Bold
+                                }
+
+                                Repeater {
+                                    model: bluetoothService.detailRows(bluetoothService.selectedDevice)
+
+                                    delegate: RowLayout {
+                                        required property var modelData
+                                        Layout.fillWidth: true
+                                        spacing: 18
+
+                                        Text {
+                                            Layout.preferredWidth: 136
+                                            text: modelData.label
+                                            color: shellRoot.textMutedTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 12
+                                            font.weight: Font.Medium
+                                        }
+
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: modelData.value
+                                            color: shellRoot.textPrimaryTone
+                                            font.family: "JetBrainsMono Nerd Font"
+                                            font.pixelSize: 13
+                                            wrapMode: Text.WrapAnywhere
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            visible: bluetoothService.capabilityRows(bluetoothService.selectedDevice).length > 0
+                            implicitHeight: capabilityColumn.implicitHeight + 40
+                            radius: 30
+                            color: shellRoot.cardToneSoft
+                            border.width: 1
+                            border.color: shellRoot.borderTone
+
+                            ColumnLayout {
+                                id: capabilityColumn
+                                anchors.fill: parent
+                                anchors.margins: 20
+                                spacing: 14
+
+                                Text {
+                                    text: "Capabilities"
+                                    color: shellRoot.textPrimaryTone
+                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.pixelSize: 16
+                                    font.weight: Font.Bold
+                                }
+
+                                Flow {
+                                    width: capabilityColumn.width
+                                    spacing: 10
+
+                                    Repeater {
+                                        model: bluetoothService.capabilityRows(bluetoothService.selectedDevice)
+
+                                        delegate: Rectangle {
+                                            required property string modelData
+                                            height: 34
+                                            radius: 17
+                                            color: shellRoot.highlightTone
+                                            border.width: 1
+                                            border.color: shellRoot.borderTone
+                                            width: capabilityText.implicitWidth + 24
+
+                                            Text {
+                                                id: capabilityText
+                                                anchors.centerIn: parent
+                                                text: modelData
+                                                color: shellRoot.textSecondaryTone
+                                                font.family: "JetBrainsMono Nerd Font"
+                                                font.pixelSize: 12
+                                                font.weight: Font.Medium
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            implicitHeight: actionsColumn.implicitHeight + 40
+                            radius: 30
+                            color: shellRoot.cardToneSoft
+                            border.width: 1
+                            border.color: shellRoot.borderTone
+
+                            ColumnLayout {
+                                id: actionsColumn
+                                anchors.fill: parent
+                                anchors.margins: 20
+                                spacing: 14
+
+                                Text {
+                                    text: "Quick Actions"
+                                    color: shellRoot.textPrimaryTone
+                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.pixelSize: 16
+                                    font.weight: Font.Bold
+                                }
+
+                                Flow {
+                                    id: actionFlow
+                                    width: actionsColumn.width
+                                    spacing: 10
+
+                                    Repeater {
+                                        model: bluetoothService.deviceActions(bluetoothService.selectedDevice)
+
+                                        delegate: Rectangle {
+                                            required property var modelData
+                                            readonly property bool primaryVariant: modelData.variant === "primary"
+                                            readonly property bool ghostVariant: modelData.variant === "ghost"
+                                            width: Math.min(220, Math.max(180, actionFlow.width / 2 - 8))
+                                            height: 44
+                                            radius: 22
+                                            color: primaryVariant ? shellRoot.accentToneMuted : ghostVariant ? "transparent" : shellRoot.highlightTone
+                                            border.width: ghostVariant ? 1 : 0
+                                            border.color: ghostVariant ? shellRoot.borderTone : "transparent"
+                                            opacity: modelData.disabled ? 0.45 : 1
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: modelData.label
+                                                color: primaryVariant ? "#231f2b" : shellRoot.textPrimaryTone
+                                                font.family: "JetBrainsMono Nerd Font"
+                                                font.pixelSize: 13
+                                                font.weight: Font.Bold
+                                            }
+
+                                            Rectangle {
+                                                anchors.fill: parent
+                                                radius: parent.radius
+                                                color: Design.ThemePalette.withAlpha("#ffffff", actionMouseArea.pressed ? 0.16 : actionMouseArea.containsMouse ? 0.08 : 0)
+                                            }
+
+                                            MouseArea {
+                                                id: actionMouseArea
+                                                anchors.fill: parent
+                                                enabled: !modelData.disabled && bluetoothService.selectedDevice !== null
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: bluetoothService.performAction(modelData.id, bluetoothService.selectedDevice)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

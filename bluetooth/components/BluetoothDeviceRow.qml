@@ -4,7 +4,7 @@ import QtQuick.Layouts
 
 import "../shared/designsystem" as Design
 
-Rectangle {
+Item {
     id: root
 
     signal clicked()
@@ -12,19 +12,10 @@ Rectangle {
     property var device
     property var service
     property bool selected: false
-
     readonly property string statusKind: root.service ? root.service.statusKind(root.device) : "available"
-    readonly property color accentColor: root.service ? root.service.statusColor(root.device) : Design.Tokens.color.primary
+    readonly property color accentColor: root.service ? root.service.statusColor(root.device) : "#7f5ed8"
 
-    implicitHeight: 88
-    radius: 26
-    color: root.selected
-        ? Design.ThemePalette.withAlpha(Design.Tokens.color.primary, 0.16)
-        : Design.Tokens.color.surfaceContainerLow
-    border.width: Design.Tokens.border.width.thin
-    border.color: root.selected
-        ? Design.ThemePalette.withAlpha(Design.Tokens.color.primary, 0.30)
-        : Design.Tokens.color.outlineVariant
+    implicitHeight: 72
 
     MouseArea {
         id: mouseArea
@@ -34,84 +25,93 @@ Rectangle {
         onClicked: root.clicked()
     }
 
+    // ── Selected / hover background pill ──
     Rectangle {
+        id: bgPill
         anchors.fill: parent
-        radius: parent.radius
-        color: Design.ThemePalette.withAlpha(Design.Tokens.color.text.primary, mouseArea.containsMouse ? Design.Tokens.stateLayer.hover : 0)
+        radius: 22
+        color: root.selected
+            ? "#5e43a7"
+            : mouseArea.containsMouse
+                ? "#2d2935"
+                : "transparent"
+        border.width: 1
+        border.color: root.selected ? "#7057ba" : "transparent"
+
+        Behavior on color {
+            ColorAnimation {
+                duration: Design.Tokens.motion.duration.fast
+                easing.type: Design.Tokens.motion.easing.standard
+            }
+        }
     }
 
+    // ── Row content ──
     RowLayout {
+        id: contentRow
         anchors.fill: parent
-        anchors.leftMargin: Design.Tokens.space.s16
-        anchors.rightMargin: Design.Tokens.space.s16
-        anchors.topMargin: Design.Tokens.space.s12
-        anchors.bottomMargin: Design.Tokens.space.s12
-        spacing: Design.Tokens.space.s16
+        anchors.leftMargin: 14
+        anchors.rightMargin: 14
+        spacing: 12
 
         DeviceGlyph {
-            Layout.alignment: Qt.AlignVCenter
-            size: 52
+            size: 40
             device: root.device
             typeKey: root.service ? root.service.typeKey(root.device) : "generic"
             containerColor: root.selected
-                ? Design.ThemePalette.withAlpha(Design.Tokens.color.primary, 0.18)
-                : Design.Tokens.color.secondaryContainer
+                ? Design.ThemePalette.withAlpha("#ffffff", 0.12)
+                : "#3a3541"
             contentColor: root.selected
-                ? Design.Tokens.color.primary
-                : Design.Tokens.color.secondaryContainerForeground
+                ? "#efe8ff"
+                : "#c7c0d7"
         }
 
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: Design.Tokens.space.s4
+            Layout.alignment: Qt.AlignVCenter
+            spacing: 1
 
             Text {
                 Layout.fillWidth: true
                 text: root.service ? root.service.deviceLabel(root.device) : ""
-                color: Design.Tokens.color.text.primary
+                color: root.selected ? "#f4efff" : "#d9d1e5"
                 font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Design.Tokens.font.size.body + 1
-                font.weight: Design.Tokens.font.weight.semibold
+                font.pixelSize: 15
+                font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
 
             Text {
                 Layout.fillWidth: true
-                text: root.service ? root.service.listStatusText(root.device) : ""
-                color: root.selected ? Design.Tokens.color.primary : Design.Tokens.color.text.secondary
+                text: root.service ? root.service.sidebarStatusText(root.device) : ""
+                color: root.selected ? "#d7caf6" : "#9f98ae"
                 font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Design.Tokens.font.size.caption
+                font.pixelSize: 11
                 elide: Text.ElideRight
             }
         }
 
         Item {
-            Layout.preferredWidth: 28
-            Layout.preferredHeight: 28
+            Layout.preferredWidth: 12
+            Layout.preferredHeight: 12
             Layout.alignment: Qt.AlignVCenter
-
-            BusyIndicator {
-                id: busyIndicator
-                anchors.centerIn: parent
-                width: 20
-                height: 20
-                running: visible
-                visible: root.statusKind === "connecting"
-                    || root.statusKind === "retrying"
-                    || root.statusKind === "waiting"
-                    || root.statusKind === "pairing"
-            }
+            visible: root.statusKind === "connected"
+                || root.statusKind === "failed"
+                || root.statusKind === "retrying"
+                || root.statusKind === "connecting"
+                || root.statusKind === "pairing"
+                || root.statusKind === "waiting"
 
             Rectangle {
                 anchors.centerIn: parent
-                visible: !busyIndicator.visible
-                width: root.statusKind === "failed" || root.statusKind === "unavailable" ? 12 : 10
+                width: root.statusKind === "connecting"
+                    || root.statusKind === "retrying"
+                    || root.statusKind === "pairing"
+                    || root.statusKind === "waiting" ? 8 : 10
                 height: width
                 radius: width / 2
                 color: root.accentColor
-                opacity: root.statusKind === "paired" || root.statusKind === "available" ? 0.64 : 1
-                border.width: root.statusKind === "available" ? Design.Tokens.border.width.thin : 0
-                border.color: Design.ThemePalette.withAlpha(root.accentColor, 0.45)
+                opacity: root.selected ? 1 : 0.92
             }
         }
     }

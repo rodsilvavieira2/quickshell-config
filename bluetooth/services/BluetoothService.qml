@@ -342,6 +342,55 @@ Item {
         return parts.join(" • ");
     }
 
+    function sidebarStatusText(device) {
+        if (!device) return "";
+
+        const kind = root.statusKind(device);
+        const battery = root.batteryPercent(device);
+        let label = "";
+
+        switch (kind) {
+        case "disabled":
+            label = "Bluetooth off";
+            break;
+        case "connected":
+            label = "Connected";
+            break;
+        case "disconnecting":
+            label = "Disconnecting";
+            break;
+        case "connecting":
+            label = "Connecting";
+            break;
+        case "retrying":
+            label = "Retrying";
+            break;
+        case "waiting":
+            label = "Waiting";
+            break;
+        case "failed":
+            label = "Needs attention";
+            break;
+        case "unavailable":
+            label = "Unavailable";
+            break;
+        case "pairing":
+            label = "Pairing";
+            break;
+        case "blocked":
+            label = "Blocked";
+            break;
+        case "paired":
+            label = "Paired";
+            break;
+        default:
+            label = "Nearby";
+            break;
+        }
+
+        return battery.length > 0 ? label + " • " + battery : label;
+    }
+
     function summaryText(device) {
         if (!device) return "Select a device to see connection details and actions.";
 
@@ -471,7 +520,7 @@ Item {
 
     function ensureSelection() {
         if (root.selectedAddress.length > 0 && root.findDevice(root.selectedAddress)) return;
-        root.selectedAddress = root.sortedDevices.length > 0 ? root.deviceAddress(root.sortedDevices[0]) : "";
+        root.selectedAddress = "";
     }
 
     function setSelectedDevice(device) {
@@ -688,6 +737,7 @@ Item {
 
         function onPanelVisibleChanged() {
             if (root.panelVisible) {
+                root.selectedAddress = "";
                 root.ensureSelection();
                 root.scheduleReconnectSweep(false);
             }

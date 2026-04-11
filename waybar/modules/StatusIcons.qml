@@ -149,7 +149,7 @@ Item {
                 labelColor: root.networkConnected ? Root.Config.chipActiveForeground : Root.Config.subtext0
                 valueMaxWidth: 110
                 clickable: true
-                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "settings", "call", "settings", "openCategory", "network"])
+                onClicked: Quickshell.execDetached(["quickshell", "ipc", "-c", "network", "call", "network", "toggle"])
             }
         }
     }
