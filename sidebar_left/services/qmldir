@@ -1,5 +1,0 @@
-singleton Utils 1.0 Utils.qml
-singleton SidebarState 1.0 SidebarState.qml
-singleton LanguageCatalog 1.0 LanguageCatalog.qml
-singleton ChatService 1.0 ChatService.qml
-singleton TranslatorService 1.0 TranslatorService.qml
