@@ -1,0 +1,5 @@
+singleton ThemeSettings 1.0 ThemeSettings.qml
+singleton FontCatalog 1.0 FontCatalog.qml
+singleton ThemePalette 1.0 ThemePalette.qml
+singleton MaterialRoles 1.0 MaterialRoles.qml
+singleton Tokens 1.0 Tokens.qml

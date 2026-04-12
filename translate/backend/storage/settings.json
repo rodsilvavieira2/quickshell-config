@@ -1,0 +1,15 @@
+{
+  "active_model": "gemma4:e2b",
+  "allow_user_override": true,
+  "audio_selected_source_id": "alsa_input.usb-3142_Fifine_Microphone-00.pro-input-0",
+  "audio_selected_source_name": "Fifine Microphone Pro",
+  "audio_selected_source_type": "input",
+  "audio_source_lang": "auto",
+  "audio_target_lang": "pt-br",
+  "history_enabled": true,
+  "max_text_length": 5000,
+  "model_status": "ready",
+  "request_timeout_seconds": 60,
+  "translation_temperature": 0.15,
+  "translation_top_p": 0.9
+}
